@@ -1,0 +1,6 @@
+node_modules
+/dist
+/public/scripts/*
+yarn-error.log
+chat.log
+entropia-tracker-db.sqlite3
