@@ -29,7 +29,6 @@ class LogReader extends EventEmitter {
     const args = [
       'parse',
       '--watch',
-      '-a',
       '-f',
       this.file,
       '-n',
