@@ -71,6 +71,7 @@
       "new-cap": 0,
       "unicorn/prefer-module": 0,
       "unicorn/no-array-reduce": 0,
+      "unicorn/prefer-object-from-entries": 0,
       "node/file-extension-in-import": 0,
       "import/extensions": 0,
       "react/jsx-tag-spacing": 0,

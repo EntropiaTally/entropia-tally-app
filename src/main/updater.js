@@ -1,3 +1,5 @@
+'use strict';
+
 const { app, dialog, shell } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const semverGt = require('semver/functions/gt');
