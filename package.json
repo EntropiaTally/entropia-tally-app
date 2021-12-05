@@ -1,0 +1,114 @@
+{
+  "name": "entropia-tracker",
+  "productName": "Entropia Tracker",
+  "version": "0.1.0",
+  "description": "Track Entropia Universe events",
+  "license": "MIT",
+  "repository": "Entropia-Tracker/entropia-tracker",
+  "main": "src/main/main.js",
+  "author": {
+    "name": "Slazor",
+    "email": "no-email-support@example.com",
+    "url": "https://github.com/Entropia-Tracker/entropia-tracker"
+  },
+  "scripts": {
+    "postinstall": "electron-builder install-app-deps",
+    "lint": "xo src/",
+    "start": "electron .",
+    "build": "webpack --mode production",
+    "build-dev": "webpack --mode development",
+    "watch": "webpack --mode development --watch",
+    "dev": "yarn build-dev && concurrently \"electron .\" \"BROWSER=none yarn watch\"",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --linux --win"
+  },
+  "dependencies": {
+    "electron-context-menu": "^3.1.1",
+    "electron-debug": "^3.2.0",
+    "electron-store": "^8.0.1",
+    "electron-unhandled": "^3.0.2",
+    "electron-updater": "^4.6.1",
+    "electron-util": "^0.17.2",
+    "events": "^3.3.0",
+    "prop-types": "^15.7.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^6.0.2",
+    "recharts": "^2.1.6",
+    "semver": "^7.3.5",
+    "sqlite3": "^5.0.2",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.16.0",
+    "@babel/preset-react": "^7.16.0",
+    "babel-loader": "^8.2.3",
+    "concurrently": "^6.4.0",
+    "electron": "^15.3.1",
+    "electron-builder": "^22.14.10",
+    "eslint-config-xo-react": "^0.25.0",
+    "eslint-plugin-react": "^7.27.1",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "webpack": "^5.64.0",
+    "webpack-cli": "^4.9.1",
+    "xo": "^0.46.4"
+  },
+  "resolutions": {
+    "**/node-gyp": ">=3.2.3"
+  },
+  "xo": {
+    "extends": "xo-react",
+    "space": 2,
+    "envs": [
+      "node",
+      "browser"
+    ],
+    "rules": {
+      "object-curly-spacing": 0,
+      "guard-for-in": 0,
+      "no-negated-condition": 0,
+      "new-cap": 0,
+      "unicorn/prefer-module": 0,
+      "unicorn/no-array-reduce": 0,
+      "node/file-extension-in-import": 0,
+      "import/extensions": 0,
+      "react/jsx-tag-spacing": 0,
+      "node/prefer-global/process": 0
+    }
+  },
+  "build": {
+    "appId": "com.Entropia-Tracker.entropia-tracker",
+    "artifactName": "${name}-${version}.${ext}",
+    "asarUnpack": [
+      "bin/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "extraResources": [
+      "./assets/icon.png"
+    ],
+    "portable": {
+      "artifactName": "${name}-${version}-portable.${ext}"
+    },
+    "nsis": {
+      "artifactName": "${name}-${version}-installable.${ext}",
+      "oneClick": false
+    },
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "icon": "assets/icon.png"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Game;Utility"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Entropia Tracker - Stream</title>
+    <link rel="stylesheet" href="styles/bulma.min.css" />
+    <link rel="stylesheet" href="styles/stream.css" />
+  </head>
+  <body>
+    HAHA I am always on top and receive events
+    <script>
+      window.api.on('session-updated', newSessionData => {
+        console.log(newSessionData);
+      });
+    </script>
+  </body>
+</html>
