@@ -40,9 +40,10 @@ const DropRateModal = ({ item, lootEvents, isOpen, closeModal }) => {
     && firstDate.getMonth() === lastDate.getMonth()
     && firstDate.getDate() === lastDate.getDate();
 
-  const preparedLoot = lootEvents ? lootEvents.map(loot => {
-    const amount = loot.name === item ? loot.amount : 0;
+  const preparedLoot = lootEvents ? lootEvents.reduce((result, loot) => {
+    const amount = loot.name === item ? Number(loot.amount) : 0;
     let date = loot.date;
+
     if (allEventsSameDay) {
       const lootDate = new Date(loot.date);
       const hours = String(lootDate.getHours()).padStart(2, '0');
@@ -51,11 +52,17 @@ const DropRateModal = ({ item, lootEvents, isOpen, closeModal }) => {
       date = `${hours}:${minutes}:${seconds}`;
     }
 
-    return {
-      amount: Number(amount),
-      date,
-    };
-  }) : [];
+    if (!result[loot.date]) {
+      result[loot.date] = {
+        amount,
+        date,
+      };
+    } else {
+      result[loot.date].amount += amount;
+    }
+
+    return result;
+  }, {}) : {};
 
   return (
     <div className={`modal ${isOpen ? 'is-active' : ''}`}>
@@ -70,7 +77,7 @@ const DropRateModal = ({ item, lootEvents, isOpen, closeModal }) => {
             <LineChart
               width={600}
               height={300}
-              data={preparedLoot}
+              data={Object.values(preparedLoot)}
               margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
             >
               <XAxis dataKey="date" height={60} tick={<XAxisTick />} />

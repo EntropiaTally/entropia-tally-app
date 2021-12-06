@@ -274,6 +274,9 @@ ipcMain.handle('get-data', async (_event, { dataType, args }) => {
     case 'stream-window-status':
       response = streamWindow && streamWindow.isVisible() ? 'enabled' : 'disabled';
       break;
+    case 'development-mode':
+      response = is.development;
+      break;
     default:
   }
 

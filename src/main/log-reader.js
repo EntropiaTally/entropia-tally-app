@@ -29,11 +29,14 @@ class LogReader extends EventEmitter {
     const args = [
       'parse',
       '--watch',
-      '-f',
-      this.file,
-      '-n',
-      this.avatarName,
     ];
+
+    if (is.development) {
+      args.push('-a');
+      this.file = path.resolve(app.getAppPath(), 'chat.log');
+    }
+
+    args.push('-f', this.file, '-n', this.avatarName);
 
     this.tail = spawn(bin, args);
     this.tail.stdout.on('data', this.onData);

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   MemoryRouter as Router,
   useNavigate,
@@ -12,9 +12,15 @@ import Settings from './pages/settings';
 
 const Nav = () => {
   const navigate = useNavigate();
+  const [isDevelopment, setIsDevelopment] = useState(false);
+
   useEffect(() => {
     const removeGotoListener = window.api.on('goto', location => {
       navigate(`/${location}`);
+    });
+
+    window.api.get('development-mode').then(isDevelopmentMode => {
+      setIsDevelopment(isDevelopmentMode);
     });
 
     return () => removeGotoListener();
@@ -24,7 +30,7 @@ const Nav = () => {
     <nav className="navbar is-fixed-top top-menu">
       <div className="navbar-brand">
         <div className="navbar-item">
-          Entropia Tracker
+          {isDevelopment && (<small className="has-text-danger">DEV&nbsp;</small>)}Entropia Tracker
         </div>
       </div>
       <div className="navbar-menu">
