@@ -5,6 +5,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 const getters = new Set(['active-session', 'session', 'sessions', 'instances', 'settings', 'logreader-status', 'development-mode']);
 const setters = new Set(['active-session', 'settings']);
 const actions = new Set(['new-session', 'new-instance', 'load-instance', 'stream-window-toggle', 'logging-status-toggle']);
+const deletes = new Set(['session', 'instance']);
 
 contextBridge.exposeInMainWorld(
   'api', {
@@ -24,6 +25,11 @@ contextBridge.exposeInMainWorld(
     set(dataType, values) {
       if (setters.has(dataType)) {
         return ipcRenderer.invoke('set-data', { type: dataType, values });
+      }
+    },
+    delete(type, id) {
+      if (deletes.has(type)) {
+        return ipcRenderer.invoke('delete', { type, id });
       }
     },
     call(action, args = {}) {

@@ -303,3 +303,15 @@ ipcMain.handle('set-data', (_event, data) => {
 
   return response;
 });
+
+ipcMain.handle('delete', async (_event, { type, id }) => {
+  let status = false;
+
+  if (type === 'session') {
+    status = await Session.Delete(id);
+  } else if (type === 'instance') {
+    status = await Session.DeleteInstance(id);
+  }
+
+  return status;
+});

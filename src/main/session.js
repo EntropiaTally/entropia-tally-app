@@ -1,6 +1,5 @@
 'use strict';
 
-/// const Crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const db = require('./database');
 
@@ -43,6 +42,33 @@ class Session {
       row.aggregated = JSON.parse(row.aggregated);
       return row;
     });
+  }
+
+  static async Delete(id) {
+    let success = true;
+
+    try {
+      await db.all('DELETE FROM session_instances WHERE session_id = ?', [id]);
+      await db.all('DELETE FROM sessions WHERE id = ?', [id]);
+    } catch (error) {
+      success = false;
+      console.error(error);
+    }
+
+    return success;
+  }
+
+  static async DeleteInstance(id) {
+    let success = true;
+
+    try {
+      await db.all('DELETE FROM session_instances WHERE id = ?', [id]);
+    } catch (error) {
+      success = false;
+      console.error(error);
+    }
+
+    return success;
   }
 
   constructor(id = null, name = null, instanceId = null) {
