@@ -1,17 +1,34 @@
-import React, { useMemo } from 'react';
-import PropTypes from 'prop-types';
+import React, { useEffect, useMemo, useState } from 'react';
 import Table from '../components/table';
 
-const SkillView = ({ attributes, skills }) => {
+const aggregatedDataDefault = { attributes: null, skills: null };
+
+const SkillView = () => {
+  const [aggregatedData, setAggregatedData] = useState(aggregatedDataDefault);
+
+  useEffect(() => {
+    const updateAggregatedData = newData => {
+      const attributes = newData?.aggregated?.attributes ?? newData?.attributes;
+      const skills = newData?.aggregated?.skills ?? newData?.skills;
+      setAggregatedData({ attributes, skills });
+    };
+
+    const removeAggregatedListener = window.api.on('session-data-updated-aggregated', updateAggregatedData);
+
+    window.api.get('active-session').then(updateAggregatedData);
+
+    return () => removeAggregatedListener();
+  }, []);
+
   const sortedAttributes = useMemo(() => {
-    const mapped = Object.keys(attributes || {}).map(key => ({ key, ...attributes[key] }));
+    const mapped = Object.keys(aggregatedData.attributes || {}).map(key => ({ key, ...aggregatedData.attributes[key] }));
     return Object.values(mapped).sort((a, b) => b.total - a.total);
-  }, [attributes]);
+  }, [aggregatedData?.attributes]);
 
   const sortedSkills = useMemo(() => {
-    const mapped = Object.keys(skills || {}).map(key => ({ key, ...skills[key] }));
+    const mapped = Object.keys(aggregatedData.skills || {}).map(key => ({ key, ...aggregatedData.skills[key] }));
     return Object.values(mapped).sort((a, b) => b.total - a.total);
-  }, [skills]);
+  }, [aggregatedData?.skills]);
 
   return (
     <>
@@ -45,11 +62,6 @@ const SkillView = ({ attributes, skills }) => {
       </div>
     </>
   );
-};
-
-SkillView.propTypes = {
-  attributes: PropTypes.object,
-  skills: PropTypes.object,
 };
 
 export default SkillView;

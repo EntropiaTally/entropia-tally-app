@@ -1,38 +1,53 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useEffect, useState } from 'react';
 import StatBox from '../components/statbox';
 
-const StatsView = ({
-  damageInflicted,
-  damageInflictedCrit,
-  damageTaken,
-  damageTakenCrit,
-  enemyMiss,
-  enemyDodge,
-  enemyEvade,
-  playerDodge,
-  playerEvade,
-  playerDeflect,
-}) => {
-  const playerAttackCount = damageInflicted.count + enemyDodge.count + enemyEvade.count; // Player attacks attempted
-  const playerEvadeCount = playerEvade.count + playerDodge.count; // Enemy attacks avoided
-  const enemyAttackCount = damageTaken.count + playerDeflect.count + enemyMiss.count + playerEvadeCount; // Enemy attacks attempted
-  const enemyHitCount = damageTaken.count + playerDeflect.count; // Enemy attacks that hit incl. player deflections
-  const enemyMissCount = enemyAttackCount - enemyHitCount; // Enemy attacks that missed
+const StatsView = () => {
+  const [stats, setStats] = useState({});
 
-  const playerAttackHitRate = ((damageInflicted.count / playerAttackCount) || 0) * 100;
-  const playerAttackCritRate = ((damageInflictedCrit.count / damageInflicted.count) || 0) * 100;
-  const enemyAttackHitCritRate = ((damageTakenCrit.count / enemyHitCount) || 0) * 100;
-  const enemyAttackMissRate = (((playerEvadeCount + enemyMiss.count) / enemyAttackCount) || 0) * 100;
+  useEffect(() => {
+    const updateAggregatedData = newData => {
+      const aggregated = newData?.aggregated ?? newData;
 
-  /// console.log("playerAttackCount", playerAttackCount)
-  /// console.log("playerHitCount", damageInflicted.count)
-  /// console.log("playerHitBeingCrits", damageInflictedCrit.count)
+      const damageInflictedCount = aggregated?.damageInflicted?.count || 0;
+      const damageInflictedCritCount = aggregated?.damageInflictedCrit?.count || 0;
+      const damageTakenCount = aggregated?.damageTaken?.count || 0;
+      const damageTakenCritCount = aggregated?.damageTakenCrit?.count || 0;
+      const playerDeflectCount = aggregated?.playerDeflect?.count || 0;
+      const enemyMissCountValue = aggregated?.enemyMiss?.count || 0;
 
-  /// console.log("enemyAttackCount", enemyAttackCount)
-  /// console.log("enemyHitCount", enemyHitCount)
-  /// console.log("enemyHitBeingCrits", damageTakenCrit.count)
-  /// console.log("enemyHitMiss", enemyMissCount)
+      const playerAttackCount = damageInflictedCount + (aggregated?.enemyDodge?.count || 0) + (aggregated?.enemyEvade?.count || 0); // Player attacks attempted
+      const playerEvadeCount = (aggregated?.playerEvade?.count || 0) + (aggregated?.playerDodge?.count || 0); // Enemy attacks avoided
+      const enemyAttackCount = damageTakenCount + playerDeflectCount + enemyMissCountValue + playerEvadeCount; // Enemy attacks attempted
+      const enemyHitCount = damageTakenCount + playerDeflectCount; // Enemy attacks that hit incl. player deflections
+      const enemyMissCount = enemyAttackCount - enemyHitCount; // Enemy attacks that missed
+
+      const playerAttackHitRate = ((damageInflictedCount / playerAttackCount) || 0) * 100;
+      const playerAttackCritRate = (((aggregated?.damageInflictedCrit?.count || 0) / damageInflictedCount) || 0) * 100;
+      const enemyAttackHitCritRate = ((damageTakenCritCount / enemyHitCount) || 0) * 100;
+      const enemyAttackMissRate = (((playerEvadeCount + enemyMissCountValue) / enemyAttackCount) || 0) * 100;
+
+      setStats({
+        damageInflictedTotal: aggregated?.damageInflicted?.total || 0,
+        damageTakenTotal: aggregated?.damageTaken?.total || 0,
+        damageInflictedCount,
+        damageInflictedCritCount,
+        damageTakenCritCount,
+        playerAttackCount,
+        enemyHitCount,
+        enemyMissCount,
+        playerAttackHitRate,
+        playerAttackCritRate,
+        enemyAttackHitCritRate,
+        enemyAttackMissRate,
+      });
+    };
+
+    const removeAggregatedListener = window.api.on('session-data-updated-aggregated', updateAggregatedData);
+
+    window.api.get('active-session').then(updateAggregatedData);
+
+    return () => removeAggregatedListener();
+  }, []);
 
   return (
     <>
@@ -42,32 +57,32 @@ const StatsView = ({
           <div className="tile tile-toplevel">
             <StatBox
               title="Damage inflicted"
-              value={damageInflicted.total.toLocaleString()}
+              value={stats?.damageInflictedTotal?.toLocaleString() ?? 0}
               suffix="HP"
             />
             <StatBox
               title="Hit rate"
-              value={playerAttackHitRate.toFixed(2)}
+              value={stats?.playerAttackHitRate?.toFixed(2) ?? 0}
               suffix="%"
             />
             <StatBox
               title="Crit rate"
-              value={playerAttackCritRate.toFixed(2)}
+              value={stats?.playerAttackCritRate?.toFixed(2) ?? 0}
               suffix="%"
             />
           </div>
           <div className="tile tile-toplevel">
             <StatBox
               title="Total attacks"
-              value={playerAttackCount.toLocaleString()}
+              value={stats?.playerAttackCount?.toLocaleString() ?? 0}
             />
             <StatBox
               title="Total attacks hit"
-              value={damageInflicted.count.toLocaleString()}
+              value={stats?.damageInflictedCount?.toLocaleString() ?? 0}
             />
             <StatBox
               title="Total crits"
-              value={damageInflictedCrit.count.toLocaleString()}
+              value={stats?.damageInflictedCritCount?.toLocaleString() ?? 0}
             />
           </div>
         </div>
@@ -78,64 +93,38 @@ const StatsView = ({
           <div className="tile tile-toplevel">
             <StatBox
               title="Damage received"
-              value={damageTaken.total.toLocaleString()}
+              value={stats?.damageTakenTotal?.toLocaleString() ?? 0}
               suffix="HP"
             />
             <StatBox
               title="Evade rate"
-              value={enemyAttackMissRate.toFixed(2)}
+              value={stats?.enemyAttackMissRate?.toFixed(2) ?? 0}
               suffix="%"
             />
             <StatBox
               title="Total evades"
-              value={enemyMissCount.toLocaleString()}
+              value={stats?.enemyMissCount?.toLocaleString() ?? 0}
             />
           </div>
           <div className="tile tile-toplevel">
             <StatBox
               title="Enemy hits"
-              value={(enemyHitCount).toLocaleString()}
+              value={stats?.enemyHitCount?.toLocaleString() ?? 0}
             />
             <StatBox
               title="Enemy crit rate"
-              value={enemyAttackHitCritRate.toFixed(2)}
+              value={stats?.enemyAttackHitCritRate?.toFixed(2) ?? 0}
               suffix="%"
             />
             <StatBox
               title="Enemy crits"
-              value={damageTakenCrit.count.toLocaleString()}
+              value={stats?.damageTakenCritCount?.toLocaleString() ?? 0}
             />
           </div>
         </div>
       </div>
     </>
   );
-};
-
-StatsView.defaultProps = {
-  damageInflicted: { count: 0, total: 0 },
-  damageInflictedCrit: { count: 0, total: 0 },
-  damageTaken: { count: 0, total: 0 },
-  damageTakenCrit: { count: 0, total: 0 },
-  enemyMiss: { count: 0, total: 0 },
-  enemyDodge: { count: 0, total: 0 },
-  enemyEvade: { count: 0, total: 0 },
-  playerDodge: { count: 0, total: 0 },
-  playerEvade: { count: 0, total: 0 },
-  playerDeflect: { count: 0, total: 0 },
-};
-
-StatsView.propTypes = {
-  damageInflicted: PropTypes.object,
-  damageInflictedCrit: PropTypes.object,
-  damageTaken: PropTypes.object,
-  damageTakenCrit: PropTypes.object,
-  enemyMiss: PropTypes.object,
-  enemyDodge: PropTypes.object,
-  enemyEvade: PropTypes.object,
-  playerDodge: PropTypes.object,
-  playerEvade: PropTypes.object,
-  playerDeflect: PropTypes.object,
 };
 
 export default StatsView;

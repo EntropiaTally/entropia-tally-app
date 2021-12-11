@@ -1,17 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Modal = ({ style, title, isOpen, closeModal, children }) => (
+const Modal = ({ type, title, isOpen, closeModal, children }) => (
   <div className={`modal ${isOpen ? 'is-active' : ''}`}>
     <div className="modal-background" />
-    {style === 'simple' && (
+    {type === 'simple' && (
       <div className="modal-content">
         <div className="box">
           {children}
         </div>
       </div>
     )}
-    {style === 'card' && (
+    {type === 'card' && (
       <div className="modal-card">
         <header className="modal-card-head">
           <p className="modal-card-title">{title ? title : '-'}</p>
@@ -26,13 +26,13 @@ const Modal = ({ style, title, isOpen, closeModal, children }) => (
 );
 
 Modal.defaultProps = {
-  style: 'simple',
+  type: 'simple',
   title: null,
   isOpen: false,
 };
 
 Modal.propTypes = {
-  style: PropTypes.string,
+  type: PropTypes.string,
   title: PropTypes.string,
   isOpen: PropTypes.bool,
   closeModal: PropTypes.func,

@@ -139,9 +139,16 @@ function receivedLoggerEvent({ data, lastLine }) {
   session.newEvent(data, lastLine).then(() => {
     // Only send the complete package
     if (lastLine) {
-      mainWindow.webContents.send('session-updated', session.getData());
+      const sessionData = session.getData();
+
+      mainWindow.webContents.send('session-data-updated', sessionData);
+      mainWindow.webContents.send('session-data-updated-aggregated', sessionData?.aggregated);
+      mainWindow.webContents.send('session-data-updated-events', sessionData?.events);
+
       if (streamWindow && streamWindow.isVisible()) {
-        streamWindow.webContents.send('session-updated', session.getData());
+        streamWindow.webContents.send('session-data-updated', sessionData);
+        streamWindow.webContents.send('session-data-updated-aggregated', sessionData?.aggregated);
+        streamWindow.webContents.send('session-data-updated-events', sessionData?.events);
       }
     }
   });
@@ -283,7 +290,7 @@ ipcMain.handle('get-data', async (_event, { dataType, args }) => {
   return response;
 });
 
-ipcMain.handle('set-data', (_event, data) => {
+ipcMain.handle('set-data', async (_event, data) => {
   let response;
 
   if (data.type === 'settings') {
@@ -296,9 +303,8 @@ ipcMain.handle('set-data', (_event, data) => {
 
     response = getSettings();
   } else if (data.type === 'active-session') {
-    session.setData(data.values).then(responseData => {
-      response = responseData;
-    });
+    const sessionData = await session.setData(data.values);
+    mainWindow.webContents.send('session-updated', sessionData);
   }
 
   return response;

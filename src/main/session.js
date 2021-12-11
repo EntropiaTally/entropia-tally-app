@@ -203,14 +203,19 @@ class Session {
     this.dataPoint('position', data.values);
   }
 
-  getData() {
-    return {
+  getData(events = true) {
+    const data = {
       id: this.id,
       instanceId: this.instanceId,
       sessionName: this.name,
-      events: this.events,
-      aggregated: this.aggregated,
     };
+
+    if (events) {
+      data.events = this.events;
+      data.aggregated = this.aggregated;
+    }
+
+    return data;
   }
 
   createNewInstance() {
@@ -247,7 +252,7 @@ class Session {
       await this.setName(data.name);
     }
 
-    return this.getData();
+    return this.getData(false);
   }
 }
 

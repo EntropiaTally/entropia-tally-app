@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { LineChart, XAxis, YAxis, Tooltip, CartesianGrid, Line } from 'recharts';
+import Modal from './modal';
 
 const XAxisTick = ({ x, y, payload }) => (
   <g transform={`translate(${x},${y})`}>
@@ -65,31 +66,27 @@ const DropRateModal = ({ item, lootEvents, isOpen, closeModal }) => {
   }, {}) : {};
 
   return (
-    <div className={`modal ${isOpen ? 'is-active' : ''}`}>
-      <div className="modal-background" />
-      <div className="modal-card">
-        <header className="modal-card-head">
-          <p className="modal-card-title">{item}</p>
-          <button type="button" className="delete" aria-label="close" onClick={() => closeModal()} />
-        </header>
-        <section className="modal-card-body content">
-          <div className="tile tile-toplevel">
-            <LineChart
-              width={600}
-              height={300}
-              data={Object.values(preparedLoot)}
-              margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
-            >
-              <XAxis dataKey="date" height={60} tick={<XAxisTick />} />
-              <YAxis type="number" width={40} />
-              <Tooltip />
-              <CartesianGrid stroke="#f5f5f5" />
-              <Line type="monotone" dataKey="amount" stroke="#485fc7" yAxisId={0} />
-            </LineChart>
-          </div>
-        </section>
+    <Modal
+      type="card"
+      title={item}
+      isOpen={isOpen}
+      closeModal={closeModal}
+    >
+      <div className="tile tile-toplevel">
+        <LineChart
+          width={600}
+          height={300}
+          data={Object.values(preparedLoot)}
+          margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
+        >
+          <XAxis dataKey="date" height={60} tick={<XAxisTick />} />
+          <YAxis type="number" width={40} />
+          <Tooltip />
+          <CartesianGrid stroke="#f5f5f5" />
+          <Line type="monotone" dataKey="amount" stroke="#485fc7" yAxisId={0} />
+        </LineChart>
       </div>
-    </div>
+    </Modal>
   );
 };
 
