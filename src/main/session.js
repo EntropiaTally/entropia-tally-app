@@ -9,10 +9,10 @@ class Session {
   static async Load(id, instanceId = null) {
     let data = null;
     data = await (instanceId
-      ? db.get('SELECT s.id, si.id AS instance_id, s.name, si.events, si.aggregated FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ? AND si.id = ?', [id, instanceId])
-      : db.get('SELECT s.id, si.id AS instance_id, s.name, si.events, si.aggregated FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ?', [id]));
+      ? db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ? AND si.id = ?', [id, instanceId])
+      : db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ?', [id]));
 
-    const instance = new Session(id, data?.name, data?.instance_id);
+    const instance = new Session(id, data?.name, data?.instance_id, data.created_at);
 
     if (data?.events) {
       instance.events = JSON.parse(data.events);
@@ -55,11 +55,13 @@ class Session {
       console.error(error);
     }
 
-    return success;
+    return { success, sessionId: id };
   }
 
   static async DeleteInstance(id) {
     let success = true;
+
+    const { session_id: sessionId } = await db.get('SELECT session_id FROM session_instances WHERE id = ?', [id]);
 
     try {
       await db.all('DELETE FROM session_instances WHERE id = ?', [id]);
@@ -68,13 +70,14 @@ class Session {
       console.error(error);
     }
 
-    return success;
+    return { success, sessionId, instanceId: id };
   }
 
-  constructor(id = null, name = null, instanceId = null) {
+  constructor(id = null, name = null, instanceId = null, createdAt = null) {
     this.id = id;
     this.instanceId = instanceId;
     this.name = name;
+    this.createdAt = createdAt;
     this.events = {};
     this.aggregated = {};
   }
@@ -234,6 +237,7 @@ class Session {
       id: this.id,
       instanceId: this.instanceId,
       sessionName: this.name,
+      sessionCreatedAt: this.createdAt,
     };
 
     if (events) {
@@ -254,6 +258,9 @@ class Session {
     if (this.instanceId === null) {
       this.instanceId = uuidv4();
       await db.run('INSERT INTO sessions(id, name) VALUES(?, ?)', [this.id, this.name]);
+
+      const result = await db.get('SELECT created_at FROM sessions WHERE id = ?', [this.id]);
+      this.createdAt = result.created_at;
     }
   }
 

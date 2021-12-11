@@ -154,6 +154,34 @@ function receivedLoggerEvent({ data, lastLine }) {
   });
 }
 
+function stopLogReader() {
+  if (logReader) {
+    logReader.stop();
+    logReader.removeListener('event', receivedLoggerEvent);
+    mainWindow.webContents.send('logger-status-changed', 'disabled');
+  }
+}
+
+async function startNewSession(emit = true) {
+  stopLogReader();
+
+  session = await Session.Create();
+  if (emit) {
+    mainWindow.webContents.send('session-new', session.getData());
+  }
+}
+
+function startNewInstance(emit = true) {
+  stopLogReader();
+
+  if (session) {
+    session.createNewInstance();
+    if (emit) {
+      mainWindow.webContents.send('instance-new', session.getData());
+    }
+  }
+}
+
 // Logger Events
 
 logReader.on('logger-status-changed', () => {
@@ -190,29 +218,9 @@ ipcMain.on('stream-window-toggle', () => {
   }
 });
 
-ipcMain.on('new-session', async () => {
-  if (logReader) {
-    logReader.stop();
-    logReader.removeListener('event', receivedLoggerEvent);
-    mainWindow.webContents.send('logger-status-changed', 'disabled');
-  }
+ipcMain.on('new-session', startNewSession);
 
-  session = await Session.Create();
-  mainWindow.webContents.send('session-new', session.getData());
-});
-
-ipcMain.on('new-instance', () => {
-  if (logReader) {
-    logReader.stop();
-    logReader.removeListener('event', receivedLoggerEvent);
-    mainWindow.webContents.send('logger-status-changed', 'disabled');
-  }
-
-  if (session) {
-    session.createNewInstance();
-    mainWindow.webContents.send('instance-new', session.getData());
-  }
-});
+ipcMain.on('new-instance', startNewInstance);
 
 ipcMain.on('load-instance', async (_event, { sessionId, instanceId }) => {
   if (logReader) {
@@ -312,6 +320,7 @@ ipcMain.handle('set-data', async (_event, data) => {
 
 ipcMain.handle('delete', async (_event, { type, id }) => {
   let status = false;
+  const currentSessionData = session ? session.getData(false) : null;
 
   if (type === 'session') {
     status = await Session.Delete(id);
@@ -319,5 +328,17 @@ ipcMain.handle('delete', async (_event, { type, id }) => {
     status = await Session.DeleteInstance(id);
   }
 
-  return status;
+  if (status.success) {
+    if (currentSessionData) {
+      if (type === 'session' && currentSessionData.id === id) {
+        startNewSession(false);
+      } else if (type === 'instance' && currentSessionData.instanceId === id) {
+        startNewInstance(false);
+      }
+    }
+
+    mainWindow.webContents.send(`${type}-deleted`, status);
+  }
+
+  return status.success;
 });
