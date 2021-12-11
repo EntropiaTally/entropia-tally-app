@@ -4,11 +4,13 @@ import PropTypes from 'prop-types';
 const StatBox = ({ title, value, suffix }) => (
   <div className="tile is-parent">
     <div className="statbox notification">
-      <h5 className="title">{title}</h5>
       <div>
-        {suffix ? (
-          <span className="sum">{value}</span>
-        ) : (value)} {suffix}
+        <h5 className="title">{title}</h5>
+        <div>
+          {suffix ? (
+            <span className="sum">{value}</span>
+          ) : (value)} {suffix}
+        </div>
       </div>
     </div>
   </div>
