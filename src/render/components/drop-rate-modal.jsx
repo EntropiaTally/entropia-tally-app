@@ -66,6 +66,9 @@ const DropRateModal = ({ item, lootEvents, isOpen, closeModal }) => {
     return result;
   }, {}) : {};
 
+  const itemMaxAmount = Math.max(...lootEvents.map(row => row.name === item ? row.amount : 0), 0);
+  const tickCount = itemMaxAmount === 1 ? 1 : 3;
+
   return (
     <Modal
       type="card"
@@ -81,7 +84,7 @@ const DropRateModal = ({ item, lootEvents, isOpen, closeModal }) => {
           margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
         >
           <XAxis dataKey="date" height={60} tick={<XAxisTick />} />
-          <YAxis type="number" width={40} />
+          <YAxis type="number" width={40} tickCount={tickCount} />
           <Tooltip />
           <CartesianGrid stroke="#f5f5f5" />
           <Line type="monotone" dataKey="amount" stroke="#485fc7" yAxisId={0} />
