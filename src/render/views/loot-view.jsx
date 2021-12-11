@@ -1,39 +1,73 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import PropTypes from 'prop-types';
+import React, { useEffect, useState, useMemo } from 'react';
+
 import Table from '../components/table';
 import StatBox from '../components/statbox';
 import DropRateModal from '../components/drop-rate-modal';
 
-const LootView = ({ loot, globals, hofs, rareLoot, lootEvents }) => {
+const LootView = () => {
+  const [lootData, setLootData] = useState({});
+  const [lootEvents, setLootEvents] = useState([]);
+
   const [dropRateItem, setDropRateItem] = useState(null);
   const [dropRateModalOpen, setDropRateModalOpen] = useState(false);
 
+  useEffect(() => {
+    const resetData = () => {
+      setLootData({});
+      setLootEvents([]);
+    };
+
+    const updateData = newData => {
+      setLootData({
+        loot: newData?.aggregated?.loot ?? {},
+        globals: newData?.aggregated?.globals ?? {},
+        hofs: newData?.aggregated?.hofs ?? {},
+        rareLoot: newData?.aggregated?.rareLoot ?? {},
+      });
+      setLootEvents(newData?.events?.loot ?? []);
+    };
+
+    const removeSessionDataListener = window.api.on('session-data-updated', updateData);
+    const removeSessionNewLoggerListener = window.api.on('session-new', resetData);
+    const removeInstanceNewLoggerListener = window.api.on('instance-new', resetData);
+    const removeInstanceLoadedLoggerListener = window.api.on('instance-loaded', resetData);
+
+    window.api.get('active-session').then(updateData);
+
+    return () => {
+      removeSessionDataListener();
+      removeSessionNewLoggerListener();
+      removeInstanceNewLoggerListener();
+      removeInstanceLoadedLoggerListener();
+    };
+  }, []);
+
   const totalLootValue = useMemo(() => (
-    Object.values(loot).reduce((previous, current) => (
+    Object.values(lootData?.loot ?? {}).reduce((previous, current) => (
       { total: previous.total + current.total }), { total: 0 },
     )?.total
-  ), [loot]);
+  ), [lootData?.loot]);
 
   const rareLootCount = useMemo(() => (
-    Object.values(rareLoot).reduce((previous, current) => (
+    Object.values(lootData?.rareLoot ?? {}).reduce((previous, current) => (
       { count: previous.count + current.count }), { count: 0 },
     )?.count
-  ), [rareLoot]);
+  ), [lootData?.rareLoot]);
 
   const sortedLoot = useMemo(() => {
-    const mapped = Object.keys(loot).map(key => ({ key, ...loot[key] }));
+    const mapped = Object.keys(lootData?.loot ?? {}).map(key => ({ key, ...lootData?.loot[key] }));
     return Object.values(mapped).sort((a, b) => b.percent - a.percent);
-  }, [loot]);
+  }, [lootData?.loot]);
 
-  const openDropRateModal = useCallback(item => {
+  const openDropRateModal = item => {
     setDropRateItem(item);
     setDropRateModalOpen(true);
-  }, []);
+  };
 
-  const closeDropRateModal = useCallback(() => {
+  const closeDropRateModal = () => {
     setDropRateItem(null);
     setDropRateModalOpen(false);
-  }, []);
+  };
 
   return (
     <>
@@ -48,11 +82,11 @@ const LootView = ({ loot, globals, hofs, rareLoot, lootEvents }) => {
             />
             <StatBox
               title="Globals"
-              value={globals?.count ?? 0}
+              value={lootData?.globals?.count ?? 0}
             />
             <StatBox
               title="HoFs"
-              value={hofs?.count ?? 0}
+              value={lootData?.hofs?.count ?? 0}
             />
             <StatBox
               title="Rare items"
@@ -87,22 +121,6 @@ const LootView = ({ loot, globals, hofs, rareLoot, lootEvents }) => {
       />
     </>
   );
-};
-
-LootView.defaultProps = {
-  loot: {},
-  globals: {},
-  hofs: {},
-  rareLoot: {},
-  lootEvents: [],
-};
-
-LootView.propTypes = {
-  loot: PropTypes.object,
-  globals: PropTypes.object,
-  hofs: PropTypes.object,
-  rareLoot: PropTypes.object,
-  lootEvents: PropTypes.array,
 };
 
 export default LootView;
