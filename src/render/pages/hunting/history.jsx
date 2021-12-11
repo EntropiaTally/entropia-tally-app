@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 
 import HistoryModal from '../../components/history-modal';
 import Table from '../../components/table';
 
-const History = ({ loadSessionInstance }) => {
+const History = () => {
   const [sessions, setSessions] = useState([]);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [selectedSessionData, setSelectedSessionData] = useState(false);
@@ -56,15 +55,10 @@ const History = ({ loadSessionInstance }) => {
           session={selectedSessionData}
           isOpen={historyModalOpen}
           closeModal={closeSession}
-          loadSessionInstance={loadSessionInstance}
         />
       )}
     </>
   );
-};
-
-History.propTypes = {
-  loadSessionInstance: PropTypes.func,
 };
 
 export default History;

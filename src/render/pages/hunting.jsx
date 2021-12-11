@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Sidebar from '../components/sidebar';
 import Current from './hunting/current';
@@ -12,20 +12,15 @@ const Hunting = () => {
       setActiveSection('current');
     };
 
-    const removeSessionNewLoggerListener = window.api.on('session-new', sessionChange);
-    const removeInstanceNewLoggerListener = window.api.on('instance-new', sessionChange);
-    const removeInstanceLoadedLoggerListener = window.api.on('instance-loaded', sessionChange);
+    const removeSessionNewListener = window.api.on('session-new', sessionChange);
+    const removeInstanceNewListener = window.api.on('instance-new', sessionChange);
+    const removeInstanceLoadedListener = window.api.on('instance-loaded', sessionChange);
 
     return () => {
-      removeSessionNewLoggerListener();
-      removeInstanceNewLoggerListener();
-      removeInstanceLoadedLoggerListener();
+      removeSessionNewListener();
+      removeInstanceNewListener();
+      removeInstanceLoadedListener();
     };
-  }, []);
-
-  const loadSessionInstance = useCallback((sessionId, instanceId) => {
-    window.api.call('load-instance', { sessionId, instanceId });
-    setActiveSection('current');
   }, []);
 
   return (
@@ -37,7 +32,7 @@ const Hunting = () => {
 
       <div className="main-content with-sidebar">
         {activeSection === 'current' && <Current />}
-        {activeSection === 'history' && <History loadSessionInstance={loadSessionInstance} />}
+        {activeSection === 'history' && <History />}
       </div>
     </>
   );
