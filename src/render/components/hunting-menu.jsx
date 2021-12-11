@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
+
 import Modal from './modal';
 
 const Tag = ({ isActive }) => (

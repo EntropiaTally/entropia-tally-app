@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { LineChart, XAxis, YAxis, Tooltip, CartesianGrid, Line } from 'recharts';
+
 import Modal from './modal';
 
 const XAxisTick = ({ x, y, payload }) => (

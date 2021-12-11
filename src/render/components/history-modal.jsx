@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
+
 import StatBox from './statbox';
 import Table from './table';
 import Modal from './modal';
