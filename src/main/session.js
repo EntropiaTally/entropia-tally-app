@@ -1,6 +1,5 @@
 'use strict';
 
-/// const Crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const db = require('./database');
 

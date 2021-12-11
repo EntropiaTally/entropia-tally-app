@@ -155,7 +155,7 @@ body {
 .sidebar-toggle {
   position: absolute;
   bottom: 10px;
-  left: 10px;
+  left: 15px;
   transform: translateX(0%);
   color: white;
   cursor: pointer;
