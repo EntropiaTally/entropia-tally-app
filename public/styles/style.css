@@ -259,6 +259,12 @@ span.sum {
 .fullwidth {
   width: 100%;
 }
+.table-action {
+  padding-left: 5px;
+}
+.has-text-right .table-action:first-child {
+  padding-left: 0;
+}
 
 /* Graphs */
 .recharts-cartesian-axis-tick-value,

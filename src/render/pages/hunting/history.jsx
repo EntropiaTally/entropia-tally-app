@@ -6,12 +6,20 @@ import Table from '../../components/table';
 const History = () => {
   const [sessions, setSessions] = useState([]);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
-  const [selectedSessionData, setSelectedSessionData] = useState(false);
+  const [selectedSessionData, setSelectedSessionData] = useState(null);
 
   useEffect(() => {
     window.api.get('sessions').then(savedSessions => {
       setSessions(savedSessions);
     });
+
+    const removeSessionDeletedListener = window.api.on('session-deleted', () => {
+      window.api.get('sessions').then(savedSessions => setSessions(savedSessions));
+      setHistoryModalOpen(false);
+      setSelectedSessionData(null);
+    });
+
+    return () => removeSessionDeletedListener();
   }, []);
 
   const openSession = id => {
