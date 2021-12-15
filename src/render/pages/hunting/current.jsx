@@ -7,11 +7,14 @@ import StatsView from '../../views/stats-view';
 
 const Current = () => {
   const [currentTab, setCurrentTab] = useState('loot');
+  const [avatarName, setAvatarName] = useState('none');
 
   useEffect(() => {
     const resetCurrentSession = () => {
       setCurrentTab('loot');
     };
+
+    window.api.get('settings').then(settings => setAvatarName(settings?.avatarName));
 
     const removeSessionNewLoggerListener = window.api.on('session-new', resetCurrentSession);
     const removeInstanceNewLoggerListener = window.api.on('instance-new', resetCurrentSession);
@@ -44,7 +47,7 @@ const Current = () => {
 
       {currentTab === 'loot' && <LootView />}
       {currentTab === 'skills' && <SkillView />}
-      {currentTab === 'stats' && <StatsView />}
+      {currentTab === 'stats' && <StatsView avatarName={avatarName} />}
     </>
   );
 };

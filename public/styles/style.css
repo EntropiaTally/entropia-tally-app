@@ -254,6 +254,11 @@ span.sum {
   font-weight: 500;
 }
 
+.stats-heal-table {
+  margin-top: 0.75rem;
+  margin-bottom: -0.75rem;
+}
+
 
 /* Tables */
 .fullwidth {
@@ -264,6 +269,9 @@ span.sum {
 }
 .has-text-right .table-action:first-child {
   padding-left: 0;
+}
+.small-locked-size {
+  width: 175px;
 }
 
 /* Graphs */

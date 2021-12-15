@@ -181,7 +181,6 @@ class Session {
   }
 
   handleDamageInflictedEvent(data) {
-    /// this.dataPoint('damageInflicted', data);
     this.aggregate('damageInflicted', null, data.values.amount);
 
     if (data.values.critical === '1') {
@@ -190,7 +189,6 @@ class Session {
   }
 
   handleDamageTakenEvent(data) {
-    /// this.dataPoint('damageTaken', data);
     this.aggregate('damageTaken', null, data.values.amount);
 
     if (data.values.critical === '1') {
@@ -199,33 +197,32 @@ class Session {
   }
 
   handleEnemyMissEvent() {
-    /// this.dataPoint('enemyMiss', data);
     this.aggregate('enemyMiss', null, 1);
   }
 
   handleEnemyEvadeEvent() {
-    /// this.dataPoint('enemyEvade', data);
     this.aggregate('enemyEvade', null, 1);
   }
 
   handleEnemyDodgeEvent() {
-    /// this.dataPoint('enemyDodge', data);
     this.aggregate('enemyDodge', null, 1);
   }
 
   handlePlayerDodgeEvent() {
-    /// this.dataPoint('playerDodge', data);
     this.aggregate('playerDodge', null, 1);
   }
 
   handlePlayerEvadeEvent() {
-    /// this.dataPoint('playerEvade', data);
     this.aggregate('playerEvade', null, 1);
   }
 
   handlePlayerDeflectEvent() {
-    /// this.dataPoint('playerDeflect', data);
     this.aggregate('playerDeflect', null, 1);
+  }
+
+  handleHealEvent(data) {
+    const { target, amount } = data.values;
+    this.aggregate('heal', target, amount);
   }
 
   handlePositionEvent(data) {
