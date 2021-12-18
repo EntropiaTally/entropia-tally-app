@@ -6,10 +6,10 @@ const path = require('path');
 const { is, fixPathForAsarUnpack } = require('electron-util');
 const EventEmitter = require('events');
 
-const parserPath = path.resolve(app.getAppPath(), 'bin');
-const name = 'entropia-tracker-parser';
+const cliPath = path.resolve(app.getAppPath(), 'bin');
+const name = 'entropia-tracker-cli';
 const ext = (is.linux) ? 'unix' : 'exe';
-const bin = fixPathForAsarUnpack(path.join(parserPath, `${name}.${ext}`));
+const bin = fixPathForAsarUnpack(path.join(cliPath, `${name}.${ext}`));
 
 class LogReader extends EventEmitter {
   constructor(file, avatarName = '') {
@@ -22,7 +22,7 @@ class LogReader extends EventEmitter {
   }
 
   onTailClose(code) {
-    console.error(`parser process exited with code ${code}`);
+    console.error(`cli process exited with code ${code}`);
   }
 
   start() {
