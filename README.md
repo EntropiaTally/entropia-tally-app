@@ -31,7 +31,7 @@ Downloads are available in Releases [**HERE**](https://github.com/Entropia-Track
 
 ## CLI
 
-Only interested the log parser or want to build your own interface?
+Only interested the CLI or want to build your own interface?
 
 Check out the [entropia-tracker-cli](https://github.com/Entropia-Tracker/entropia-tracker-cli)
 
