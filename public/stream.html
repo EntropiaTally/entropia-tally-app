@@ -8,7 +8,14 @@
     <link rel="stylesheet" href="styles/stream.css" />
   </head>
   <body>
-    HAHA I am always on top and receive events
+    <div class="flex">
+      <h3 class="title is-6">Total loot: <span>0</span> PED</h3>
+    </div>
+    <div class="flex">
+      <h3 class="title is-6">Globals: <span>0</span></h3>
+      <h3 class="title is-6">HoFs: <span>0</span></h3>
+      <h3 class="title is-6">Rare items: <span>0</span></h3>
+    </div>
     <script>
       window.api.on('session-updated', newSessionData => {
         console.log(newSessionData);

@@ -77,6 +77,11 @@ const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
                 Session history
               </MenuItem>
             </li>
+            <li>
+              <MenuItem onClick={() => window.api.call('overlay-window-toggle')}>
+                Toggle overlay
+              </MenuItem>
+            </li>
           </ul>
         </aside>
         <aside className="menu-mini">
@@ -109,6 +114,13 @@ const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
                 title="Session history"
                 iconClass="ri-history-line"
                 onClick={() => setActivePage('history')}
+              />
+            </li>
+            <li>
+              <MenuItem
+                title="Toggle overlay"
+                iconClass="ri-window-2-fill"
+                onClick={() => window.api.call('overlay-window-toggle')}
               />
             </li>
           </ul>

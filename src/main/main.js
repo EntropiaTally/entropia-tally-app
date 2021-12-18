@@ -14,7 +14,7 @@ const Session = require('./session');
 const LogReader = require('./log-reader');
 
 let mainWindow;
-let streamWindow;
+let overlayWindow;
 let session;
 
 unhandled();
@@ -61,7 +61,7 @@ const createMainWindow = async () => {
   return win;
 };
 
-const createStreamWindow = async parent => {
+const createOverlayWindow = async parent => {
   const win = new BrowserWindow({
     parent,
     title: `${app.name} - Stream`,
@@ -83,7 +83,7 @@ const createStreamWindow = async parent => {
   });
 
   win.on('closed', () => {
-    streamWindow = undefined;
+    overlayWindow = undefined;
   });
 
   await win.loadFile(path.resolve(app.getAppPath(), 'public/stream.html'));
@@ -145,10 +145,10 @@ function receivedLoggerEvent({ data, lastLine }) {
       mainWindow.webContents.send('session-data-updated-aggregated', sessionData?.aggregated);
       mainWindow.webContents.send('session-data-updated-events', sessionData?.events);
 
-      if (streamWindow && streamWindow.isVisible()) {
-        streamWindow.webContents.send('session-data-updated', sessionData);
-        streamWindow.webContents.send('session-data-updated-aggregated', sessionData?.aggregated);
-        streamWindow.webContents.send('session-data-updated-events', sessionData?.events);
+      if (overlayWindow && overlayWindow.isVisible()) {
+        overlayWindow.webContents.send('session-data-updated', sessionData);
+        overlayWindow.webContents.send('session-data-updated-aggregated', sessionData?.aggregated);
+        overlayWindow.webContents.send('session-data-updated-events', sessionData?.events);
       }
     }
   });
@@ -208,13 +208,13 @@ ipcMain.on('logging-status-toggle', () => {
   }
 });
 
-ipcMain.on('stream-window-toggle', () => {
-  if (!streamWindow) {
-    createStreamWindow(mainWindow).then(newWindow => {
-      streamWindow = newWindow;
+ipcMain.on('overlay-window-toggle', () => {
+  if (!overlayWindow) {
+    createOverlayWindow(mainWindow).then(newWindow => {
+      overlayWindow = newWindow;
     });
-  } else if (streamWindow && streamWindow.isVisible()) {
-    streamWindow.close();
+  } else if (overlayWindow && overlayWindow.isVisible()) {
+    overlayWindow.close();
   }
 });
 
@@ -287,7 +287,7 @@ ipcMain.handle('get-data', async (_event, { dataType, args }) => {
       response = await Session.FetchInstances(args.id);
       break;
     case 'stream-window-status':
-      response = streamWindow && streamWindow.isVisible() ? 'enabled' : 'disabled';
+      response = overlayWindow && overlayWindow.isVisible() ? 'enabled' : 'disabled';
       break;
     case 'development-mode':
       response = is.development;

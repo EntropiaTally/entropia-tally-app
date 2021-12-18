@@ -7,3 +7,11 @@ body {
   height: 100vh;
   width: 100%;
 }
+
+.flex {
+  display: flex;
+}
+
+.flex h3 {
+  flex: 1;
+}
