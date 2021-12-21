@@ -6,7 +6,7 @@ const LogSelect = ({ currentLog, selectLog }) => (
     <h3 className="title">System</h3>
     <div className="field">
       <div className="control level">
-        <button className="button is-small" type="button" onClick={selectLog}>Select log file</button>
+        <button className="button is-small is-info" type="button" onClick={selectLog}>Select log file</button>
         <code className="current-log">{currentLog}</code>
       </div>
       <p className="help">Select the Entropia Universe <code>chat.log</code> file.</p>

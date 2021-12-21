@@ -13,6 +13,18 @@ const configStorage = new Store({
   sidebarStyle: {
     type: 'string',
   },
+  huntingSets: {
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', format: 'uuid' },
+        default: { type: 'boolean' },
+        name: { type: 'string' },
+        decay: { type: 'number' },
+      },
+    },
+  },
 });
 
 module.exports = configStorage;
