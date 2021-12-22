@@ -2,7 +2,7 @@
 
 const { contextBridge, ipcRenderer } = require('electron');
 
-const getters = new Set(['active-session', 'session', 'sessions', 'instances', 'settings', 'logreader-status', 'development-mode']);
+const getters = new Set(['active-session', 'session', 'sessions', 'instances', 'settings', 'logreader-status', 'development-mode', 'overlay-window-status']);
 const setters = new Set(['active-session', 'settings']);
 const actions = new Set(['new-session', 'new-instance', 'load-instance', 'overlay-window-toggle', 'logging-status-toggle']);
 const deletes = new Set(['session', 'instance']);

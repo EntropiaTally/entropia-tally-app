@@ -30,6 +30,7 @@ MenuItem.propTypes = {
 
 const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
   const [isLogRunning, setIsLogRunning] = useState(false);
+  const [isOverlayRunning, setIsOverlayRunning] = useState(false);
   const [isSessionModalActive, setIsSessionModalActive] = useState(false);
   const [isInstanceModalActive, setIsInstanceModalActive] = useState(false);
 
@@ -38,7 +39,17 @@ const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
       setIsLogRunning(status === 'enabled');
     });
 
-    return () => removeLogStatusListener();
+    const removeOverlayClosedListener = window.api.on('overlay-closed', closed => {
+      setIsOverlayRunning(false);
+    });
+
+
+    window.api.get('overlay-window-status').then(status => setIsOverlayRunning(status === 'enabled'));
+
+    return () => {
+      removeLogStatusListener();
+      removeOverlayClosedListener();
+    }
   }, []);
 
   const startNewSession = useCallback(() => {
@@ -56,6 +67,11 @@ const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
     setIsInstanceModalActive(false);
     setActivePage('current');
   }, [setActivePage]);
+
+  const toggleOverlay = () => {
+    window.api.call('overlay-window-toggle');
+    setIsOverlayRunning(!isOverlayRunning);
+  };
 
   return (
     <>
@@ -78,7 +94,7 @@ const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
               </MenuItem>
             </li>
             <li>
-              <MenuItem onClick={() => window.api.call('overlay-window-toggle')}>
+              <MenuItem isActive={isOverlayRunning} onClick={() => toggleOverlay()}>
                 Toggle overlay
               </MenuItem>
             </li>
@@ -118,9 +134,10 @@ const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
             </li>
             <li>
               <MenuItem
+                isActive={isOverlayRunning}
                 title="Toggle overlay"
                 iconClass="ri-window-2-fill"
-                onClick={() => window.api.call('overlay-window-toggle')}
+                onClick={() => toggleOverlay()}
               />
             </li>
           </ul>

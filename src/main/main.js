@@ -63,8 +63,7 @@ const createMainWindow = async () => {
 
 const createOverlayWindow = async parent => {
   const win = new BrowserWindow({
-    parent,
-    title: `${app.name} - Stream`,
+    title: `${app.name} - Overlay`,
     frame: false,
     show: false,
     width: 250,
@@ -84,9 +83,12 @@ const createOverlayWindow = async parent => {
 
   win.on('closed', () => {
     overlayWindow = undefined;
+    if (mainWindow) {
+      mainWindow.webContents.send('overlay-closed', true);
+    }
   });
 
-  await win.loadFile(path.resolve(app.getAppPath(), 'public/stream.html'));
+  await win.loadFile(path.resolve(app.getAppPath(), 'public/overlay.html'));
 
   return win;
 };
@@ -286,7 +288,7 @@ ipcMain.handle('get-data', async (_event, { dataType, args }) => {
     case 'instances':
       response = await Session.FetchInstances(args.id);
       break;
-    case 'stream-window-status':
+    case 'overlay-window-status':
       response = overlayWindow && overlayWindow.isVisible() ? 'enabled' : 'disabled';
       break;
     case 'development-mode':
