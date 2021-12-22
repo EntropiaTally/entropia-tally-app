@@ -30,7 +30,7 @@ const Nav = () => {
     <nav className="navbar is-fixed-top top-menu">
       <div className="navbar-brand">
         <div className="navbar-item">
-          {isDevelopment && (<small className="has-text-danger">DEV&nbsp;</small>)}Entropia Tracker
+          {isDevelopment && (<small className="has-text-danger">DEV&nbsp;</small>)}Entropia Tally
         </div>
       </div>
       <div className="navbar-menu">

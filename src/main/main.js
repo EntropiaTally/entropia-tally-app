@@ -22,7 +22,7 @@ debug();
 contextMenu();
 
 // Note: Must match `build.appId` in package.json
-app.setAppUserModelId('com.Entropia-Tracker.entropia-tracker');
+app.setAppUserModelId('com.EntropiaTally.entropia-tally');
 
 if (!is.development) {
   checkForUpdates();
