@@ -14,8 +14,8 @@ const CalcView = () => {
       if (newData.usedHuntingSets) {
         const fixedSets = Object.values(newData.usedHuntingSets).map(set => ({
           ...set,
-          hits: newData?.aggregated?.huntingSetDmg?.[set.id],
-          misses: newData?.aggregated?.huntingSetMissed?.[set.id],
+          hits: newData?.aggregated?.huntingSetDmg?.[set.id] || {},
+          misses: newData?.aggregated?.huntingSetMissed?.[set.id] || {},
         }));
         setInstanceHuntingSets(fixedSets.filter(set => set.hits || set.misses));
       }
@@ -36,28 +36,43 @@ const CalcView = () => {
     setAggregatedData({ ...aggregatedData, additionalCost: newCost });
   }, [aggregatedData]);
 
-  const totalWeaponCost = instanceHuntingSets.reduce((previous, current) => previous + ((current.hits.count + current.misses.count) * (current.decay / 100)), 0);
+  const totalWeaponCost = instanceHuntingSets.reduce((previous, current) => {
+    const hits = current.hits?.count ?? 0;
+    const misses = current.misses?.count ?? 0;
+    return previous + ((hits + misses) * (current.decay / 100));
+  }, 0);
 
   const totalCost = totalWeaponCost + aggregatedData.additionalCost;
   const resultValue = aggregatedData.allLoot - totalCost;
-  const resultRate = (aggregatedData.allLoot / totalCost) * 100 || 0;
+  const resultRate = totalCost > 0
+    ? (aggregatedData.allLoot / totalCost) * 100 || 0
+    : 0;
 
   return (
     <div className="content box info-box">
       <Table hasBorder header={['Description', 'Value']}>
-        <tr>
-          <td>Total weapon ammo and decay</td>
-          <td className="calc-col-width"><span className="sum">{totalWeaponCost.toFixed(4)}</span> PED</td>
-        </tr>
-
-        {instanceHuntingSets.length > 1 && instanceHuntingSets.map(set => (
-          <tr key={set.id}>
-            <td><i className="ri-arrow-right-s-line vert-align-icon" />{set.name}</td>
+        {instanceHuntingSets.length > 0 && (
+          <tr>
+            <td>Total weapon ammo and decay</td>
             <td className="calc-col-width">
-              <span className="sum">{((set.hits.count + set.misses.count) * (set.decay / 100)).toFixed(4)}</span> PED
+              <span className="sum">{totalWeaponCost.toFixed(4)}</span> PED
             </td>
           </tr>
-        ))}
+        )}
+
+        {instanceHuntingSets.length > 1 && instanceHuntingSets.map(set => {
+          const hits = set.hits?.count ?? 0;
+          const misses = set.misses?.count ?? 0;
+
+          return (
+            <tr key={set.id}>
+              <td><i className="ri-arrow-right-s-line vert-align-icon" />{set.name}</td>
+              <td className="calc-col-width">
+                <span className="sum">{((hits + misses) * (set.decay / 100)).toFixed(4)}</span> PED
+              </td>
+            </tr>
+          );
+        })}
 
         <tr>
           <td className="vert-align-middle">Additional costs</td>
@@ -98,7 +113,15 @@ const CalcView = () => {
         </tr>
         <tr>
           <td>Result</td>
-          <td className="calc-col-width"><span className="sum">{resultRate.toFixed(2)} %</span> ({resultValue.toFixed(4)} PED)</td>
+          <td className="calc-col-width">
+            {resultRate === null && (
+              <>
+                <span className="sum">{resultRate.toFixed(2)} %</span>
+                <span>({resultValue.toFixed(4)} PED)</span>
+              </>
+            )}
+            {resultRate >= 0 && (<><span className="sum">{resultValue.toFixed(4)}</span> PED</>)}
+          </td>
         </tr>
       </Table>
     </div>

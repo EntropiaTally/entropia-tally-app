@@ -146,7 +146,6 @@ function getSettings() {
 }
 
 function setDefaultHuntingSet() {
-  console.log('UPDATE DEFAULT SET');
   activeHuntingSet = config.get('huntingSets', []).find(set => set.default);
 
   if (!activeHuntingSet) {
@@ -193,6 +192,7 @@ async function startNewSession(emit = true) {
   setDefaultHuntingSet();
 
   session = await Session.Create();
+  session.setHuntingSet(activeHuntingSet);
   if (emit) {
     mainWindow.webContents.send('session-new', session.getData());
   }
@@ -204,6 +204,7 @@ function startNewInstance(emit = true) {
 
   if (session) {
     session.createNewInstance();
+    session.setHuntingSet(activeHuntingSet);
 
     if (emit) {
       mainWindow.webContents.send('instance-new', session.getData());
@@ -265,6 +266,8 @@ ipcMain.on('load-instance', async (_event, { sessionId, instanceId }) => {
   if (session) {
     const selectedInstanceId = (instanceId === 'new') ? null : instanceId;
     session = await Session.Load(sessionId, selectedInstanceId);
+    session.setHuntingSet(activeHuntingSet);
+
     if (instanceId === 'new') {
       session.createNewInstance();
       mainWindow.webContents.send('instance-new', session.getData());
@@ -278,6 +281,9 @@ ipcMain.on('change-hunting-set', (_event, selectedHuntingSet) => {
   if (session) {
     activeHuntingSet = selectedHuntingSet;
     session.setHuntingSet(selectedHuntingSet);
+
+    const updatedSettings = getSettings();
+    mainWindow.webContents.send('settings-updated', updatedSettings);
   }
 });
 
@@ -376,7 +382,7 @@ ipcMain.handle('set-hunting-sets', (_event, sets) => {
       return set;
     });
 
-    const confirmActiveHuntingSet = updatedSets.find(set => set.id === activeHuntingSet.id);
+    const confirmActiveHuntingSet = updatedSets.find(set => set.id === activeHuntingSet?.id);
 
     config.set('huntingSets', updatedSets);
 

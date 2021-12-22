@@ -115,7 +115,7 @@ const HuntingSets = ({ huntingSets }) => {
 
   return (
     <div className="box block">
-      <h3 className="title">Hunting sets</h3>
+      <h3 className="title">Weapon sets</h3>
       <p className="help">
         Create sets allow tracking of hunting runs.
         Go to the <a onClick={() => window.api.call('goto-wiki-weapontool')}>EntropiaWiki</a> to get the PEC cost of your weapon setup.
