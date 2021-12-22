@@ -3,4 +3,4 @@ node_modules
 /public/scripts/*
 yarn-error.log
 chat.log
-entropia-tracker-db.sqlite3
+entropia-tally-db.sqlite3

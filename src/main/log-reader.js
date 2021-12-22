@@ -7,7 +7,7 @@ const { is, fixPathForAsarUnpack } = require('electron-util');
 const EventEmitter = require('events');
 
 const cliPath = path.resolve(app.getAppPath(), 'bin');
-const name = 'entropia-tracker-cli';
+const name = 'cli';
 const ext = (is.linux) ? 'unix' : 'exe';
 const bin = fixPathForAsarUnpack(path.join(cliPath, `${name}.${ext}`));
 
