@@ -61,7 +61,7 @@ const createMainWindow = async () => {
   return win;
 };
 
-const createOverlayWindow = async parent => {
+const createOverlayWindow = async _parent => {
   const win = new BrowserWindow({
     title: `${app.name} - Overlay`,
     frame: false,

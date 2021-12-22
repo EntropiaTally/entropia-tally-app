@@ -39,17 +39,16 @@ const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
       setIsLogRunning(status === 'enabled');
     });
 
-    const removeOverlayClosedListener = window.api.on('overlay-closed', closed => {
+    const removeOverlayClosedListener = window.api.on('overlay-closed', _closed => {
       setIsOverlayRunning(false);
     });
-
 
     window.api.get('overlay-window-status').then(status => setIsOverlayRunning(status === 'enabled'));
 
     return () => {
       removeLogStatusListener();
       removeOverlayClosedListener();
-    }
+    };
   }, []);
 
   const startNewSession = useCallback(() => {
