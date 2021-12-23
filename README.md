@@ -1,4 +1,4 @@
-# Entropia Tracker
+# Entropia Tally
 
 > Tracking software for Entropia Universe
 
@@ -16,7 +16,7 @@
 
 *GNU/Linux and Windows supported (64-bit only).*
 
-Downloads are available in Releases [**HERE**](https://github.com/Entropia-Tracker/entropia-tracker/releases/latest)
+Downloads are available in Releases [**HERE**](https://github.com/EntropiaTally/entropia-tally-app/releases/latest)
 
 **GNU/Linux**
 - *AppImage* (**Automatic updates**)
@@ -33,7 +33,7 @@ Downloads are available in Releases [**HERE**](https://github.com/Entropia-Track
 
 Only interested the CLI or want to build your own interface?
 
-Check out the [entropia-tracker-cli](https://github.com/Entropia-Tracker/entropia-tracker-cli)
+Check out the [entropia-tally-cli](https://github.com/EntropiaTally/entropia-tally-cli)
 
 
 ## Development
@@ -62,6 +62,6 @@ $ yarn dist
 
 ## Support
 
-Support and feature requests provided through [Github Issues](https://github.com/Entropia-Tracker/entropia-tracker/issues)
+Support and feature requests provided through [Github Issues](https://github.com/EntropiaTally/entropia-tally-app/issues)
 
-Want to contribute? Make a [Pull request](https://github.com/Entropia-Tracker/entropia-tracker/pulls)
+Want to contribute? Make a [Pull request](https://github.com/EntropiaTally/entropia-tally-app/pulls)

@@ -37,7 +37,7 @@ const SQL_CREATE_DB_CONFIG = `
 
 class Database {
   constructor() {
-    this.path = path.resolve(storagePath, 'entropia-tracker-db.sqlite3');
+    this.path = path.resolve(storagePath, 'entropia-tally-db.sqlite3');
     this.instance = new sqlite3.Database(this.path, error => {
       if (error) {
         throw error;
