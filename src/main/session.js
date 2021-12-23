@@ -111,6 +111,8 @@ class Session {
       const { id, name, decay } = huntingSet;
       this.config.usedHuntingSets[id] = { id, name, decay };
       this.currentHuntingSet = id;
+    } else {
+      this.currentHuntingSet = null;
     }
   }
 
