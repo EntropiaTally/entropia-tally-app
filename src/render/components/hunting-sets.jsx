@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
-const HuntingSet = ({ set, saveSet }) => {
+const HuntingSet = ({ set, saveSet, hasDefault }) => {
   const { id, name, decay } = set;
   const [values, setValues] = useState({});
 
@@ -53,7 +53,7 @@ const HuntingSet = ({ set, saveSet }) => {
             { id ? 'Save' : 'Add' }
           </button>
           {id && <button type="button" className="button is-small is-danger" onClick={() => doAction('delete')}>Delete</button>}
-          {id && (
+          {(id && hasDefault) && (
             <button type="button" className={`button is-small ${set.default ? 'is-success' : 'is-warning'}`} onClick={() => doAction('set-default')}>
               { set.default ? 'Default' : 'Set default' }
             </button>
@@ -72,10 +72,12 @@ HuntingSet.propTypes = {
     default: PropTypes.bool, // eslint-disable-line react/boolean-prop-naming
   }),
   saveSet: PropTypes.func.isRequired,
+  hasDefault: PropTypes.bool,
 };
 
 HuntingSet.defaultProps = {
   set: {},
+  hasDefault: true,
 };
 
 const HuntingSets = ({ huntingSets }) => {
@@ -117,7 +119,7 @@ const HuntingSets = ({ huntingSets }) => {
     <div className="box block">
       <h3 className="title">Weapon sets</h3>
       <p className="help">
-        Create sets allow tracking of hunting runs.
+        Create sets to allow tracking of hunting returns.
         Go to the <a onClick={() => window.api.call('goto-wiki-weapontool')}>EntropiaWiki</a> to get the PEC cost of your weapon setup.
       </p>
 
@@ -127,6 +129,7 @@ const HuntingSets = ({ huntingSets }) => {
             key={set?.id}
             set={set}
             saveSet={setHuntingSet}
+            hasDefault={huntingSets.length > 1}
           />
         ))}
         {showNew && <HuntingSet saveSet={setHuntingSet} />}

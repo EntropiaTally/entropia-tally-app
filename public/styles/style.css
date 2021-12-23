@@ -259,6 +259,17 @@ span.sum {
   margin-bottom: -0.75rem;
 }
 
+.flex {
+  display: flex;
+  align-items: center;
+}
+.flex-1 {
+  flex: 1;
+}
+.inline-label {
+  margin: 0 1rem 0 0 !important;
+}
+
 
 /* Tables */
 .fullwidth {

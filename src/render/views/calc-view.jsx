@@ -17,7 +17,7 @@ const CalcView = () => {
           hits: newData?.aggregated?.huntingSetDmg?.[set.id] || {},
           misses: newData?.aggregated?.huntingSetMissed?.[set.id] || {},
         }));
-        setInstanceHuntingSets(fixedSets.filter(set => set.hits || set.misses));
+        setInstanceHuntingSets(fixedSets.filter(set => set.hits.count || set.misses.count));
       }
 
       setAggregatedData({ allLoot, additionalCost });
@@ -53,14 +53,14 @@ const CalcView = () => {
       <Table hasBorder header={['Description', 'Value']}>
         {instanceHuntingSets.length > 0 && (
           <tr>
-            <td>Total weapon ammo and decay</td>
+            <td>Total weapon cost (ammo and decay)</td>
             <td className="calc-col-width">
               <span className="sum">{totalWeaponCost.toFixed(4)}</span> PED
             </td>
           </tr>
         )}
 
-        {instanceHuntingSets.length > 1 && instanceHuntingSets.map(set => {
+        {instanceHuntingSets.map(set => {
           const hits = set.hits?.count ?? 0;
           const misses = set.misses?.count ?? 0;
 
@@ -75,7 +75,7 @@ const CalcView = () => {
         })}
 
         <tr>
-          <td className="vert-align-middle">Additional costs</td>
+          <td className="vert-align-middle">Additional costs (armor, healing...)</td>
           <td className="calc-col-width">
             <div className="control has-icons-right">
               {aggregatedData?.additionalCost !== null && (
@@ -88,9 +88,7 @@ const CalcView = () => {
                   onChange={updateAdditionalCost}
                 />
               )}
-              <span className="icon is-medium is-right">
-                PED
-              </span>
+              <span className="icon is-medium is-right">PED</span>
             </div>
           </td>
         </tr>
@@ -100,13 +98,14 @@ const CalcView = () => {
         </tr>
 
         <tr>
-          <td>Total loot</td>
-          <td className="calc-col-width"><span className="sum">{aggregatedData.allLoot.toFixed(4)}</span> PED</td>
-        </tr>
-        <tr>
           <td>Total costs</td>
           <td className="calc-col-width"><span className="sum">{totalCost.toFixed(4)}</span> PED</td>
         </tr>
+        <tr>
+          <td>Total loot</td>
+          <td className="calc-col-width"><span className="sum">{aggregatedData.allLoot.toFixed(4)}</span> PED</td>
+        </tr>
+
         <tr>
           <td />
           <td />
@@ -114,13 +113,13 @@ const CalcView = () => {
         <tr>
           <td>Result</td>
           <td className="calc-col-width">
-            {resultRate === null && (
+            {resultRate >= 0 && (
               <>
-                <span className="sum">{resultRate.toFixed(2)} %</span>
-                <span>({resultValue.toFixed(4)} PED)</span>
+                <span><span className="sum">{resultRate.toFixed(2)}</span> %</span>
+                <span>&nbsp;(<span className="sum">{resultValue.toFixed(4)}</span> PED)</span>
               </>
             )}
-            {resultRate >= 0 && (<><span className="sum">{resultValue.toFixed(4)}</span> PED</>)}
+            {resultRate === null && <><span className="sum">{resultValue.toFixed(4)}</span> PED</>}
           </td>
         </tr>
       </Table>
