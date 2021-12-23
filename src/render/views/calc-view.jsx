@@ -46,7 +46,7 @@ const CalcView = () => {
   const resultValue = aggregatedData.allLoot - totalCost;
   const resultRate = totalCost > 0
     ? (aggregatedData.allLoot / totalCost) * 100 || 0
-    : 0;
+    : null;
 
   return (
     <div className="content box info-box">
@@ -113,7 +113,7 @@ const CalcView = () => {
         <tr>
           <td>Result</td>
           <td className="calc-col-width">
-            {resultRate >= 0 && (
+            {resultRate !== null && (
               <>
                 <span><span className="sum">{resultRate.toFixed(2)}</span> %</span>
                 <span>&nbsp;(<span className="sum">{resultValue.toFixed(4)}</span> PED)</span>
