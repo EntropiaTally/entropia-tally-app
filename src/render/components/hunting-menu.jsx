@@ -34,9 +34,11 @@ const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
   const [isInstanceModalActive, setIsInstanceModalActive] = useState(false);
 
   useEffect(() => {
-    const removeLogStatusListener = window.api.on('logger-status-changed', status => {
-      setIsLogRunning(status === 'enabled');
-    });
+    const updateLogStatus = status => setIsLogRunning(status === 'enabled');
+
+    const removeLogStatusListener = window.api.on('logger-status-changed', updateLogStatus);
+
+    window.api.get('logreader-status').then(updateLogStatus);
 
     return () => removeLogStatusListener();
   }, []);
