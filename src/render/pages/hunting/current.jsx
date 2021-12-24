@@ -57,7 +57,7 @@ const Current = () => {
             <a onClick={() => setCurrentTab('stats')}>Stats</a>
           </li>
           <li className={currentTab === 'calc' ? 'is-active' : ''}>
-            <a onClick={() => setCurrentTab('calc')}>Calc</a>
+            <a onClick={() => setCurrentTab('calc')}>Returns</a>
           </li>
         </ul>
       </div>
