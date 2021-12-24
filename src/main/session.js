@@ -226,7 +226,7 @@ class Session {
   }
 
   handlePositionEvent(data) {
-    this.dataPoint('position', data.values);
+    this.dataPoint('position', data);
   }
 
   getData(events = true) {
