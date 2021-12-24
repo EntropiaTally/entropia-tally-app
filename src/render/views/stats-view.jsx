@@ -22,7 +22,7 @@ const StatsView = ({ avatarName }) => {
       const playerDeflectCount = makeNumber(aggregated?.playerDeflect?.count);
       const enemyMissCountValue = makeNumber(aggregated?.enemyMiss?.count);
 
-      const playerAttackCount = damageInflictedCount + makeNumber(aggregated?.enemyDodge?.count) + makeNumber(aggregated?.enemyEvade?.count); // Player attacks attempted
+      const playerAttackCount = damageInflictedCount + makeNumber(aggregated?.playerMiss?.count) + makeNumber(aggregated?.enemyDodge?.count) + makeNumber(aggregated?.enemyEvade?.count) + makeNumber(aggregated?.enemyJam?.count); // Player attacks attempted
       const playerEvadeCount = makeNumber(aggregated?.playerEvade?.count) + makeNumber(aggregated?.playerDodge?.count); // Enemy attacks avoided
       const enemyAttackCount = damageTakenCount + playerDeflectCount + enemyMissCountValue + playerEvadeCount; // Enemy attacks attempted
       const enemyHitCount = damageTakenCount + playerDeflectCount; // Enemy attacks that hit incl. player deflections

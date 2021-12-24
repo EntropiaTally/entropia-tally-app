@@ -243,12 +243,28 @@ class Session {
     }
   }
 
+  handleEnemyJamEvent() {
+    this.aggregate('enemyJam', null, 1);
+
+    if (this.currentHuntingSet) {
+      this.aggregate('huntingSetMissed', this.currentHuntingSet, 1);
+    }
+  }
+
   handlePlayerDodgeEvent() {
     this.aggregate('playerDodge', null, 1);
   }
 
   handlePlayerEvadeEvent() {
     this.aggregate('playerEvade', null, 1);
+  }
+
+  handlePlayerMissEvent() {
+    this.aggregate('playerMiss', null, 1);
+
+    if (this.currentHuntingSet) {
+      this.aggregate('huntingSetMissed', this.currentHuntingSet, 1);
+    }
   }
 
   handlePlayerDeflectEvent() {
