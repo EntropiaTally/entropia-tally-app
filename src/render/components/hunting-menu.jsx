@@ -50,11 +50,7 @@ const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
   }, [setActivePage]);
 
   const startNewInstance = useCallback(async () => {
-    const sessionData = await window.api.get('active-session');
-    window.api.call('load-instance', {
-      sessionId: sessionData?.id,
-      instanceId: 'new',
-    });
+    window.api.call('new-instance');
     setIsInstanceModalActive(false);
     setActivePage('current');
   }, [setActivePage]);

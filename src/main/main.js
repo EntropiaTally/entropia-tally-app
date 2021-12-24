@@ -1,7 +1,8 @@
 'use strict';
 
-const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 const { is } = require('electron-util');
 const unhandled = require('electron-unhandled');
 const debug = require('electron-debug');
@@ -30,6 +31,12 @@ if (!is.development) {
 
 const logReader = new LogReader(config.get('log'), config.get('avatarName'));
 const assetPath = is.development ? app.getAppPath() : process.resourcesPath;
+
+const initialHuntingSets = config.get('huntingSets', []);
+let activeHuntingSet = initialHuntingSets.find(set => set.default);
+if (!activeHuntingSet) {
+  activeHuntingSet = initialHuntingSets[0];
+}
 
 const createMainWindow = async () => {
   const win = new BrowserWindow({
@@ -121,6 +128,7 @@ app.on('activate', async () => {
 (async () => {
   await app.whenReady();
   session = await Session.Create();
+  session.setHuntingSet(activeHuntingSet);
   Menu.setApplicationMenu(menu);
   mainWindow = await createMainWindow();
 })();
@@ -132,7 +140,24 @@ function getSettings() {
     log: config.get('log', null),
     avatarName: config.get('avatarName', null),
     sidebarStyle: config.get('sidebarStyle', 'full'),
+    huntingSets: config.get('huntingSets', []),
+    activeHuntingSet: activeHuntingSet?.id,
   };
+}
+
+function setDefaultHuntingSet() {
+  activeHuntingSet = config.get('huntingSets', []).find(set => set.default);
+
+  if (!activeHuntingSet) {
+    activeHuntingSet = config.get('huntingSets', [])[0];
+  }
+
+  const updatedSettings = getSettings();
+  mainWindow.webContents.send('settings-updated', updatedSettings);
+
+  if (streamWindow && streamWindow.isVisible()) {
+    streamWindow.webContents.send('settings-updated', updatedSettings);
+  }
 }
 
 function receivedLoggerEvent({ data, lastLine }) {
@@ -164,8 +189,10 @@ function stopLogReader() {
 
 async function startNewSession(emit = true) {
   stopLogReader();
+  setDefaultHuntingSet();
 
   session = await Session.Create();
+  session.setHuntingSet(activeHuntingSet);
   if (emit) {
     mainWindow.webContents.send('session-new', session.getData());
   }
@@ -173,9 +200,12 @@ async function startNewSession(emit = true) {
 
 function startNewInstance(emit = true) {
   stopLogReader();
+  setDefaultHuntingSet();
 
   if (session) {
     session.createNewInstance();
+    session.setHuntingSet(activeHuntingSet);
+
     if (emit) {
       mainWindow.webContents.send('instance-new', session.getData());
     }
@@ -194,6 +224,10 @@ ipcMain.on('show-settings', () => {
   if (mainWindow) {
     mainWindow.webContents.send('goto', 'settings');
   }
+});
+
+ipcMain.on('goto-wiki-weapontool', () => {
+  shell.openExternal('http://www.entropiawiki.com/WeaponCompareV2.aspx');
 });
 
 ipcMain.on('logging-status-toggle', () => {
@@ -232,12 +266,24 @@ ipcMain.on('load-instance', async (_event, { sessionId, instanceId }) => {
   if (session) {
     const selectedInstanceId = (instanceId === 'new') ? null : instanceId;
     session = await Session.Load(sessionId, selectedInstanceId);
+    session.setHuntingSet(activeHuntingSet);
+
     if (instanceId === 'new') {
       session.createNewInstance();
       mainWindow.webContents.send('instance-new', session.getData());
     }
 
     mainWindow.webContents.send('instance-loaded', session.getData());
+  }
+});
+
+ipcMain.on('change-hunting-set', (_event, selectedHuntingSet) => {
+  if (session) {
+    activeHuntingSet = selectedHuntingSet;
+    session.setHuntingSet(selectedHuntingSet);
+
+    const updatedSettings = getSettings();
+    mainWindow.webContents.send('settings-updated', updatedSettings);
   }
 });
 
@@ -314,6 +360,47 @@ ipcMain.handle('set-data', async (_event, data) => {
     const sessionData = await session.setData(data.values);
     mainWindow.webContents.send('session-updated', sessionData);
   }
+
+  return response;
+});
+
+ipcMain.handle('set-hunting-sets', (_event, sets) => {
+  let response = false;
+  const currentSavedSets = config.get('huntingSets', []);
+
+  try {
+    const updatedSets = sets.map(set => {
+      set.id = set.id ? set.id : uuidv4();
+      if (set.default === undefined) {
+        const wasDefault = currentSavedSets.find(originalSet => originalSet.id === set.id)?.default;
+        if (wasDefault !== null) {
+          set.default = wasDefault;
+        }
+      }
+
+      set.default = (set.default !== undefined) ? set.default : false;
+      return set;
+    });
+
+    const confirmActiveHuntingSet = updatedSets.find(set => set.id === activeHuntingSet?.id);
+
+    config.set('huntingSets', updatedSets);
+
+    // Active set has been removed, set default
+    if (!confirmActiveHuntingSet) {
+      setDefaultHuntingSet();
+      if (session) {
+        session.setHuntingSet(activeHuntingSet);
+      }
+    }
+
+    response = true;
+  } catch (error) {
+    console.error(error);
+  }
+
+  const updatedSettings = getSettings();
+  mainWindow.webContents.send('settings-updated', updatedSettings);
 
   return response;
 });

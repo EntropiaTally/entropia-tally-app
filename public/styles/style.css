@@ -259,6 +259,17 @@ span.sum {
   margin-bottom: -0.75rem;
 }
 
+.flex {
+  display: flex;
+  align-items: center;
+}
+.flex-1 {
+  flex: 1;
+}
+.inline-label {
+  margin: 0 1rem 0 0 !important;
+}
+
 
 /* Tables */
 .fullwidth {
@@ -273,9 +284,24 @@ span.sum {
 .small-locked-size {
   width: 175px;
 }
+.vert-align-middle {
+  vertical-align: middle !important;
+}
+.vert-align-icon {
+  vertical-align: bottom !important;
+}
+.calc-col-width {
+  width: 300px;
+}
 
 /* Graphs */
 .recharts-cartesian-axis-tick-value,
 .x-axis-ticks {
   font-size: 0.75rem;
+}
+
+
+/* Settings */
+.column-250 {
+  max-width: 250px;
 }

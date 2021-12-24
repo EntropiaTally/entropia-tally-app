@@ -5,7 +5,7 @@ const path = require('path');
 const { is } = require('electron-util');
 const sqlite3 = require('sqlite3');
 
-const dbVersion = 1;
+const dbVersion = 2;
 const storagePath = is.development ? app.getAppPath() : app.getPath('userData');
 
 const SQL_CREATE_SESSIONS = `
@@ -23,6 +23,7 @@ const SQL_CREATE_SESSION_INSTANCES = `
     created_at VARCHAR NOT NULL DEFAULT CURRENT_TIMESTAMP,
     events TEXT NOT NULL,
     aggregated TEXT NOT NULL,
+    config TEXT NOT NULL DEFAULT "{}",
     FOREIGN KEY(session_id) REFERENCES sessions(id)
   )
 `;
@@ -56,6 +57,9 @@ class Database {
         'INSERT INTO db_config(id, version) VALUES(?, ?)',
         ['version', dbVersion],
       );
+    } else if (row?.version === 1) {
+      await this.run('UPDATE db_config SET version = ?', [dbVersion]);
+      await this.run('ALTER TABLE session_instances ADD config TEXT NOT NULL DEFAULT "{}"');
     }
   }
 

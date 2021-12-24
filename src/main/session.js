@@ -7,12 +7,13 @@ class Session {
   static IGNORE_LOOT = ['Universal Ammo'];
 
   static async Load(id, instanceId = null) {
-    let data = null;
-    data = await (instanceId
-      ? db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ? AND si.id = ?', [id, instanceId])
-      : db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ?', [id]));
+    const data = await (instanceId
+      ? db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated, si.config FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ? AND si.id = ?', [id, instanceId])
+      : db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated, si.config FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ?', [id]));
 
-    const instance = new Session(id, data?.name, data?.instance_id, data.created_at);
+    const options = { name: data?.name, createdAt: data?.created_at };
+    const config = JSON.parse(data.config || {});
+    const instance = new Session(id, data?.instance_id, options, config);
 
     if (data?.events) {
       instance.events = JSON.parse(data.events);
@@ -25,9 +26,10 @@ class Session {
     return instance;
   }
 
-  static async Create(name = null) {
+  static async Create(name = null, config = null) {
     const id = uuidv4();
-    const instance = new Session(id, name);
+    const options = { name };
+    const instance = new Session(id, null, options, config);
     return instance;
   }
 
@@ -37,7 +39,7 @@ class Session {
   }
 
   static async FetchInstances(id) {
-    const rows = await db.all('SELECT id, session_id, created_at, aggregated FROM session_instances WHERE session_id = ? ORDER BY DATETIME(created_at) DESC', [id]);
+    const rows = await db.all('SELECT id, session_id, created_at, aggregated, config FROM session_instances WHERE session_id = ? ORDER BY DATETIME(created_at) DESC', [id]);
     return rows.map(row => {
       row.aggregated = JSON.parse(row.aggregated);
       return row;
@@ -73,13 +75,15 @@ class Session {
     return { success, sessionId, instanceId: id };
   }
 
-  constructor(id = null, name = null, instanceId = null, createdAt = null) {
+  constructor(id = null, instanceId = null, options = {}, config = null) {
     this.id = id;
     this.instanceId = instanceId;
-    this.name = name;
-    this.createdAt = createdAt;
+    this.name = options?.name;
+    this.createdAt = options?.createdAt;
     this.events = {};
     this.aggregated = {};
+    this.config = config || {};
+    this.currentHuntingSet = null;
   }
 
   newEvent(eventData, updateDb = true) {
@@ -97,6 +101,20 @@ class Session {
   /// hashString(string) {
   ///   return Crypto.createHash('sha1').update(string.toLowerCase()).digest('hex');
   /// }
+
+  setHuntingSet(huntingSet) {
+    if (huntingSet && huntingSet.id) {
+      if (!this.config.usedHuntingSets) {
+        this.config.usedHuntingSets = {};
+      }
+
+      const { id, name, decay } = huntingSet;
+      this.config.usedHuntingSets[id] = { id, name, decay };
+      this.currentHuntingSet = id;
+    } else {
+      this.currentHuntingSet = null;
+    }
+  }
 
   dataPoint(type, data) {
     if (!this.events[type]) {
@@ -148,8 +166,13 @@ class Session {
     }
 
     this.aggregate('allLoot', null, value, amount);
+
     this.dataPoint('loot', data);
     this.aggregate('loot', name, value, amount);
+
+    if (this.currentHuntingSet) {
+      this.aggregate('huntingSetLoot', this.currentHuntingSet, value, amount);
+    }
   }
 
   handleRareLootEvent(data) {
@@ -186,6 +209,10 @@ class Session {
     if (data.values.critical === '1') {
       this.aggregate('damageInflictedCrit', null, data.values.amount);
     }
+
+    if (this.currentHuntingSet) {
+      this.aggregate('huntingSetDmg', this.currentHuntingSet, data.values.amount);
+    }
   }
 
   handleDamageTakenEvent(data) {
@@ -202,10 +229,26 @@ class Session {
 
   handleEnemyEvadeEvent() {
     this.aggregate('enemyEvade', null, 1);
+
+    if (this.currentHuntingSet) {
+      this.aggregate('huntingSetMissed', this.currentHuntingSet, 1);
+    }
   }
 
   handleEnemyDodgeEvent() {
     this.aggregate('enemyDodge', null, 1);
+
+    if (this.currentHuntingSet) {
+      this.aggregate('huntingSetMissed', this.currentHuntingSet, 1);
+    }
+  }
+
+  handleEnemyJamEvent() {
+    this.aggregate('enemyJam', null, 1);
+
+    if (this.currentHuntingSet) {
+      this.aggregate('huntingSetMissed', this.currentHuntingSet, 1);
+    }
   }
 
   handlePlayerDodgeEvent() {
@@ -214,6 +257,14 @@ class Session {
 
   handlePlayerEvadeEvent() {
     this.aggregate('playerEvade', null, 1);
+  }
+
+  handlePlayerMissEvent() {
+    this.aggregate('playerMiss', null, 1);
+
+    if (this.currentHuntingSet) {
+      this.aggregate('huntingSetMissed', this.currentHuntingSet, 1);
+    }
   }
 
   handlePlayerDeflectEvent() {
@@ -235,6 +286,8 @@ class Session {
       instanceId: this.instanceId,
       sessionName: this.name,
       sessionCreatedAt: this.createdAt,
+      usedHuntingSets: this.config.usedHuntingSets,
+      additionalCost: this.config.additionalCost,
     };
 
     if (events) {
@@ -263,11 +316,12 @@ class Session {
 
   async updateDb() {
     await this.createNewSession();
-    await db.run('REPLACE INTO session_instances(id, session_id, events, aggregated) VALUES(?, ?, ?, ?)', [
+    await db.run('REPLACE INTO session_instances(id, session_id, events, aggregated, config) VALUES(?, ?, ?, ?, ?)', [
       this.instanceId,
       this.id,
       JSON.stringify(this.events),
       JSON.stringify(this.aggregated),
+      JSON.stringify(this.config),
     ]);
   }
 
@@ -280,6 +334,11 @@ class Session {
   async setData(data) {
     if (data?.name) {
       await this.setName(data.name);
+    }
+
+    if (data?.additionalCost !== null) {
+      this.config.additionalCost = data.additionalCost;
+      await this.updateDb();
     }
 
     return this.getData(false);
