@@ -15,13 +15,16 @@ const SessionHeader = () => {
       setSessionName(sessionData.sessionName);
     };
 
-    const removeLoggerListener = window.api.on('logger-status-changed', status => setIsLogRunning(status === 'enabled'));
+    const updateLogStatus = status => setIsLogRunning(status === 'enabled');
+
+    const removeLoggerListener = window.api.on('logger-status-changed', updateLogStatus);
     const removeSessionUpdateListener = window.api.on('session-updated', onSessionUpdated);
     const removeSessionNewListener = window.api.on('session-new', resetCurrentSession);
     const removeInstanceNewListener = window.api.on('instance-new', resetCurrentSession);
     const removeInstanceLoadedListener = window.api.on('instance-loaded', resetCurrentSession);
 
     window.api.get('active-session').then(onSessionUpdated);
+    window.api.get('logreader-status').then(updateLogStatus);
 
     return () => {
       removeLoggerListener();
