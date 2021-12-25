@@ -12,7 +12,8 @@ class Session {
       : db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated, si.config FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ?', [id]));
 
     const options = { name: data?.name, createdAt: data?.created_at };
-    const config = JSON.parse(data.config || {});
+    const config = data?.config ? JSON.parse(data.config) : 0;
+
     const instance = new Session(id, data?.instance_id, options, config);
 
     if (data?.events) {
@@ -302,6 +303,7 @@ class Session {
     this.instanceId = uuidv4();
     this.aggregated = {};
     this.events = {};
+    this.config = {};
   }
 
   async createNewSession() {
