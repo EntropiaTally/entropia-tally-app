@@ -3,7 +3,7 @@
 > Tracking software for Entropia Universe
 
 
-## Features (v0.4.1)
+## Features (v0.4.2)
 - Keeps track of
   - Loot, Globals, HoFs and rare items
   - Attributes & Skills
