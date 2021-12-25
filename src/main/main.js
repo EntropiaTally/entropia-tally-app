@@ -266,12 +266,13 @@ ipcMain.on('load-instance', async (_event, { sessionId, instanceId }) => {
   if (session) {
     const selectedInstanceId = (instanceId === 'new') ? null : instanceId;
     session = await Session.Load(sessionId, selectedInstanceId);
-    session.setHuntingSet(activeHuntingSet);
 
     if (instanceId === 'new') {
       session.createNewInstance();
       mainWindow.webContents.send('instance-new', session.getData());
     }
+
+    session.setHuntingSet(activeHuntingSet);
 
     mainWindow.webContents.send('instance-loaded', session.getData());
   }
