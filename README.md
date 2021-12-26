@@ -3,7 +3,7 @@
 > Tracking software for Entropia Universe
 
 
-## Features (v0.4.2)
+## Features (v0.5.0)
 - Keeps track of
   - Loot, Globals, HoFs and rare items
   - Attributes & Skills
@@ -13,6 +13,7 @@
 - Saves data historically
 - Weapon sets
 - Show hunting returns
+- Hunting notes connected to sessions
 
 ## Install
 
