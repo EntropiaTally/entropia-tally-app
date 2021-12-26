@@ -22,7 +22,6 @@ const SQL_CREATE_SESSION_INSTANCES = `
     created_at VARCHAR NOT NULL DEFAULT CURRENT_TIMESTAMP,
     events TEXT NOT NULL,
     aggregated TEXT NOT NULL,
-    config TEXT NOT NULL DEFAULT "{}",
     FOREIGN KEY(session_id) REFERENCES sessions(id)
   )
 `;
