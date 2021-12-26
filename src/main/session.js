@@ -342,6 +342,7 @@ class Session {
 
   async setNotes(notes) {
     this.notes = notes;
+    await this.createNewSession();
     await db.run('UPDATE session_instances SET notes = ? WHERE id = ?', [notes, this.instanceId]);
   }
 
