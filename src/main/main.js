@@ -365,6 +365,10 @@ ipcMain.handle('set-data', async (_event, data) => {
   return response;
 });
 
+ipcMain.handle('set-session-notes', async (_event, notes) => {
+  await session.setNotes(notes);
+});
+
 ipcMain.handle('set-hunting-sets', (_event, sets) => {
   let response = false;
   const currentSavedSets = config.get('huntingSets', []);
