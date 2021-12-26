@@ -5,7 +5,6 @@ const path = require('path');
 const { is } = require('electron-util');
 const sqlite3 = require('sqlite3');
 
-const dbVersion = 2;
 const storagePath = is.development ? app.getAppPath() : app.getPath('userData');
 
 const SQL_CREATE_SESSIONS = `
@@ -55,11 +54,18 @@ class Database {
     if (!row?.id) {
       await this.run(
         'INSERT INTO db_config(id, version) VALUES(?, ?)',
-        ['version', dbVersion],
+        ['version', 1],
       );
-    } else if (row?.version === 1) {
-      await this.run('UPDATE db_config SET version = ?', [dbVersion]);
+    }
+
+    if (row?.version < 2) {
+      await this.run('UPDATE db_config SET version = ?', [2]);
       await this.run('ALTER TABLE session_instances ADD config TEXT NOT NULL DEFAULT "{}"');
+    }
+
+    if (row?.version < 3) {
+      await this.run('UPDATE db_config SET version = ?', [3]);
+      await this.run('ALTER TABLE session_instances ADD notes TEXT NOT NULL DEFAULT ""');
     }
   }
 

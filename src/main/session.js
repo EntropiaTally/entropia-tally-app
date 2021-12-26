@@ -8,8 +8,8 @@ class Session {
 
   static async Load(id, instanceId = null) {
     const data = await (instanceId
-      ? db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated, si.config FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ? AND si.id = ?', [id, instanceId])
-      : db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated, si.config FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ?', [id]));
+      ? db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated, si.config, si.notes FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ? AND si.id = ?', [id, instanceId])
+      : db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated, si.config, si.notes FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ?', [id]));
 
     const options = { name: data?.name, createdAt: data?.created_at };
     const config = data?.config ? JSON.parse(data.config) : 0;
@@ -22,6 +22,10 @@ class Session {
 
     if (data?.aggregated) {
       instance.aggregated = JSON.parse(data.aggregated);
+    }
+
+    if (data?.notes) {
+      instance.notes = data.notes;
     }
 
     return instance;
@@ -85,6 +89,7 @@ class Session {
     this.aggregated = {};
     this.config = config || {};
     this.currentHuntingSet = null;
+    this.notes = "";
   }
 
   newEvent(eventData, updateDb = true) {
@@ -289,6 +294,7 @@ class Session {
       sessionCreatedAt: this.createdAt,
       usedHuntingSets: this.config.usedHuntingSets,
       additionalCost: this.config.additionalCost,
+      notes: this.notes,
     };
 
     if (events) {
@@ -318,12 +324,13 @@ class Session {
 
   async updateDb() {
     await this.createNewSession();
-    await db.run('REPLACE INTO session_instances(id, session_id, events, aggregated, config) VALUES(?, ?, ?, ?, ?)', [
+    await db.run('REPLACE INTO session_instances(id, session_id, events, aggregated, config, notes) VALUES(?, ?, ?, ?, ?, ?)', [
       this.instanceId,
       this.id,
       JSON.stringify(this.events),
       JSON.stringify(this.aggregated),
       JSON.stringify(this.config),
+      this.notes,
     ]);
   }
 
@@ -331,6 +338,11 @@ class Session {
     this.name = name;
     await this.createNewSession();
     await db.run('UPDATE sessions SET name = ? WHERE id = ?', [name, this.id]);
+  }
+
+  async setNotes(notes) {
+    this.notes = notes;
+    await db.run('UPDATE session_instances SET notes = ? WHERE id = ?', [notes, this.instanceId]);
   }
 
   async setData(data) {

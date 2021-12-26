@@ -29,6 +29,8 @@ contextBridge.exposeInMainWorld(
 
       if (dataType === 'hunting-sets') {
         return ipcRenderer.invoke('set-hunting-sets', values);
+      } else if (dataType == 'session-notes') {
+        return ipcRenderer.invoke('set-session-notes', values);
       }
     },
     delete(type, id) {

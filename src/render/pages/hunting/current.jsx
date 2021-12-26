@@ -6,6 +6,7 @@ import LootView from '../../views/loot-view';
 import SkillView from '../../views/skill-view';
 import StatsView from '../../views/stats-view';
 import CalcView from '../../views/calc-view';
+import NotesView from '../../views/notes-view';
 
 const Current = () => {
   const [currentTab, setCurrentTab] = useState('loot');
@@ -59,6 +60,9 @@ const Current = () => {
           <li className={currentTab === 'calc' ? 'is-active' : ''}>
             <a onClick={() => setCurrentTab('calc')}>Returns</a>
           </li>
+          <li className={currentTab === 'notes' ? 'is-active' : ''}>
+            <a onClick={() => setCurrentTab('notes')}>Notes</a>
+          </li>
         </ul>
       </div>
 
@@ -66,6 +70,7 @@ const Current = () => {
       {currentTab === 'skills' && <SkillView />}
       {currentTab === 'stats' && <StatsView avatarName={avatarName} />}
       {currentTab === 'calc' && <CalcView />}
+      {currentTab === 'notes' && <NotesView />}
     </>
   );
 };

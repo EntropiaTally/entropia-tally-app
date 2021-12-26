@@ -305,3 +305,10 @@ span.sum {
 .column-250 {
   max-width: 250px;
 }
+
+/* Textarea */
+textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 10px;
+}
