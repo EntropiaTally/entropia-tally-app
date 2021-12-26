@@ -310,6 +310,7 @@ class Session {
     this.aggregated = {};
     this.events = {};
     this.config = {};
+    this.notes = '';
   }
 
   async createNewSession() {
