@@ -49,20 +49,21 @@ class Database {
     await this.run(SQL_CREATE_DB_CONFIG);
 
     const row = await this.get('SELECT id, version FROM db_config');
+    const version = row?.version ?? 0;
 
-    if (!row?.id) {
+    if (version === 0) {
       await this.run(
         'INSERT INTO db_config(id, version) VALUES(?, ?)',
         ['version', 1],
       );
     }
 
-    if (row?.version < 2) {
+    if (version < 2) {
       await this.run('UPDATE db_config SET version = ?', [2]);
       await this.run('ALTER TABLE session_instances ADD config TEXT NOT NULL DEFAULT "{}"');
     }
 
-    if (row?.version < 3) {
+    if (version < 3) {
       await this.run('UPDATE db_config SET version = ?', [3]);
       await this.run('ALTER TABLE session_instances ADD notes TEXT NOT NULL DEFAULT ""');
     }
