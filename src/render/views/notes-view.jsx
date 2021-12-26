@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 
 const NotesView = () => {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
 
   useEffect(() => {
     function updateValues(newData) {
       if (newData.notes) {
         setValue(newData.notes);
       }
-    };
+    }
 
     window.api.get('active-session').then(updateValues);
     window.api.on('session-data-updated', updateValues);

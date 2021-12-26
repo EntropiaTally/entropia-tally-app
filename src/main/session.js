@@ -89,7 +89,7 @@ class Session {
     this.aggregated = {};
     this.config = config || {};
     this.currentHuntingSet = null;
-    this.notes = "";
+    this.notes = '';
   }
 
   newEvent(eventData, updateDb = true) {
