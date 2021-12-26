@@ -25,6 +25,7 @@ const NotesView = () => {
   return (
     <div className="content box">
       <textarea
+        className="textarea"
         value={value}
         rows={10}
         placeholder="Enter your notes here"
