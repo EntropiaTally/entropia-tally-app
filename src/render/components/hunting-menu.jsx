@@ -35,9 +35,11 @@ const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
   const [isInstanceModalActive, setIsInstanceModalActive] = useState(false);
 
   useEffect(() => {
-    const removeLogStatusListener = window.api.on('logger-status-changed', status => {
-      setIsLogRunning(status === 'enabled');
-    });
+    const updateLogStatus = status => setIsLogRunning(status === 'enabled');
+
+    const removeLogStatusListener = window.api.on('logger-status-changed', updateLogStatus);
+
+    window.api.get('logreader-status').then(updateLogStatus);
 
     const removeOverlayClosedListener = window.api.on('overlay-closed', _closed => {
       setIsOverlayRunning(false);
@@ -58,11 +60,7 @@ const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
   }, [setActivePage]);
 
   const startNewInstance = useCallback(async () => {
-    const sessionData = await window.api.get('active-session');
-    window.api.call('load-instance', {
-      sessionId: sessionData?.id,
-      instanceId: 'new',
-    });
+    window.api.call('new-instance');
     setIsInstanceModalActive(false);
     setActivePage('current');
   }, [setActivePage]);

@@ -5,7 +5,6 @@ const path = require('path');
 const { is } = require('electron-util');
 const sqlite3 = require('sqlite3');
 
-const dbVersion = 1;
 const storagePath = is.development ? app.getAppPath() : app.getPath('userData');
 
 const SQL_CREATE_SESSIONS = `
@@ -36,7 +35,7 @@ const SQL_CREATE_DB_CONFIG = `
 
 class Database {
   constructor() {
-    this.path = path.resolve(storagePath, 'entropia-tracker-db.sqlite3');
+    this.path = path.resolve(storagePath, 'entropia-tally-db.sqlite3');
     this.instance = new sqlite3.Database(this.path, error => {
       if (error) {
         throw error;
@@ -50,12 +49,23 @@ class Database {
     await this.run(SQL_CREATE_DB_CONFIG);
 
     const row = await this.get('SELECT id, version FROM db_config');
+    const version = row?.version ?? 0;
 
-    if (!row?.id) {
+    if (version === 0) {
       await this.run(
         'INSERT INTO db_config(id, version) VALUES(?, ?)',
-        ['version', dbVersion],
+        ['version', 1],
       );
+    }
+
+    if (version < 2) {
+      await this.run('UPDATE db_config SET version = ?', [2]);
+      await this.run('ALTER TABLE session_instances ADD config TEXT NOT NULL DEFAULT "{}"');
+    }
+
+    if (version < 3) {
+      await this.run('UPDATE db_config SET version = ?', [3]);
+      await this.run('ALTER TABLE session_instances ADD notes TEXT NOT NULL DEFAULT ""');
     }
   }
 

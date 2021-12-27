@@ -20,7 +20,7 @@ const showPreferences = () => {
 const helpSubmenu = [
   openUrlMenuItem({
     label: 'Website',
-    url: 'https://github.com/Entropia-Tracker/entropia-tracker',
+    url: 'https://github.com/EntropiaTally/entropia-tally-app',
   }),
   {
     label: 'Report an Issue…',
@@ -33,8 +33,8 @@ const helpSubmenu = [
 ${debugInfo()}`;
 
       openNewGitHubIssue({
-        user: 'Entropia-Tracker',
-        repo: 'entropia-tracker',
+        user: 'EntropiaTally',
+        repo: 'entropia-tally-app',
         body,
       });
     },

@@ -1,9 +1,9 @@
-# Entropia Tracker
+# Entropia Tally
 
 > Tracking software for Entropia Universe
 
 
-## Features (v0.3.0)
+## Features (v0.5.0)
 - Keeps track of
   - Loot, Globals, HoFs and rare items
   - Attributes & Skills
@@ -11,12 +11,15 @@
 - Graphs to help figure out how often item drops during a hunt
 - Stats for multiple sessions
 - Saves data historically
+- Weapon sets
+- Show hunting returns
+- Hunting notes connected to sessions
 
 ## Install
 
 *GNU/Linux and Windows supported (64-bit only).*
 
-Downloads are available in Releases [**HERE**](https://github.com/Entropia-Tracker/entropia-tracker/releases/latest)
+Downloads are available in Releases [**HERE**](https://github.com/EntropiaTally/entropia-tally-app/releases/latest)
 
 **GNU/Linux**
 - *AppImage* (**Automatic updates**)
@@ -33,7 +36,7 @@ Downloads are available in Releases [**HERE**](https://github.com/Entropia-Track
 
 Only interested the CLI or want to build your own interface?
 
-Check out the [entropia-tracker-cli](https://github.com/Entropia-Tracker/entropia-tracker-cli)
+Check out the [entropia-tally-cli](https://github.com/EntropiaTally/entropia-tally-cli)
 
 
 ## Development
@@ -62,6 +65,6 @@ $ yarn dist
 
 ## Support
 
-Support and feature requests provided through [Github Issues](https://github.com/Entropia-Tracker/entropia-tracker/issues)
+Support and feature requests provided through [Github Issues](https://github.com/EntropiaTally/entropia-tally-app/issues)
 
-Want to contribute? Make a [Pull request](https://github.com/Entropia-Tracker/entropia-tracker/pulls)
+Want to contribute? Make a [Pull request](https://github.com/EntropiaTally/entropia-tally-app/pulls)

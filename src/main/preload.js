@@ -4,7 +4,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 const getters = new Set(['active-session', 'session', 'sessions', 'instances', 'settings', 'logreader-status', 'development-mode', 'overlay-window-status']);
 const setters = new Set(['active-session', 'settings']);
-const actions = new Set(['new-session', 'new-instance', 'load-instance', 'overlay-window-toggle', 'logging-status-toggle']);
+const actions = new Set(['new-session', 'new-instance', 'load-instance', 'overlay-window-toggle', 'logging-status-toggle', 'goto-wiki-weapontool', 'change-hunting-set']);
 const deletes = new Set(['session', 'instance']);
 
 contextBridge.exposeInMainWorld(
@@ -25,6 +25,14 @@ contextBridge.exposeInMainWorld(
     set(dataType, values) {
       if (setters.has(dataType)) {
         return ipcRenderer.invoke('set-data', { type: dataType, values });
+      }
+
+      if (dataType === 'hunting-sets') {
+        return ipcRenderer.invoke('set-hunting-sets', values);
+      }
+
+      if (dataType === 'session-notes') {
+        return ipcRenderer.invoke('set-session-notes', values);
       }
     },
     delete(type, id) {

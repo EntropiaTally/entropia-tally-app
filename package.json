@@ -1,15 +1,15 @@
 {
-  "name": "entropia-tracker",
-  "productName": "Entropia Tracker",
-  "version": "0.3.0",
+  "name": "entropia-tally",
+  "productName": "Entropia Tally",
+  "version": "0.5.0",
   "description": "Track Entropia Universe events",
   "license": "MIT",
-  "repository": "Entropia-Tracker/entropia-tracker",
+  "repository": "EntropiaTally/entropia-tally-app",
   "main": "src/main/main.js",
   "author": {
     "name": "Slazor",
     "email": "no-email-support@example.com",
-    "url": "https://github.com/Entropia-Tracker/entropia-tracker"
+    "url": "https://github.com/EntropiaTally/entropia-tally-app"
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
@@ -79,7 +79,7 @@
     }
   },
   "build": {
-    "appId": "com.Entropia-Tracker.entropia-tracker",
+    "appId": "com.EntropiaTally.entropia-tally",
     "artifactName": "${name}-${version}.${ext}",
     "asarUnpack": [
       "bin/*"
