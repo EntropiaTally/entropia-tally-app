@@ -15,10 +15,10 @@ const OVERLAY_TOGGLES = [
 const OverlaySettings = ({ settings, onChange }) => {
   const handleChange = (key, value) => {
     onChange({ ...settings, [key]: value });
-  }
+  };
 
-  const items = OVERLAY_TOGGLES.map((toggle, index) =>
-    <div className="control" key={index}>
+  const items = OVERLAY_TOGGLES.map((toggle, index) => (
+    <div key={index} className="control">
       <label className="label">
         <input
           type="checkbox"
@@ -29,6 +29,7 @@ const OverlaySettings = ({ settings, onChange }) => {
         {toggle.label}
       </label>
     </div>
+  ),
   );
 
   return (

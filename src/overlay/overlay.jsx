@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-const pad = str => str < 10 ? `0${str}` : str;
+const pad = string_ => string_ < 10 ? `0${string_}` : string_;
 
 function formatTime(seconds) {
   const values = {
     hours: pad(Math.max(Math.floor(seconds / 3600) % 24, 0)),
     minutes: pad(Math.max(Math.floor(seconds / 60) % 60, 0)),
-    seconds: pad(Math.max(Math.floor(seconds % 60), 0))
+    seconds: pad(Math.max(Math.floor(seconds % 60), 0)),
   };
 
   return `${values.hours}:${values.minutes}:${values.seconds}`;
@@ -24,7 +24,7 @@ const Overlay = () => {
     setData({
       ...data,
       totalLoot: newData.aggregated.allLoot.total,
-      totalSpend: 5.00, // TODO
+      totalSpend: 5, // TODO
       returnPercent: 90.5, // TODO
       numGlobals: 5, // TODO,
       numHofs: 10, // TODO,
@@ -54,61 +54,53 @@ const Overlay = () => {
 
   return (
     <div className="overlay p-2">
-      {settings.lootTotal &&
-        <div className="overlay__item overlay__totalLoot">
+      {settings.lootTotal
+        && <div className="overlay__item overlay__totalLoot">
           <div className="overlay__label">Total loot</div>
           <div className="overlay__value">{formatPED(data.totalLoot)}</div>
-        </div>
-      }
+           </div>}
 
-      {settings.spendTotal &&
-        <div className="overlay__item overlay__totalSpend">
+      {settings.spendTotal
+        && <div className="overlay__item overlay__totalSpend">
           <div className="overlay__label">Total spent</div>
           <div className="overlay__value">{formatPED(data.totalSpend)}</div>
-        </div>
-      }
+           </div>}
 
-      {settings.returnPercent &&
-        <div className="overlay__item overlay__returnPercent">
+      {settings.returnPercent
+        && <div className="overlay__item overlay__returnPercent">
           <div className="overlay__label">Returns</div>
           <div className="overlay__value">{data.returnPercent.toFixed(2)}%</div>
-        </div>
-      }
+           </div>}
 
-      {settings.numGlobals &&
-        <div className="overlay__item overlay__numGlobals">
+      {settings.numGlobals
+        && <div className="overlay__item overlay__numGlobals">
           <div className="overlay__label">Globals</div>
           <div className="overlay__value">{data.numGlobals}</div>
-        </div>
-      }
+           </div>}
 
-      {settings.numHofs &&
-        <div className="overlay__item overlay__numHofs">
+      {settings.numHofs
+        && <div className="overlay__item overlay__numHofs">
           <div className="overlay__label">HoFs</div>
           <div className="overlay__value">{data.numHofs}</div>
-        </div>
-      }
+           </div>}
 
-      {settings.hitPercent &&
-        <div className="overlay__item overlay__hitPercent">
+      {settings.hitPercent
+        && <div className="overlay__item overlay__hitPercent">
           <div className="overlay__label">Hit%</div>
           <div className="overlay__value">{data.hitPercent}%</div>
-        </div>
-      }
+           </div>}
 
-      {settings.evadePercent &&
-        <div className="overlay__item overlay__evadePercent">
+      {settings.evadePercent
+        && <div className="overlay__item overlay__evadePercent">
           <div className="overlay__label">Evade%</div>
           <div className="overlay__value">{data.evadePercent}%</div>
-        </div>
-      }
+           </div>}
 
-      {settings.sessionTime &&
-        <div className="overlay__item overlay__sessionTime">
+      {settings.sessionTime
+        && <div className="overlay__item overlay__sessionTime">
           <div className="overlay__label">Session time</div>
           <div className="overlay__value">{formatTime(data.sessionTime)}</div>
-        </div>
-      }
+           </div>}
     </div>
   );
 };

@@ -359,10 +359,18 @@ ipcMain.handle('set-data', async (_event, data) => {
     }
 
     response = getSettings();
+
+    mainWindow.webContents.send('settings-updated', response);
+    if (overlayWindow) {
+      overlayWindow.webContents.send('settings-updated', response);
+    }
   } else if (data.type === 'active-session') {
     const sessionData = await session.setData(data.values);
     mainWindow.webContents.send('session-updated', sessionData);
-    overlayWindow.webContents.send('session-updated', sessionData);
+
+    if (overlayWindow) {
+      overlayWindow.webContents.send('session-updated', sessionData);
+    }
   }
 
   return response;
