@@ -105,7 +105,7 @@ const Overlay = () => {
     settings.numHofs,
     settings.hitPercent,
     settings.evadePercent,
-  ].filter(val => !!val).length === 0;
+  ].filter(value => Boolean(value)).length === 0;
 
   return (
     <div className="overlay p-2">

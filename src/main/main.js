@@ -84,12 +84,6 @@ const createOverlayWindow = async _parent => {
     },
   });
 
-  /*
-  win.on('ready-to-show', () => {
-    win.show();
-  });
-  */
-
   win.on('closed', () => {
     if (mainWindow) {
       mainWindow.webContents.send('overlay-closed', true);
