@@ -160,7 +160,7 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
             type="button"
             onClick={() => onLoadSessionInstance(id, 'new')}
           >
-            Start new instance
+            Start new run
           </button>
           <button
             className="button is-danger is-small"
@@ -172,7 +172,7 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
         </div>
         {(!modifiedSessionInstances || modifiedSessionInstances.length === 0) && (<p>Nothing has been saved yet</p>)}
         {(modifiedSessionInstances && modifiedSessionInstances.length > 0) && (
-          <Table header={['Instances', 'Notes', 'Actions']}>
+          <Table header={['Run', 'Notes', 'Actions']}>
             {modifiedSessionInstances.map(instance => (
               <tr key={instance.id}>
                 <td className="halfwidth">{instance.created_at}</td>

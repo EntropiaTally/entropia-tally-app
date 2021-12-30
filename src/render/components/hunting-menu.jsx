@@ -82,7 +82,7 @@ const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
               </MenuItem>
               <ul>
                 <li><MenuItem onClick={() => setIsSessionModalActive(true)}>New session</MenuItem></li>
-                <li><MenuItem onClick={() => setIsInstanceModalActive(true)}>New instance</MenuItem></li>
+                <li><MenuItem onClick={() => setIsInstanceModalActive(true)}>New run</MenuItem></li>
               </ul>
             </li>
             <li>
@@ -116,7 +116,7 @@ const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
             </li>
             <li>
               <MenuItem
-                title="New instance"
+                title="New run"
                 iconClass="ri-add-circle-line"
                 onClick={() => setIsInstanceModalActive(true)}
               />
@@ -154,8 +154,8 @@ const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
       </Modal>
       <Modal isOpen={isInstanceModalActive}>
         <div className="block">
-          <h2 className="title">Start a new instance</h2>
-          <p>This will stop any current session instance.</p>
+          <h2 className="title">Start a new run</h2>
+          <p>This will stop any current session run.</p>
         </div>
         <div className="buttons">
           <button type="button" className="button is-danger" onClick={startNewInstance}>Proceed</button>

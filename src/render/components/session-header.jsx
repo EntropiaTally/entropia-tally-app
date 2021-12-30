@@ -68,7 +68,7 @@ const SessionHeader = () => {
       </div>
       <div>
         <button
-          className={`button is-small ${isLogRunning ? 'is-danger' : 'is-warning'}`}
+          className={`button is-small ${isLogRunning ? 'is-danger' : 'is-success'}`}
           type="button"
           onClick={toggleLogging}
         >
