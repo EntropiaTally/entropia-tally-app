@@ -3,16 +3,14 @@ import React, { useEffect, useState, useCallback } from 'react';
 import LogSelect from '../components/log-select';
 import AvatarName from '../components/avatar-name';
 import HuntingSets from '../components/hunting-sets';
+import OverlaySettings from '../components/overlay-settings';
 
 const Settings = () => {
   const [settings, setSettings] = useState({});
 
   useEffect(() => {
-    const receivedSettings = newSettings => setSettings(newSettings);
-
-    const removeSettingsUpdateListener = window.api.on('settings-updated', receivedSettings);
-
-    window.api.get('settings').then(receivedSettings);
+    const removeSettingsUpdateListener = window.api.on('settings-updated', setSettings);
+    window.api.get('settings').then(setSettings);
 
     return () => removeSettingsUpdateListener();
   }, []);
@@ -44,6 +42,13 @@ const Settings = () => {
           />
 
           <HuntingSets huntingSets={settings.huntingSets} />
+
+          <OverlaySettings
+            settings={settings.overlay}
+            onChange={overlaySettings => updateSettings('overlay', overlaySettings)}
+          />
+
+          <div className="block-top" />
         </div>
       </div>
     </div>

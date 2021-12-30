@@ -1,0 +1,39 @@
+html {
+  overflow: hidden;
+}
+
+body {
+  -webkit-app-region: drag;
+  height: 100vh;
+  width: 100%;
+  background-color: #363636;
+}
+
+#root {
+  height: 100%;
+}
+
+.overlay {
+  display: flex;
+  height: 100%;
+}
+
+.overlay__item {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column-reverse;
+  color: white;
+}
+
+.overlay__value,
+.overlay__label {
+  width: 100%;
+  text-align: center;
+}
+
+.overlay__value {
+  flex: 1;
+  font-weight: 700;
+}

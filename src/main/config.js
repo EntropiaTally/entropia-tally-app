@@ -25,6 +25,16 @@ const configStorage = new Store({
       },
     },
   },
+  overlay: {
+    lootTotal: { type: 'boolean' },
+    spendTotal: { type: 'boolean' },
+    returnPercent: { type: 'boolean' },
+    numGlobals: { type: 'boolean' },
+    numHofs: { type: 'boolean' },
+    hitPercent: { type: 'boolean' },
+    evadePercent: { type: 'boolean' },
+    sessionTime: { type: 'boolean' },
+  },
 });
 
 module.exports = configStorage;

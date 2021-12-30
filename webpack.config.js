@@ -3,10 +3,13 @@ const isProduction = process.argv[process.argv.indexOf('--mode') + 1] === 'produ
 
 module.exports = {
   mode: isProduction ? 'production' : 'development',
-  entry: "./src/render",
+  entry: {
+    render: "./src/render",
+    overlay: "./src/overlay",
+  },
   output: {
     path: path.resolve(__dirname, "public/scripts"),
-    filename: "bundle.js",
+    filename: "[name].bundle.js",
   },
   module: {
     rules: [

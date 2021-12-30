@@ -15,7 +15,7 @@ const Session = require('./session');
 const LogReader = require('./log-reader');
 
 let mainWindow;
-let streamWindow;
+let overlayWindow;
 let session;
 
 unhandled();
@@ -68,14 +68,13 @@ const createMainWindow = async () => {
   return win;
 };
 
-const createStreamWindow = async parent => {
+const createOverlayWindow = async _parent => {
   const win = new BrowserWindow({
-    parent,
-    title: `${app.name} - Stream`,
+    title: `${app.name} - Overlay`,
     frame: false,
     show: false,
-    width: 250,
-    height: 100,
+    width: 350,
+    height: 60,
     resizable: true,
     alwaysOnTop: true,
     webPreferences: {
@@ -85,15 +84,13 @@ const createStreamWindow = async parent => {
     },
   });
 
-  win.on('ready-to-show', () => {
-    win.show();
-  });
-
   win.on('closed', () => {
-    streamWindow = undefined;
+    if (mainWindow) {
+      mainWindow.webContents.send('overlay-closed', true);
+    }
   });
 
-  await win.loadFile(path.resolve(app.getAppPath(), 'public/stream.html'));
+  await win.loadFile(path.resolve(app.getAppPath(), 'public/overlay.html'));
 
   return win;
 };
@@ -131,6 +128,7 @@ app.on('activate', async () => {
   session.setHuntingSet(activeHuntingSet);
   Menu.setApplicationMenu(menu);
   mainWindow = await createMainWindow();
+  overlayWindow = await createOverlayWindow();
 })();
 
 // Functions
@@ -142,6 +140,7 @@ function getSettings() {
     sidebarStyle: config.get('sidebarStyle', 'full'),
     huntingSets: config.get('huntingSets', []),
     activeHuntingSet: activeHuntingSet?.id,
+    overlay: config.get('overlay', {}),
   };
 }
 
@@ -154,10 +153,7 @@ function setDefaultHuntingSet() {
 
   const updatedSettings = getSettings();
   mainWindow.webContents.send('settings-updated', updatedSettings);
-
-  if (streamWindow && streamWindow.isVisible()) {
-    streamWindow.webContents.send('settings-updated', updatedSettings);
-  }
+  overlayWindow.webContents.send('settings-updated', updatedSettings);
 }
 
 function receivedLoggerEvent({ data, lastLine }) {
@@ -170,10 +166,10 @@ function receivedLoggerEvent({ data, lastLine }) {
       mainWindow.webContents.send('session-data-updated-aggregated', sessionData?.aggregated);
       mainWindow.webContents.send('session-data-updated-events', sessionData?.events);
 
-      if (streamWindow && streamWindow.isVisible()) {
-        streamWindow.webContents.send('session-data-updated', sessionData);
-        streamWindow.webContents.send('session-data-updated-aggregated', sessionData?.aggregated);
-        streamWindow.webContents.send('session-data-updated-events', sessionData?.events);
+      if (overlayWindow && overlayWindow.isVisible()) {
+        overlayWindow.webContents.send('session-data-updated', sessionData);
+        overlayWindow.webContents.send('session-data-updated-aggregated', sessionData?.aggregated);
+        overlayWindow.webContents.send('session-data-updated-events', sessionData?.events);
       }
     }
   });
@@ -242,13 +238,11 @@ ipcMain.on('logging-status-toggle', () => {
   }
 });
 
-ipcMain.on('stream-window-toggle', () => {
-  if (!streamWindow) {
-    createStreamWindow(mainWindow).then(newWindow => {
-      streamWindow = newWindow;
-    });
-  } else if (streamWindow && streamWindow.isVisible()) {
-    streamWindow.close();
+ipcMain.on('overlay-window-toggle', () => {
+  if (overlayWindow.isVisible()) {
+    overlayWindow.hide();
+  } else {
+    overlayWindow.show();
   }
 });
 
@@ -261,6 +255,7 @@ ipcMain.on('load-instance', async (_event, { sessionId, instanceId }) => {
     logReader.stop();
     logReader.removeListener('event', receivedLoggerEvent);
     mainWindow.webContents.send('logger-status-changed', 'disabled');
+    overlayWindow.webContents.send('logger-status-changed', 'disabled');
   }
 
   if (session) {
@@ -270,11 +265,13 @@ ipcMain.on('load-instance', async (_event, { sessionId, instanceId }) => {
     if (instanceId === 'new') {
       session.createNewInstance();
       mainWindow.webContents.send('instance-new', session.getData());
+      overlayWindow.webContents.send('instance-new', session.getData());
     }
 
     session.setHuntingSet(activeHuntingSet);
 
     mainWindow.webContents.send('instance-loaded', session.getData());
+    overlayWindow.webContents.send('instance-loaded', session.getData());
   }
 });
 
@@ -285,6 +282,7 @@ ipcMain.on('change-hunting-set', (_event, selectedHuntingSet) => {
 
     const updatedSettings = getSettings();
     mainWindow.webContents.send('settings-updated', updatedSettings);
+    overlayWindow.webContents.send('settings-updated', updatedSettings);
   }
 });
 
@@ -333,8 +331,8 @@ ipcMain.handle('get-data', async (_event, { dataType, args }) => {
     case 'instances':
       response = await Session.FetchInstances(args.id);
       break;
-    case 'stream-window-status':
-      response = streamWindow && streamWindow.isVisible() ? 'enabled' : 'disabled';
+    case 'overlay-window-status':
+      response = overlayWindow && overlayWindow.isVisible() ? 'enabled' : 'disabled';
       break;
     case 'development-mode':
       response = is.development;
@@ -357,9 +355,18 @@ ipcMain.handle('set-data', async (_event, data) => {
     }
 
     response = getSettings();
+
+    mainWindow.webContents.send('settings-updated', response);
+    if (overlayWindow) {
+      overlayWindow.webContents.send('settings-updated', response);
+    }
   } else if (data.type === 'active-session') {
     const sessionData = await session.setData(data.values);
     mainWindow.webContents.send('session-updated', sessionData);
+
+    if (overlayWindow) {
+      overlayWindow.webContents.send('session-updated', sessionData);
+    }
   }
 
   return response;
@@ -406,6 +413,7 @@ ipcMain.handle('set-hunting-sets', (_event, sets) => {
 
   const updatedSettings = getSettings();
   mainWindow.webContents.send('settings-updated', updatedSettings);
+  overlayWindow.webContents.send('settings-updated', updatedSettings);
 
   return response;
 });
@@ -430,6 +438,7 @@ ipcMain.handle('delete', async (_event, { type, id }) => {
     }
 
     mainWindow.webContents.send(`${type}-deleted`, status);
+    overlayWindow.webContents.send(`${type}-deleted`, status);
   }
 
   return status.success;
