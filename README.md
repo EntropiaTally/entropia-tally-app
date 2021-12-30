@@ -3,17 +3,22 @@
 > Tracking software for Entropia Universe
 
 
-## Features (v0.5.0)
+## Features (v0.6.0)
 - Keeps track of
   - Loot, Globals, HoFs and rare items
   - Attributes & Skills
   - Offense & Defense statistics
-- Graphs to help figure out how often item drops during a hunt
-- Stats for multiple sessions
+- Simple item loot graphs
+- Stats for multiple runs
 - Saves data historically
 - Weapon sets
-- Show hunting returns
-- Hunting notes connected to sessions
+- Hunting returns
+- Hunting notes
+- Overlay
+
+##  Getting started
+
+[Entropia Tally website](https://entropiatally.github.io/getting-started/)
 
 ## Install
 
