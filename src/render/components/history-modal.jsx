@@ -98,6 +98,14 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
     ? (combinedValues.loot / totalCost) * 100 || 0
     : null;
 
+  const modifiedSessionInstances = sessionInstances.map(instance => {
+    if (instance.notes && instance.notes.length > 24) {
+      instance.notes = instance.notes.slice(0, 24) + '...';
+    }
+
+    return instance;
+  });
+
   return (
     <>
       <Modal
@@ -162,12 +170,13 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
             Delete session
           </button>
         </div>
-        {(!sessionInstances || sessionInstances.length === 0) && (<p>Nothing has been logged yet</p>)}
-        {(sessionInstances && sessionInstances.length > 0) && (
-          <Table header={['Instances', 'Actions']}>
-            {sessionInstances.map(instance => (
+        {(!modifiedSessionInstances || modifiedSessionInstances.length === 0) && (<p>Nothing has been saved yet</p>)}
+        {(modifiedSessionInstances && modifiedSessionInstances.length > 0) && (
+          <Table header={['Instances', 'Notes', 'Actions']}>
+            {modifiedSessionInstances.map(instance => (
               <tr key={instance.id}>
-                <td className="fullwidth">{instance.created_at}</td>
+                <td className="halfwidth">{instance.created_at}</td>
+                <td className="halfwidth">{instance.notes}</td>
                 <td className="has-text-right">
                   <a className="table-action" onClick={() => onLoadSessionInstance(instance.session_id, instance.id)}>Load</a>
                   <a className="table-action has-text-danger" onClick={() => openDeleteModal('instance', instance.id)}>Delete</a>
