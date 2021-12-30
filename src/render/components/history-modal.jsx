@@ -32,13 +32,34 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
       const currentHofTotal = current?.aggregated?.hofs?.count || 0;
       const currentRareLootTotal = Object.values(current?.aggregated?.rareLoot || {})
         .reduce((previousItem, currentItem) => previousItem + currentItem.count, 0);
+      const usedHuntingSets = current?.config?.usedHuntingSets;
+      const additionalCost = current?.config?.additionalCost || 0;
+      const updatedSets = previous.usedSets;
+
+      for (const set of Object.values(usedHuntingSets || {})) {
+        if (updatedSets[set.id]) {
+          updatedSets[set.id].hits.count += current?.aggregated?.huntingSetDmg?.[set.id]?.count || 0;
+          updatedSets[set.id].misses.count += current?.aggregated?.huntingSetMissed?.[set.id]?.count || 0;
+          updatedSets[set.id].loot.total += current?.aggregated?.huntingSetLoot?.[set.id]?.total || 0;
+        } else {
+          updatedSets[set.id] = {
+            ...set,
+            hits: { count: current?.aggregated?.huntingSetDmg?.[set.id]?.count || 0 },
+            misses: { count: current?.aggregated?.huntingSetMissed?.[set.id]?.count || 0 },
+            loot: { total: current?.aggregated?.huntingSetLoot?.[set.id]?.total || 0 },
+          };
+        }
+      }
+
       return {
         total: previous.total + currentLootTotal,
         globals: previous.globals + currentGlobalTotal,
         hofs: previous.hofs + currentHofTotal,
         rareLoots: previous.rareLoots + currentRareLootTotal,
+        usedSets: updatedSets,
+        additionalCost: previous.additionalCost + additionalCost,
       };
-    }, { total: 0, globals: 0, hofs: 0, rareLoots: 0 })
+    }, { total: 0, globals: 0, hofs: 0, rareLoots: 0, usedSets: {}, additionalCost: 0 })
   , [sessionInstances]);
 
   const onLoadSessionInstance = (sessionId, instanceId) => {
@@ -61,6 +82,21 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
     setActiveDeleteData({ type, id });
     setIsDeleteModalOpen(true);
   };
+
+  const combinedValues = Object.values(combinedSessionStats.usedSets).reduce((previous, current) => {
+    const hits = current.hits?.count ?? 0;
+    const misses = current.misses?.count ?? 0;
+    const loot = current.loot?.total ?? 0;
+    return {
+      cost: previous.cost + ((hits + misses) * (current.decay / 100)),
+      loot: previous.loot + loot,
+    };
+  }, { cost: 0, loot: 0 });
+
+  const totalCost = combinedValues.cost + combinedSessionStats.additionalCost;
+  const resultRate = totalCost > 0
+    ? (combinedValues.loot / totalCost) * 100 || 0
+    : null;
 
   const modifiedSessionInstances = sessionInstances.map(instance => {
     if (instance.notes && instance.notes.length > 24) {
@@ -85,6 +121,25 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
               value={combinedSessionStats?.total.toFixed(2)}
               suffix="PED"
             />
+            {combinedSessionStats?.total > combinedValues?.loot && (
+              <StatBox
+                title="Tracked loot "
+                value={combinedValues?.loot.toFixed(2)}
+                suffix="PED"
+              />
+            )}
+            <StatBox
+              title="Total spent"
+              value={totalCost.toFixed(2)}
+              suffix="PED"
+            />
+            <StatBox
+              title="Returns"
+              value={resultRate ? resultRate.toFixed(2) : 0}
+              suffix="%"
+            />
+          </div>
+          <div className="tile tile-toplevel">
             <StatBox
               title="Globals"
               value={combinedSessionStats?.globals ?? 0}
