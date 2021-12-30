@@ -44,9 +44,10 @@ class Session {
   }
 
   static async FetchInstances(id) {
-    const rows = await db.all('SELECT id, session_id, created_at, aggregated, config FROM session_instances WHERE session_id = ? ORDER BY DATETIME(created_at) DESC', [id]);
+    const rows = await db.all('SELECT id, session_id, created_at, aggregated, config, notes FROM session_instances WHERE session_id = ? ORDER BY DATETIME(created_at) DESC', [id]);
     return rows.map(row => {
       row.aggregated = JSON.parse(row.aggregated);
+      row.config = JSON.parse(row.config);
       return row;
     });
   }
