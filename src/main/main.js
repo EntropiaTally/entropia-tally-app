@@ -73,8 +73,8 @@ const createOverlayWindow = async _parent => {
     title: `${app.name} - Overlay`,
     frame: false,
     show: false,
-    width: 250,
-    height: 100,
+    width: 350,
+    height: 60,
     resizable: true,
     alwaysOnTop: true,
     webPreferences: {
@@ -84,9 +84,11 @@ const createOverlayWindow = async _parent => {
     },
   });
 
+  /*
   win.on('ready-to-show', () => {
     win.show();
   });
+  */
 
   win.on('closed', () => {
     if (mainWindow) {

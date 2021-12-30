@@ -9,7 +9,7 @@ const OVERLAY_TOGGLES = [
   { label: 'HoF count', key: 'numHofs', default: false },
   { label: 'Hit rate (%)', key: 'hitPercent', default: false },
   { label: 'Evade rate (%)', key: 'evadePercent', default: false },
-  { label: 'Session time', key: 'sessionTime', default: false },
+  // { label: 'Session time', key: 'sessionTime', default: false },
 ];
 
 const OverlaySettings = ({ settings, onChange }) => {
@@ -17,8 +17,8 @@ const OverlaySettings = ({ settings, onChange }) => {
     onChange({ ...settings, [key]: value });
   };
 
-  const items = OVERLAY_TOGGLES.map((toggle, index) => (
-    <div key={index} className="control">
+  const items = OVERLAY_TOGGLES.map(toggle => (
+    <div key={toggle.key} className="control">
       <label className="label">
         <input
           type="checkbox"
@@ -29,8 +29,7 @@ const OverlaySettings = ({ settings, onChange }) => {
         {toggle.label}
       </label>
     </div>
-  ),
-  );
+  ));
 
   return (
     <div className="box block">
@@ -39,6 +38,11 @@ const OverlaySettings = ({ settings, onChange }) => {
       {items}
     </div>
   );
+};
+
+OverlaySettings.propTypes = {
+  settings: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
 };
 
 export default OverlaySettings;
