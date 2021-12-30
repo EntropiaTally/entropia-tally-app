@@ -9,14 +9,31 @@ body {
   background-color: #363636;
 }
 
-.title {
+#root {
+  height: 100%;
+}
+
+.overlay {
+  display: flex;
+  height: 100%;
+}
+
+.overlay__item {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column-reverse;
   color: white;
 }
 
-.flex {
-  display: flex;
+.overlay__value,
+.overlay__label {
+  width: 100%;
+  text-align: center;
 }
 
-.flex h3 {
+.overlay__value {
   flex: 1;
+  font-weight: 700;
 }

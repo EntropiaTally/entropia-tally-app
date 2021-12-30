@@ -89,7 +89,6 @@ const createOverlayWindow = async _parent => {
   });
 
   win.on('closed', () => {
-    overlayWindow = undefined;
     if (mainWindow) {
       mainWindow.webContents.send('overlay-closed', true);
     }
@@ -133,6 +132,7 @@ app.on('activate', async () => {
   session.setHuntingSet(activeHuntingSet);
   Menu.setApplicationMenu(menu);
   mainWindow = await createMainWindow();
+  overlayWindow = await createOverlayWindow();
 })();
 
 // Functions
@@ -144,6 +144,7 @@ function getSettings() {
     sidebarStyle: config.get('sidebarStyle', 'full'),
     huntingSets: config.get('huntingSets', []),
     activeHuntingSet: activeHuntingSet?.id,
+    overlay: config.get('overlay', {}),
   };
 }
 
@@ -156,10 +157,7 @@ function setDefaultHuntingSet() {
 
   const updatedSettings = getSettings();
   mainWindow.webContents.send('settings-updated', updatedSettings);
-
-  if (streamWindow && streamWindow.isVisible()) {
-    streamWindow.webContents.send('settings-updated', updatedSettings);
-  }
+  overlayWindow.webContents.send('settings-updated', updatedSettings);
 }
 
 function receivedLoggerEvent({ data, lastLine }) {
@@ -245,12 +243,10 @@ ipcMain.on('logging-status-toggle', () => {
 });
 
 ipcMain.on('overlay-window-toggle', () => {
-  if (!overlayWindow) {
-    createOverlayWindow(mainWindow).then(newWindow => {
-      overlayWindow = newWindow;
-    });
-  } else if (overlayWindow && overlayWindow.isVisible()) {
-    overlayWindow.close();
+  if (overlayWindow.isVisible()) {
+    overlayWindow.hide();
+  } else {
+    overlayWindow.show();
   }
 });
 
@@ -263,6 +259,7 @@ ipcMain.on('load-instance', async (_event, { sessionId, instanceId }) => {
     logReader.stop();
     logReader.removeListener('event', receivedLoggerEvent);
     mainWindow.webContents.send('logger-status-changed', 'disabled');
+    overlayWindow.webContents.send('logger-status-changed', 'disabled');
   }
 
   if (session) {
@@ -272,11 +269,13 @@ ipcMain.on('load-instance', async (_event, { sessionId, instanceId }) => {
     if (instanceId === 'new') {
       session.createNewInstance();
       mainWindow.webContents.send('instance-new', session.getData());
+      overlayWindow.webContents.send('instance-new', session.getData());
     }
 
     session.setHuntingSet(activeHuntingSet);
 
     mainWindow.webContents.send('instance-loaded', session.getData());
+    overlayWindow.webContents.send('instance-loaded', session.getData());
   }
 });
 
@@ -287,6 +286,7 @@ ipcMain.on('change-hunting-set', (_event, selectedHuntingSet) => {
 
     const updatedSettings = getSettings();
     mainWindow.webContents.send('settings-updated', updatedSettings);
+    overlayWindow.webContents.send('settings-updated', updatedSettings);
   }
 });
 
@@ -362,6 +362,7 @@ ipcMain.handle('set-data', async (_event, data) => {
   } else if (data.type === 'active-session') {
     const sessionData = await session.setData(data.values);
     mainWindow.webContents.send('session-updated', sessionData);
+    overlayWindow.webContents.send('session-updated', sessionData);
   }
 
   return response;
@@ -408,6 +409,7 @@ ipcMain.handle('set-hunting-sets', (_event, sets) => {
 
   const updatedSettings = getSettings();
   mainWindow.webContents.send('settings-updated', updatedSettings);
+  overlayWindow.webContents.send('settings-updated', updatedSettings);
 
   return response;
 });
@@ -432,6 +434,7 @@ ipcMain.handle('delete', async (_event, { type, id }) => {
     }
 
     mainWindow.webContents.send(`${type}-deleted`, status);
+    overlayWindow.webContents.send(`${type}-deleted`, status);
   }
 
   return status.success;

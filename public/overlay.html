@@ -3,23 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Entropia Tracker - Overlay</title>
+    <title>Entropia Tally</title>
     <link rel="stylesheet" href="styles/bulma.min.css" />
     <link rel="stylesheet" href="styles/overlay.css" />
+    <link rel="stylesheet" href="fonts/remixicon.css" />
   </head>
   <body>
-    <div class="flex">
-      <h3 class="title is-6">Total loot: <span>0</span> PED</h3>
-    </div>
-    <div class="flex">
-      <h3 class="title is-6">Globals: <span>0</span></h3>
-      <h3 class="title is-6">HoFs: <span>0</span></h3>
-      <h3 class="title is-6">Rare items: <span>0</span></h3>
-    </div>
-    <script>
-      window.api.on('session-updated', newSessionData => {
-        console.log(newSessionData);
-      });
-    </script>
+    <div id="root"></div>
+    <script src="scripts/overlay.bundle.js"></script>
   </body>
 </html>
