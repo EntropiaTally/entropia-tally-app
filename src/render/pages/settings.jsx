@@ -47,6 +47,8 @@ const Settings = () => {
             settings={settings.overlay}
             onChange={overlaySettings => updateSettings('overlay', overlaySettings)}
           />
+
+          <div className="block-top" />
         </div>
       </div>
     </div>

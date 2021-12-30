@@ -40,8 +40,12 @@ const OverlaySettings = ({ settings, onChange }) => {
   );
 };
 
+OverlaySettings.defaultProps = {
+  settings: {},
+};
+
 OverlaySettings.propTypes = {
-  settings: PropTypes.object.isRequired,
+  settings: PropTypes.object,
   onChange: PropTypes.func.isRequired,
 };
 
