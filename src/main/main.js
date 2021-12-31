@@ -29,7 +29,7 @@ if (!is.development) {
   checkForUpdates();
 }
 
-const logReader = new LogReader(config.get('log'), config.get('avatarName'));
+const logReader = new LogReader(config.get('log'), config.get('avatarName'), config.get('logReadAll', false));
 const assetPath = is.development ? app.getAppPath() : process.resourcesPath;
 
 const initialHuntingSets = config.get('huntingSets', []);
@@ -140,6 +140,7 @@ app.on('activate', async () => {
 function getSettings() {
   return {
     log: config.get('log', null),
+    logReadAll: config.get('logReadAll', false),
     avatarName: config.get('avatarName', null),
     sidebarStyle: config.get('sidebarStyle', 'full'),
     huntingSets: config.get('huntingSets', []),

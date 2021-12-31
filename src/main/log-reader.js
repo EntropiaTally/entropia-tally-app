@@ -12,13 +12,14 @@ const ext = (is.linux) ? 'unix' : 'exe';
 const bin = fixPathForAsarUnpack(path.join(cliPath, `${name}.${ext}`));
 
 class LogReader extends EventEmitter {
-  constructor(file, avatarName = '') {
+  constructor(file, avatarName = '', readFullLog = false) {
     super();
     this.file = file;
     this.avatarName = avatarName;
     this.tail = null;
     this.active = false;
     this.onData = this.onData.bind(this);
+    this.readFullLog = readFullLog;
   }
 
   onTailClose(code) {
@@ -34,6 +35,8 @@ class LogReader extends EventEmitter {
     if (is.development) {
       args.push('-a');
       this.file = path.resolve(app.getAppPath(), 'chat.log');
+    } else if (this.readFullLog) {
+      args.push('-a');
     }
 
     args.push('-f', this.file, '-n', this.avatarName);

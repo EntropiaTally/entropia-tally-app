@@ -7,6 +7,9 @@ const configStorage = new Store({
     type: 'string',
     format: 'uri',
   },
+  logReadAll: {
+    type: 'boolean',
+  },
   avatarName: {
     type: 'string',
   },

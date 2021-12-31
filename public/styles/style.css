@@ -308,3 +308,12 @@ span.sum {
 .column-250 {
   max-width: 250px;
 }
+.checkbox-center {
+  vertical-align: middle !important;
+}
+.help-inline {
+  display: inline;
+  font-size: .75rem;
+  line-height: 1.25;
+  margin-left: 5px;
+}

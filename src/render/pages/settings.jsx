@@ -35,6 +35,8 @@ const Settings = () => {
           <LogSelect
             currentLog={settings?.log}
             selectLog={selectLog}
+            isReadAllEnabled={Boolean(settings?.logReadAll)}
+            updateReadAllStatus={event => updateSettings('logReadAll', event.target.checked)}
           />
           <AvatarName
             currentAvatarName={settings?.avatarName}
