@@ -61,6 +61,10 @@ const createMainWindow = async () => {
 
   win.on('closed', () => {
     mainWindow = undefined;
+    if (overlayWindow) {
+      overlayWindow.destroy();
+      overlayWindow = undefined;
+    }
   });
 
   await win.loadFile(path.resolve(app.getAppPath(), 'public/index.html'));
