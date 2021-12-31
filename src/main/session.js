@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('./database');
 
 class Session {
-  static IGNORE_LOOT = ['Universal Ammo'];
+  static IGNORE_LOOT = ['Universal Ammo', 'Strongbox Key'];
 
   static async Load(id, instanceId = null) {
     const data = await (instanceId
