@@ -36,7 +36,15 @@ const Settings = () => {
             currentLog={settings?.log}
             selectLog={selectLog}
             isReadAllEnabled={Boolean(settings?.logReadAll)}
-            updateReadAllStatus={event => updateSettings('logReadAll', event.target.checked)}
+            updateReadAllStatus={event => {
+              if (event.target.checked) {
+                if (confirm('Are you sure?\n\rThis will read the entire log upon starting and may cause duplicate entries if used multiple times or on existing runs.')) { // eslint-disable-line no-alert
+                  updateSettings('logReadAll', event.target.checked);
+                }
+              } else {
+                updateSettings('logReadAll', event.target.checked);
+              }
+            }}
           />
           <AvatarName
             currentAvatarName={settings?.avatarName}

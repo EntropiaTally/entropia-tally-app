@@ -384,6 +384,8 @@ ipcMain.handle('set-data', async (_event, data) => {
       config.set(setting.name, setting.value);
       if (setting.name === 'avatarName') {
         logReader.setAvatarName(setting.value);
+      } else if (setting.name === 'logReadAll') {
+        logReader.updateReadFullLogStatus(setting.value);
       }
     }
 

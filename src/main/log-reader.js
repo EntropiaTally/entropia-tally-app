@@ -91,6 +91,10 @@ class LogReader extends EventEmitter {
       this.start();
     }
   }
+
+  updateReadFullLogStatus(status) {
+    this.readFullLog = status;
+  }
 }
 
 module.exports = LogReader;
