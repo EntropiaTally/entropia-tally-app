@@ -296,7 +296,10 @@ ipcMain.on('load-instance', async (_event, { sessionId, instanceId }) => {
     if (instanceId === 'new') {
       session.createNewInstance();
       mainWindow.webContents.send('instance-new', session.getData());
-      overlayWindow.webContents.send('instance-new', session.getData());
+
+      if (overlayWindow) {
+        overlayWindow.webContents.send('instance-new', session.getData());
+      }
     }
 
     session.setHuntingSet(activeHuntingSet);
