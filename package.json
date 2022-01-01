@@ -1,7 +1,7 @@
 {
   "name": "entropia-tally",
   "productName": "Entropia Tally",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Track Entropia Universe events",
   "license": "MIT",
   "repository": "EntropiaTally/entropia-tally-app",
