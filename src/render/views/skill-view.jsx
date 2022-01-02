@@ -37,10 +37,11 @@ const SkillView = () => {
         <h3 className="title is-5">Attributes</h3>
         {(!sortedAttributes || sortedAttributes.length === 0) && (<p>Nothing has been logged yet</p>)}
         {(sortedAttributes && sortedAttributes.length > 0) && (
-          <Table header={['Name', 'Amount']}>
+          <Table header={['Name', 'Times increased', 'Amount']}>
             {sortedAttributes.map(row => (
               <tr key={row.key}>
                 <td>{row.key}</td>
+                <td>{row.count}</td>
                 <td><span className="sum">{row.total.toFixed(4)}</span> Points</td>
               </tr>
             ))}
@@ -51,10 +52,11 @@ const SkillView = () => {
         <h3 className="title is-5">Skills</h3>
         {(!sortedSkills || sortedSkills.length === 0) && (<p>Nothing has been logged yet</p>)}
         {(sortedSkills && sortedSkills.length > 0) && (
-          <Table header={['Name', 'Amount']}>
+          <Table header={['Name', 'Times increased', 'Amount']}>
             {sortedSkills.map(row => (
               <tr key={row.key}>
                 <td>{row.key}</td>
+                <td>{row.count}</td>
                 <td><span className="sum">{row.total.toFixed(4)}</span> Points</td>
               </tr>
             ))}
