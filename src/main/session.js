@@ -287,6 +287,10 @@ class Session {
     this.dataPoint('position', data);
   }
 
+  handleEnhancerBreakEvent(data) {
+    this.dataPoint('enhancerBreak', data);
+  }
+
   getData(events = true) {
     const data = {
       id: this.id,
