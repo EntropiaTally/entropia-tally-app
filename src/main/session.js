@@ -287,6 +287,11 @@ class Session {
     this.dataPoint('position', data);
   }
 
+  handleTierUpEvent(data) {
+    this.dataPoint('tierUp', data);
+    this.aggregate('tierUp', data.values.item, 0.01);
+  }
+
   getData(events = true) {
     const data = {
       id: this.id,
