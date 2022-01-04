@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 const OVERLAY_TOGGLES = [
   { label: 'Total loot (PED)', key: 'lootTotal', default: false },
   { label: 'Total spent (PED)', key: 'spendTotal', default: false },
+  { label: 'Returns (PED)', key: 'returnTotal', default: false },
   { label: 'Returns (%)', key: 'returnPercent', default: false },
   { label: 'Global count', key: 'numGlobals', default: false },
   { label: 'HoF count', key: 'numHofs', default: false },
