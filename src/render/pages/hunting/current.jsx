@@ -5,6 +5,7 @@ import SessionHuntingSet from '../../components/session-hunting-set';
 import LootView from '../../views/loot-view';
 import SkillView from '../../views/skill-view';
 import StatsView from '../../views/stats-view';
+import MiscView from '../../views/misc-view';
 import CalcView from '../../views/calc-view';
 import NotesView from '../../views/notes-view';
 
@@ -57,6 +58,9 @@ const Current = () => {
           <li className={currentTab === 'stats' ? 'is-active' : ''}>
             <a onClick={() => setCurrentTab('stats')}>Stats</a>
           </li>
+          <li className={currentTab === 'misc' ? 'is-active' : ''}>
+            <a onClick={() => setCurrentTab('misc')}>Misc</a>
+          </li>
           <li className={currentTab === 'calc' ? 'is-active' : ''}>
             <a onClick={() => setCurrentTab('calc')}>Returns</a>
           </li>
@@ -69,6 +73,7 @@ const Current = () => {
       {currentTab === 'loot' && <LootView />}
       {currentTab === 'skills' && <SkillView />}
       {currentTab === 'stats' && <StatsView avatarName={avatarName} />}
+      {currentTab === 'misc' && <MiscView />}
       {currentTab === 'calc' && <CalcView />}
       {currentTab === 'notes' && <NotesView />}
     </>

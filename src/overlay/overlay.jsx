@@ -64,9 +64,11 @@ const Overlay = () => {
     const enemyAttackMissRate = ((playerEvadeCount + enemyMissCountValue) / enemyAttackCount) * 100;
 
     const returnPercent = (lootedPED / spentPED) * 100;
+    const returnTotal = lootedPED - spentPED;
 
     setData({
       ...data,
+      returnTotal,
       totalLoot: newData?.aggregated?.allLoot?.total ?? 0,
       totalSpend: spentPED,
       returnPercent: Number.isNaN(returnPercent) ? 0 : returnPercent,
@@ -100,6 +102,7 @@ const Overlay = () => {
   const allDisabled = [
     settings.lootTotal,
     settings.spendTotal,
+    settings.returnTotal,
     settings.returnPercent,
     settings.numGlobals,
     settings.numHofs,
@@ -129,9 +132,16 @@ const Overlay = () => {
         </div>
       )}
 
+      {settings.returnTotal && (
+        <div className="overlay__item overlay__returnTotal">
+          <div className="overlay__label">Returns</div>
+          <div className="overlay__value">{formatPED(data.returnTotal)}</div>
+        </div>
+      )}
+
       {settings.returnPercent && (
         <div className="overlay__item overlay__returnPercent">
-          <div className="overlay__label">Returns</div>
+          <div className="overlay__label">Return rate</div>
           <div className="overlay__value">{data.returnPercent.toFixed(2)}%</div>
         </div>
       )}
