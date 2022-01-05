@@ -292,6 +292,10 @@ class Session {
     this.aggregate('tierUp', data.values.item, 0.01);
   }
 
+  handleEnhancerBreakEvent(data) {
+    this.dataPoint('enhancerBreak', data);
+  }
+
   getData(events = true) {
     const data = {
       id: this.id,
