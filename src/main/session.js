@@ -91,6 +91,9 @@ class Session {
     this.config = config || {};
     this.currentHuntingSet = null;
     this.notes = '';
+    this.lastLootTime = null;
+    this.currentLootEvent = [];
+    this.currentEventTimer = null;
   }
 
   newEvent(eventData, updateDb = true) {
@@ -165,11 +168,49 @@ class Session {
     }
   }
 
+  saveLootEvent(updateDb = false) {
+    clearTimeout(this.currentEventTimer);
+    if (this.currentLootEvent.length > 0) {
+      const lootEventValue = this.currentLootEvent.reduce(
+        (previous, current) => (previous + Number(current.values.value)),
+        0,
+      );
+
+      this.aggregate('lootEvent', null, lootEventValue, 1);
+      this.dataPoint('lootEvent', {
+        date: this.currentLootEvent[0].date,
+        values: { lootItems: this.currentLootEvent },
+      });
+
+      this.currentLootEvent = [];
+      this.lastLootTime = null;
+    }
+
+    if (updateDb) {
+      this.updateDb();
+    }
+  }
+
   handleLootEvent(data) {
     const { name, amount, value } = data.values;
 
     if (Session.IGNORE_LOOT.includes(name)) {
       return;
+    }
+
+    const lootTime = new Date(data.date);
+    const lastLootTime = this.lastLootTime?.getTime();
+
+    if (lastLootTime !== undefined && lastLootTime !== lootTime.getTime()) {
+      this.saveLootEvent();
+    }
+
+    if (this.lastLootTime === null || this.lastLootTime?.getTime() === lootTime.getTime()) {
+      this.currentLootEvent.push(data);
+      this.lastLootTime = lootTime;
+      this.currentEventTimer = setTimeout(() => {
+        this.saveLootEvent(true);
+      }, 1000);
     }
 
     this.aggregate('allLoot', null, value, amount);
