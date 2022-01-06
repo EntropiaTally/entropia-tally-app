@@ -11,7 +11,6 @@ const NotesView = () => {
     }
 
     window.api.get('active-session').then(updateValues);
-    window.api.on('session-data-updated', updateValues);
   }, []);
 
   useEffect(() => {
@@ -26,7 +25,7 @@ const NotesView = () => {
     <div className="content box">
       <textarea
         className="textarea"
-        value={value}
+        defaultValue={value}
         rows={10}
         placeholder="Enter your notes here"
         onChange={evt => setValue(evt.target.value)}
