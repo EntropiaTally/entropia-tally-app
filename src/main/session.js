@@ -6,6 +6,7 @@ const db = require('./database');
 
 class Session {
   static IGNORE_LOOT = ['Universal Ammo', 'Strongbox Key'];
+  static IGNORE_LOOT_EVENT_LOOT = ['Mayhem Token'];
 
   static async Load(id, instanceId = null) {
     const data = await (instanceId
@@ -173,7 +174,17 @@ class Session {
 
   saveLootEvent(updateDb = false) {
     clearTimeout(this.currentEventTimer);
-    if (this.currentLootEvent.length > 0) {
+    const lootSize = this.currentLootEvent.length;
+    if (lootSize > 0) {
+      const firstItemName = this.currentLootEvent[0]?.values?.name;
+
+      // Independent loot. Pick up, mission reward or similar.
+      if (lootSize === 1 && Session.IGNORE_LOOT_EVENT_LOOT.includes(firstItemName)) {
+        this.currentLootEvent = [];
+        this.lastLootTime = null;
+        return;
+      }
+
       const lootEventValue = this.currentLootEvent.reduce(
         (previous, current) => (previous + Number(current.values.value)),
         0,
