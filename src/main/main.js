@@ -135,6 +135,8 @@ app.on('activate', async () => {
   await app.whenReady();
   session = await Session.Create();
   session.setHuntingSet(activeHuntingSet);
+  session.emitter.on('session-updated', sessionForcedUpdate);
+
   Menu.setApplicationMenu(menu);
   mainWindow = await createMainWindow();
 })();
@@ -150,6 +152,7 @@ function getSettings() {
     huntingSets: config.get('huntingSets', []),
     activeHuntingSet: activeHuntingSet?.id,
     overlay: config.get('overlay', {}),
+    killCount: config.get('killCount', false),
   };
 }
 
@@ -187,6 +190,20 @@ function receivedLoggerEvent({ data, lastLine }) {
   });
 }
 
+function sessionForcedUpdate() {
+  const sessionData = session.getData();
+
+  mainWindow.webContents.send('session-data-updated', sessionData);
+  mainWindow.webContents.send('session-data-updated-aggregated', sessionData?.aggregated);
+  mainWindow.webContents.send('session-data-updated-events', sessionData?.events);
+
+  if (overlayWindow && overlayWindow.isVisible()) {
+    overlayWindow.webContents.send('session-data-updated', sessionData);
+    overlayWindow.webContents.send('session-data-updated-aggregated', sessionData?.aggregated);
+    overlayWindow.webContents.send('session-data-updated-events', sessionData?.events);
+  }
+}
+
 function stopLogReader() {
   if (logReader) {
     logReader.stop();
@@ -203,8 +220,11 @@ async function startNewSession(emit = true) {
   stopLogReader();
   setDefaultHuntingSet();
 
+  session.emitter.removeAllListeners();
   session = await Session.Create();
   session.setHuntingSet(activeHuntingSet);
+  session.emitter.on('session-updated', sessionForcedUpdate);
+
   if (emit) {
     mainWindow.webContents.send('session-new', session.getData());
 
@@ -290,6 +310,7 @@ ipcMain.on('load-instance', async (_event, { sessionId, instanceId }) => {
   }
 
   if (session) {
+    session.emitter.removeAllListeners();
     const selectedInstanceId = (instanceId === 'new') ? null : instanceId;
     session = await Session.Load(sessionId, selectedInstanceId);
 
@@ -303,6 +324,7 @@ ipcMain.on('load-instance', async (_event, { sessionId, instanceId }) => {
     }
 
     session.setHuntingSet(activeHuntingSet);
+    session.emitter.on('session-updated', sessionForcedUpdate);
 
     mainWindow.webContents.send('instance-loaded', session.getData());
 

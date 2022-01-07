@@ -46,10 +46,27 @@ const Settings = () => {
               }
             }}
           />
+
           <AvatarName
             currentAvatarName={settings?.avatarName}
             updateAvatarName={avatarName => updateSettings('avatarName', avatarName)}
           />
+
+          <div className="box block">
+            <h3 className="title">Extras</h3>
+            <div className="control">
+              <label className="label">
+                <input
+                  type="checkbox"
+                  className="checkbox mr-2"
+                  checked={settings?.killCount ?? false}
+                  onChange={evt => updateSettings('killCount', evt.target.checked)}
+                />
+                {' '}
+                Show kill count (Could be inaccurate, based on loot events happening the same second)
+              </label>
+            </div>
+          </div>
 
           <HuntingSets huntingSets={settings.huntingSets} />
 

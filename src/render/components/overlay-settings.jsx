@@ -8,6 +8,7 @@ const OVERLAY_TOGGLES = [
   { label: 'Returns (%)', key: 'returnPercent', default: false },
   { label: 'Global count', key: 'numGlobals', default: false },
   { label: 'HoF count', key: 'numHofs', default: false },
+  { label: 'Kill count (requires \'Show kill count\' to be enabled)', key: 'killCount', default: false },
   { label: 'Hit rate (%)', key: 'hitPercent', default: false },
   { label: 'Evade rate (%)', key: 'evadePercent', default: false },
   // { label: 'Session time', key: 'sessionTime', default: false },

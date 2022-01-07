@@ -16,6 +16,9 @@ const configStorage = new Store({
   sidebarStyle: {
     type: 'string',
   },
+  killCount: {
+    type: 'boolean',
+  },
   huntingSets: {
     type: 'array',
     items: {
@@ -34,6 +37,7 @@ const configStorage = new Store({
     returnPercent: { type: 'boolean' },
     numGlobals: { type: 'boolean' },
     numHofs: { type: 'boolean' },
+    killCount: { type: 'boolean' },
     hitPercent: { type: 'boolean' },
     evadePercent: { type: 'boolean' },
     sessionTime: { type: 'boolean' },

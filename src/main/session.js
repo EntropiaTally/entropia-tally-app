@@ -1,5 +1,6 @@
 'use strict';
 
+const EventEmitter = require('events');
 const { v4: uuidv4 } = require('uuid');
 const db = require('./database');
 
@@ -94,6 +95,8 @@ class Session {
     this.lastLootTime = null;
     this.currentLootEvent = [];
     this.currentEventTimer = null;
+
+    this.emitter = new EventEmitter();
   }
 
   newEvent(eventData, updateDb = true) {
@@ -188,6 +191,7 @@ class Session {
 
     if (updateDb) {
       this.updateDb();
+      this.emitter.emit('session-updated');
     }
   }
 
