@@ -6,7 +6,21 @@ const db = require('./database');
 
 class Session {
   static IGNORE_LOOT = ['Universal Ammo', 'Strongbox Key'];
-  static IGNORE_LOOT_EVENT_LOOT = ['Mayhem Token'];
+  static IGNORE_LOOT_EVENT_LOOT = [
+    'Mayhem Token',
+    'Daily Token',
+    'Bombardo',
+    'Caroot',
+    'Haimoros',
+    'Papplon',
+    'Common Dung',
+    'Brukite',
+    'Kaldon',
+    'Nissit',
+    'Rutol',
+    'Sopur',
+    'Trutun',
+  ];
 
   static async Load(id, instanceId = null) {
     const data = await (instanceId
@@ -193,7 +207,7 @@ class Session {
       this.aggregate('lootEvent', null, lootEventValue, 1);
       this.dataPoint('lootEvent', {
         date: this.currentLootEvent[0].date,
-        values: { lootItems: this.currentLootEvent },
+        values: { items: this.currentLootEvent.map(loot => loot.values) },
       });
 
       this.currentLootEvent = [];
@@ -215,17 +229,24 @@ class Session {
 
     const lootTime = new Date(data.date);
     const lastLootTime = this.lastLootTime?.getTime();
+    const lastLootTimeExtra = lastLootTime ? new Date(lastLootTime + 1000)?.getTime() : null;
+    let includeLoot = false;
 
-    if (lastLootTime !== undefined && lastLootTime !== lootTime.getTime()) {
+    if (lastLootTime !== undefined && lastLootTime !== lootTime.getTime() && lastLootTimeExtra !== lootTime.getTime()) {
       this.saveLootEvent();
+    } else if (lastLootTime !== undefined && lastLootTimeExtra === lootTime.getTime()) {
+      includeLoot = true;
     }
 
-    if (this.lastLootTime === null || this.lastLootTime?.getTime() === lootTime.getTime()) {
+    if (this.lastLootTime === null || this.lastLootTime?.getTime() === lootTime.getTime() || includeLoot) {
       this.currentLootEvent.push(data);
-      this.lastLootTime = lootTime;
+      if (!includeLoot) {
+        this.lastLootTime = lootTime;
+      }
+
       this.currentEventTimer = setTimeout(() => {
         this.saveLootEvent(true);
-      }, 1000);
+      }, 500);
     }
 
     this.aggregate('allLoot', null, value, amount);

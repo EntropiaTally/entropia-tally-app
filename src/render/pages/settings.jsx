@@ -63,7 +63,7 @@ const Settings = () => {
                   onChange={evt => updateSettings('killCount', evt.target.checked)}
                 />
                 {' '}
-                Show kill count (Could be inaccurate, based on loot events happening the same second)
+                Show kill count (May be inaccurate, looting multiple mobs at the same time or loot lag may skew results)
               </label>
             </div>
           </div>
