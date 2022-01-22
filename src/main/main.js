@@ -255,6 +255,12 @@ function startNewInstance(emit = true) {
 // Logger Events
 
 logReader.on('logger-status-changed', () => {
+  if (logReader.active) {
+    session.startTimer();
+  } else {
+    session.stopTimer();
+  }
+
   mainWindow.webContents.send('logger-status-changed', logReader.active ? 'enabled' : 'disabled');
 
   if (overlayWindow) {
