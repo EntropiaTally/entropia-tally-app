@@ -246,7 +246,7 @@ class Session {
 
       this.currentEventTimer = setTimeout(() => {
         this.saveLootEvent(true);
-      }, 500);
+      }, 1500);
     }
 
     this.aggregate('allLoot', null, value, amount);
