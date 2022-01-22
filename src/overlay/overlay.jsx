@@ -1,18 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
-/* Not in use right now
-const pad = string_ => string_ < 10 ? `0${string_}` : string_;
-
-function formatTime(seconds) {
-  const values = {
-    hours: pad(Math.max(Math.floor(seconds / 3600) % 24, 0)),
-    minutes: pad(Math.max(Math.floor(seconds / 60) % 60, 0)),
-    seconds: pad(Math.max(Math.floor(seconds % 60), 0)),
-  };
-
-  return `${values.hours}:${values.minutes}:${values.seconds}`;
-}
-*/
+import SessionTimer from '../render/components/session-timer';
 
 function formatPED(value) {
   return `${value.toFixed(2)} PED`;
@@ -78,7 +65,6 @@ const Overlay = () => {
       numKills: newData.aggregated?.lootEvent?.count || 0,
       hitPercent: Number.isNaN(playerAttackHitRate) ? 0 : playerAttackHitRate,
       evadePercent: Number.isNaN(enemyAttackMissRate) ? 0 : enemyAttackMissRate,
-      sessionTime: 500,
     });
   }
 
@@ -102,6 +88,7 @@ const Overlay = () => {
   }
 
   const allDisabled = [
+    settings.sessionTime,
     settings.lootTotal,
     settings.spendTotal,
     settings.returnTotal,
@@ -118,6 +105,15 @@ const Overlay = () => {
       {allDisabled && (
         <div className="overlay__item overlay__warning">
           Enable which stats to show in the settings.
+        </div>
+      )}
+
+      {settings.sessionTime && (
+        <div className="overlay__item overlay__sessionTime">
+          <div className="overlay__label">Time</div>
+          <div className="overlay__value">
+            <SessionTimer />
+          </div>
         </div>
       )}
 

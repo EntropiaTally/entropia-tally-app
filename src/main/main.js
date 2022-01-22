@@ -136,6 +136,7 @@ app.on('activate', async () => {
   session = await Session.Create();
   session.setHuntingSet(activeHuntingSet);
   session.emitter.on('session-updated', sessionForcedUpdate);
+  session.emitter.on('session-time-updated', sessionTimeUpdated);
 
   Menu.setApplicationMenu(menu);
   mainWindow = await createMainWindow();
@@ -190,6 +191,14 @@ function receivedLoggerEvent({ data, lastLine }) {
   });
 }
 
+function sessionTimeUpdated(seconds) {
+  mainWindow.webContents.send('session-time-updated', seconds);
+
+  if (overlayWindow && overlayWindow.isVisible()) {
+    overlayWindow.webContents.send('session-time-updated', seconds);
+  }
+}
+
 function sessionForcedUpdate() {
   const sessionData = session.getData();
 
@@ -224,6 +233,7 @@ async function startNewSession(emit = true) {
   session = await Session.Create();
   session.setHuntingSet(activeHuntingSet);
   session.emitter.on('session-updated', sessionForcedUpdate);
+  session.emitter.on('session-time-updated', sessionTimeUpdated);
 
   if (emit) {
     mainWindow.webContents.send('session-new', session.getData());
@@ -331,6 +341,7 @@ ipcMain.on('load-instance', async (_event, { sessionId, instanceId }) => {
 
     session.setHuntingSet(activeHuntingSet);
     session.emitter.on('session-updated', sessionForcedUpdate);
+    session.emitter.on('session-time-updated', sessionTimeUpdated);
 
     mainWindow.webContents.send('instance-loaded', session.getData());
 

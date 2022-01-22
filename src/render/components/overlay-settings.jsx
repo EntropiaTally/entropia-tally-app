@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const OVERLAY_TOGGLES = [
+  { label: 'Session time', key: 'sessionTime', default: false },
   { label: 'Total loot (PED)', key: 'lootTotal', default: false },
   { label: 'Total spent (PED)', key: 'spendTotal', default: false },
   { label: 'Returns (PED)', key: 'returnTotal', default: false },
@@ -11,7 +12,6 @@ const OVERLAY_TOGGLES = [
   { label: 'Kill count (requires \'Show kill count\' to be enabled)', key: 'killCount', default: false },
   { label: 'Hit rate (%)', key: 'hitPercent', default: false },
   { label: 'Evade rate (%)', key: 'evadePercent', default: false },
-  // { label: 'Session time', key: 'sessionTime', default: false },
 ];
 
 const OverlaySettings = ({ settings, onChange }) => {

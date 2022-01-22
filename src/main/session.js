@@ -122,6 +122,7 @@ class Session {
     this.sessionTimer = setInterval(async () => {
       this.sessionTime += 1;
       await this.updateDb();
+      this.emitter.emit('session-time-updated', this.sessionTime);
     }, 1000);
   }
 
