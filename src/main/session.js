@@ -1,10 +1,26 @@
 'use strict';
 
+const EventEmitter = require('events');
 const { v4: uuidv4 } = require('uuid');
 const db = require('./database');
 
 class Session {
   static IGNORE_LOOT = ['Universal Ammo', 'Strongbox Key'];
+  static IGNORE_LOOT_EVENT_LOOT = [
+    'Mayhem Token',
+    'Daily Token',
+    'Bombardo',
+    'Caroot',
+    'Haimoros',
+    'Papplon',
+    'Common Dung',
+    'Brukite',
+    'Kaldon',
+    'Nissit',
+    'Rutol',
+    'Sopur',
+    'Trutun',
+  ];
 
   static async Load(id, instanceId = null) {
     const data = await (instanceId
@@ -91,6 +107,11 @@ class Session {
     this.config = config || {};
     this.currentHuntingSet = null;
     this.notes = '';
+    this.lastLootTime = null;
+    this.currentLootEvent = [];
+    this.currentEventTimer = null;
+
+    this.emitter = new EventEmitter();
   }
 
   newEvent(eventData, updateDb = true) {
@@ -165,11 +186,67 @@ class Session {
     }
   }
 
+  saveLootEvent(updateDb = false) {
+    clearTimeout(this.currentEventTimer);
+    const lootSize = this.currentLootEvent.length;
+    if (lootSize > 0) {
+      const firstItemName = this.currentLootEvent[0]?.values?.name;
+
+      // Independent loot. Pick up, mission reward or similar.
+      if (lootSize === 1 && Session.IGNORE_LOOT_EVENT_LOOT.includes(firstItemName)) {
+        this.currentLootEvent = [];
+        this.lastLootTime = null;
+        return;
+      }
+
+      const lootEventValue = this.currentLootEvent.reduce(
+        (previous, current) => (previous + Number(current.values.value)),
+        0,
+      );
+
+      this.aggregate('lootEvent', null, lootEventValue, 1);
+      this.dataPoint('lootEvent', {
+        date: this.currentLootEvent[0].date,
+        values: { items: this.currentLootEvent.map(loot => loot.values) },
+      });
+
+      this.currentLootEvent = [];
+      this.lastLootTime = null;
+    }
+
+    if (updateDb) {
+      this.updateDb();
+      this.emitter.emit('session-updated');
+    }
+  }
+
   handleLootEvent(data) {
     const { name, amount, value } = data.values;
 
     if (Session.IGNORE_LOOT.includes(name)) {
       return;
+    }
+
+    const lootTime = new Date(data.date);
+    const lastLootTime = this.lastLootTime?.getTime();
+    const lastLootTimeExtra = lastLootTime ? new Date(lastLootTime + 1000)?.getTime() : null;
+    let includeLoot = false;
+
+    if (lastLootTime !== undefined && lastLootTime !== lootTime.getTime() && lastLootTimeExtra !== lootTime.getTime()) {
+      this.saveLootEvent();
+    } else if (lastLootTime !== undefined && lastLootTimeExtra === lootTime.getTime()) {
+      includeLoot = true;
+    }
+
+    if (this.lastLootTime === null || this.lastLootTime?.getTime() === lootTime.getTime() || includeLoot) {
+      this.currentLootEvent.push(data);
+      if (!includeLoot) {
+        this.lastLootTime = lootTime;
+      }
+
+      this.currentEventTimer = setTimeout(() => {
+        this.saveLootEvent(true);
+      }, 1500);
     }
 
     this.aggregate('allLoot', null, value, amount);

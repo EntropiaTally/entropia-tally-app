@@ -12,6 +12,7 @@ import NotesView from '../../views/notes-view';
 const Current = () => {
   const [currentTab, setCurrentTab] = useState('loot');
   const [avatarName, setAvatarName] = useState('none');
+  const [killCountEnabled, setKillCountEnabled] = useState(false);
   const [huntingSets, setHuntingSets] = useState([]);
   const [activeHuntingSet, setActiveHuntingSet] = useState(null);
 
@@ -24,6 +25,7 @@ const Current = () => {
       setHuntingSets(settings?.huntingSets);
       setActiveHuntingSet(settings?.activeHuntingSet);
       setAvatarName(settings?.avatarName);
+      setKillCountEnabled(Boolean(settings?.killCount));
     };
 
     window.api.get('settings').then(updateSettings);
@@ -72,7 +74,7 @@ const Current = () => {
 
       {currentTab === 'loot' && <LootView />}
       {currentTab === 'skills' && <SkillView />}
-      {currentTab === 'stats' && <StatsView avatarName={avatarName} />}
+      {currentTab === 'stats' && <StatsView avatarName={avatarName} isKillCountEnabled={killCountEnabled} />}
       {currentTab === 'misc' && <MiscView />}
       {currentTab === 'calc' && <CalcView />}
       {currentTab === 'notes' && <NotesView />}

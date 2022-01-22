@@ -8,7 +8,7 @@ function makeNumber(value) {
   return value || 0;
 }
 
-const StatsView = ({ avatarName }) => {
+const StatsView = ({ avatarName, isKillCountEnabled }) => {
   const [stats, setStats] = useState({});
 
   useEffect(() => {
@@ -47,6 +47,7 @@ const StatsView = ({ avatarName }) => {
         damageInflictedTotal: makeNumber(aggregated?.damageInflicted?.total),
         damageTakenTotal: makeNumber(aggregated?.damageTaken?.total),
         healAll: sortedHeal,
+        killCount: makeNumber(aggregated?.lootEvent?.count),
         damageInflictedCount,
         damageInflictedCritCount,
         damageTakenCritCount,
@@ -108,6 +109,14 @@ const StatsView = ({ avatarName }) => {
               value={stats?.damageInflictedCritCount?.toLocaleString() ?? 0}
             />
           </div>
+          {isKillCountEnabled && (
+            <div className="tile tile-toplevel">
+              <StatBox
+                title="Estimated kills"
+                value={stats?.killCount ?? 0}
+              />
+            </div>
+          )}
         </div>
       </div>
       <div className="content box info-box">
@@ -187,6 +196,7 @@ const StatsView = ({ avatarName }) => {
 
 StatsView.propTypes = {
   avatarName: PropTypes.string,
+  isKillCountEnabled: PropTypes.bool,
 };
 
 export default StatsView;

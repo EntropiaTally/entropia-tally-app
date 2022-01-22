@@ -32,6 +32,7 @@ function sum(...values) {
 
 const Overlay = () => {
   const [settings, setSettings] = useState(null);
+  const [isKillCountEnabled, setIsKillCountEnabled] = useState(false);
   const [data, setData] = useState(null);
 
   function updateData(newData) {
@@ -74,6 +75,7 @@ const Overlay = () => {
       returnPercent: Number.isNaN(returnPercent) ? 0 : returnPercent,
       numGlobals: newData.aggregated?.globals?.count || 0,
       numHofs: newData.aggregated?.hofs?.count || 0,
+      numKills: newData.aggregated?.lootEvent?.count || 0,
       hitPercent: Number.isNaN(playerAttackHitRate) ? 0 : playerAttackHitRate,
       evadePercent: Number.isNaN(enemyAttackMissRate) ? 0 : enemyAttackMissRate,
       sessionTime: 500,
@@ -81,18 +83,18 @@ const Overlay = () => {
   }
 
   useEffect(() => {
+    const updateSettings = newSettings => {
+      setSettings(newSettings.overlay);
+      setIsKillCountEnabled(newSettings.killCount);
+    };
+
     window.api.on('instance-loaded', console.log);
     window.api.on('session-updated', updateData);
     window.api.on('session-data-updated', updateData);
-
-    window.api.on('settings-updated', newSettings => {
-      setSettings(newSettings.overlay);
-    });
+    window.api.on('settings-updated', updateSettings);
 
     window.api.get('active-session').then(updateData);
-    window.api.get('settings').then(newSettings => {
-      setSettings(newSettings.overlay);
-    });
+    window.api.get('settings').then(updateSettings);
   }, []);
 
   if (!settings || !data) {
@@ -108,6 +110,7 @@ const Overlay = () => {
     settings.numHofs,
     settings.hitPercent,
     settings.evadePercent,
+    settings.killCount && isKillCountEnabled,
   ].filter(value => Boolean(value)).length === 0;
 
   return (
@@ -157,6 +160,13 @@ const Overlay = () => {
         <div className="overlay__item overlay__numHofs">
           <div className="overlay__label">HoFs</div>
           <div className="overlay__value">{data.numHofs}</div>
+        </div>
+      )}
+
+      {isKillCountEnabled && settings.killCount && (
+        <div className="overlay__item overlay__killCount">
+          <div className="overlay__label">Kills</div>
+          <div className="overlay__value">{data.numKills}</div>
         </div>
       )}
 
