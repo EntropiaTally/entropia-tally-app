@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import SessionTimer from './session-timer';
 
 const SessionHeader = () => {
   const [isLogRunning, setIsLogRunning] = useState(false);
@@ -66,7 +67,8 @@ const SessionHeader = () => {
           <h2 className="title is-4">{sessionName ? sessionName : 'Session'} <span className="icon"><i className="ri-pencil-fill" onClick={() => setSessionNameActive(true)} /></span></h2>
         )}
       </div>
-      <div>
+      <div className="flex">
+        <SessionTimer />
         <button
           className={`button is-small ${isLogRunning ? 'is-danger' : 'is-success'}`}
           type="button"

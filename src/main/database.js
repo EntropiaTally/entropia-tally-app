@@ -67,6 +67,11 @@ class Database {
       await this.run('UPDATE db_config SET version = ?', [3]);
       await this.run('ALTER TABLE session_instances ADD notes TEXT NOT NULL DEFAULT ""');
     }
+
+    if (version < 4) {
+      await this.run('UPDATE db_config SET version = ?', [4]);
+      await this.run('ALTER TABLE session_instances ADD run_time INTEGER DEFAULT NULL');
+    }
   }
 
   async get(query, values = []) {

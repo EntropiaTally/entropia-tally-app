@@ -37,6 +37,7 @@ body {
   display: flex;
 }
 
+
 /* Navigation */
 
 .navbar {
@@ -316,4 +317,10 @@ span.sum {
   font-size: .75rem;
   line-height: 1.25;
   margin-left: 5px;
+}
+
+
+/* SessionTimer */
+.session-timer {
+  margin-right: 1rem;
 }

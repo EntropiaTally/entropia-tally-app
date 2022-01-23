@@ -24,10 +24,10 @@ class Session {
 
   static async Load(id, instanceId = null) {
     const data = await (instanceId
-      ? db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated, si.config, si.notes FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ? AND si.id = ?', [id, instanceId])
-      : db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated, si.config, si.notes FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ?', [id]));
+      ? db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated, si.config, si.notes, si.run_time FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ? AND si.id = ?', [id, instanceId])
+      : db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated, si.config, si.notes, si.run_time FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ?', [id]));
 
-    const options = { name: data?.name, createdAt: data?.created_at };
+    const options = { name: data?.name, createdAt: data?.created_at, sessionTime: data?.run_time };
     const config = data?.config ? JSON.parse(data.config) : 0;
 
     const instance = new Session(id, data?.instance_id, options, config);
@@ -60,7 +60,7 @@ class Session {
   }
 
   static async FetchInstances(id) {
-    const rows = await db.all('SELECT id, session_id, created_at, aggregated, config, notes FROM session_instances WHERE session_id = ? ORDER BY DATETIME(created_at) DESC', [id]);
+    const rows = await db.all('SELECT id, session_id, created_at, aggregated, config, notes, run_time FROM session_instances WHERE session_id = ? ORDER BY DATETIME(created_at) DESC', [id]);
     return rows.map(row => {
       row.aggregated = JSON.parse(row.aggregated);
       row.config = JSON.parse(row.config);
@@ -110,25 +110,28 @@ class Session {
     this.lastLootTime = null;
     this.currentLootEvent = [];
     this.currentEventTimer = null;
+    this.sessionTime = options?.sessionTime ?? 0;
+    this.sessionTimer = null;
 
     this.emitter = new EventEmitter();
   }
 
-  newEvent(eventData, updateDb = true) {
-    const eventName = eventData.event
-      .split('_')
-      .map(event => event[0].toUpperCase() + event.slice(1))
-      .join('');
+  startTimer() {
+    this.stopTimer();
 
-    const handler = `handle${eventName}Event`;
-    this?.[handler]?.(eventData);
-
-    return updateDb ? this.updateDb() : Promise.resolve();
+    this.sessionTimer = setInterval(async () => {
+      this.sessionTime += 1;
+      await this.updateDb();
+      this.emitter.emit('session-time-updated', this.sessionTime);
+    }, 1000);
   }
 
-  /// hashString(string) {
-  ///   return Crypto.createHash('sha1').update(string.toLowerCase()).digest('hex');
-  /// }
+  async stopTimer() {
+    if (this.sessionTimer) {
+      clearInterval(this.sessionTimer);
+      await this.updateDb();
+    }
+  }
 
   setHuntingSet(huntingSet) {
     if (huntingSet && huntingSet.id) {
@@ -142,6 +145,18 @@ class Session {
     } else {
       this.currentHuntingSet = null;
     }
+  }
+
+  newEvent(eventData, updateDb = true) {
+    const eventName = eventData.event
+      .split('_')
+      .map(event => event[0].toUpperCase() + event.slice(1))
+      .join('');
+
+    const handler = `handle${eventName}Event`;
+    this?.[handler]?.(eventData);
+
+    return updateDb ? this.updateDb() : Promise.resolve();
   }
 
   dataPoint(type, data) {
@@ -382,6 +397,7 @@ class Session {
       usedHuntingSets: this.config.usedHuntingSets,
       additionalCost: this.config.additionalCost,
       notes: this.notes,
+      sessionTime: this.sessionTime,
     };
 
     if (events) {
@@ -398,6 +414,7 @@ class Session {
     this.events = {};
     this.config = {};
     this.notes = '';
+    this.sessionTime = 0;
   }
 
   async createNewSession() {
@@ -412,13 +429,14 @@ class Session {
 
   async updateDb() {
     await this.createNewSession();
-    await db.run('REPLACE INTO session_instances(id, session_id, events, aggregated, config, notes) VALUES(?, ?, ?, ?, ?, ?)', [
+    await db.run('REPLACE INTO session_instances(id, session_id, events, aggregated, config, notes, run_time) VALUES(?, ?, ?, ?, ?, ?, ?)', [
       this.instanceId,
       this.id,
       JSON.stringify(this.events),
       JSON.stringify(this.aggregated),
       JSON.stringify(this.config),
       this.notes,
+      this.sessionTime,
     ]);
   }
 
