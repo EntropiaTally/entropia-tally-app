@@ -173,7 +173,7 @@ function setDefaultHuntingSet() {
 }
 
 function receivedLoggerEvent({ data, lastLine }) {
-  session.newEvent(data, lastLine).then(() => {
+  session.newEvent(data).then(() => {
     // Only send the complete package
     if (lastLine) {
       const sessionData = session.getData();
