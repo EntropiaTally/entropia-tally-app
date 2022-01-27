@@ -90,6 +90,7 @@ const createOverlayWindow = async _parent => {
 
   win.on('ready-to-show', () => {
     win.show();
+    win.setAlwaysOnTop(true, 'screen-saver', 1);
   });
 
   win.on('closed', () => {
