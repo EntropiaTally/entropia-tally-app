@@ -42,6 +42,10 @@ const configStorage = new Store({
     evadePercent: { type: 'boolean' },
     sessionTime: { type: 'boolean' },
   },
+  overlaySize: {
+    type: 'array',
+    items: { type: 'string' },
+  },
 });
 
 module.exports = configStorage;

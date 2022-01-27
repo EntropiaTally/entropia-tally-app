@@ -73,12 +73,15 @@ const createMainWindow = async () => {
 };
 
 const createOverlayWindow = async _parent => {
+  let resizeCooldown = null;
+  const overlaySize = config.get('overlaySize', [350, 60]);
+
   const win = new BrowserWindow({
     title: `${app.name} - Overlay`,
     frame: false,
     show: false,
-    width: 350,
-    height: 60,
+    width: overlaySize[0],
+    height: overlaySize[1],
     resizable: true,
     alwaysOnTop: true,
     webPreferences: {
@@ -91,6 +94,16 @@ const createOverlayWindow = async _parent => {
   win.on('ready-to-show', () => {
     win.show();
     win.setAlwaysOnTop(true, 'screen-saver', 1);
+  });
+
+  win.on('resize', () => {
+    if (resizeCooldown) {
+      clearTimeout(resizeCooldown);
+    }
+
+    resizeCooldown = setTimeout(() => {
+      config.set('overlaySize', win.getSize());
+    }, 1000);
   });
 
   win.on('closed', () => {
