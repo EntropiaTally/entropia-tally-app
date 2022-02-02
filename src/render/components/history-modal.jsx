@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
+import { formatTime } from '../utils/formatting';
+
 import StatBox from './statbox';
 import Table from './table';
 import Modal from './modal';
@@ -9,12 +11,16 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
   const [sessionInstances, setSessionInstances] = useState([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [activeDeleteData, setActiveDeleteData] = useState(null);
+  const [isKillCountEnabled, setIsKillCountEnabled] = useState(false);
+
   const { id, sessionName, sessionCreatedAt } = session;
 
   useEffect(() => {
     window.api.get('instances', { id }).then(instances => {
       setSessionInstances(instances);
     });
+
+    window.api.get('settings').then(settings => setIsKillCountEnabled(Boolean(settings?.killCount)));
 
     const removeInstanceDeletedListener = window.api.on('instance-deleted', ({ sessionId }) => {
       window.api.get('instances', { id: sessionId }).then(instances => {
@@ -34,6 +40,7 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
         .reduce((previousItem, currentItem) => previousItem + currentItem.count, 0);
       const usedHuntingSets = current?.config?.usedHuntingSets;
       const additionalCost = current?.config?.additionalCost || 0;
+      const lootEventTotal = current?.aggregated?.lootEvent?.count || 0;
       const updatedSets = previous.usedSets;
 
       for (const set of Object.values(usedHuntingSets || {})) {
@@ -58,8 +65,10 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
         rareLoots: previous.rareLoots + currentRareLootTotal,
         usedSets: updatedSets,
         additionalCost: previous.additionalCost + additionalCost,
+        lootEvents: previous.lootEvents + lootEventTotal,
+        runTime: previous.runTime + (current?.run_time ?? 0),
       };
-    }, { total: 0, globals: 0, hofs: 0, rareLoots: 0, usedSets: {}, additionalCost: 0 })
+    }, { total: 0, globals: 0, hofs: 0, rareLoots: 0, usedSets: {}, additionalCost: 0, lootEvents: 0, runTime: 0 })
   , [sessionInstances]);
 
   const onLoadSessionInstance = (sessionId, instanceId) => {
@@ -151,6 +160,18 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
             <StatBox
               title="Rare items"
               value={combinedSessionStats?.rareLoots ?? 0}
+            />
+          </div>
+          <div className="tile tile-toplevel">
+            {isKillCountEnabled && (
+              <StatBox
+                title="Kill count / Loot Events"
+                value={combinedSessionStats?.lootEvents ?? 0}
+              />
+            )}
+            <StatBox
+              title="Total time"
+              value={formatTime(combinedSessionStats?.runTime ?? 0)}
             />
           </div>
         </div>

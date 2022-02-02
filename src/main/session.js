@@ -147,7 +147,7 @@ class Session {
     }
   }
 
-  newEvent(eventData, updateDb = true) {
+  newEvent(eventData, updateDb = false) {
     const eventName = eventData.event
       .split('_')
       .map(event => event[0].toUpperCase() + event.slice(1))
