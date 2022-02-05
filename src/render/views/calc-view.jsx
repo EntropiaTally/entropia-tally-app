@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 
+import { aggregateHuntingSetData, calculateReturns } from '../../utils/helpers';
+
 import Table from '../components/table';
 
 const CalcView = () => {
@@ -12,12 +14,8 @@ const CalcView = () => {
       const additionalCost = newData?.additionalCost ?? 0;
 
       if (newData.usedHuntingSets) {
-        const fixedSets = Object.values(newData.usedHuntingSets).map(set => ({
-          ...set,
-          hits: newData?.aggregated?.huntingSetDmg?.[set.id] || {},
-          misses: newData?.aggregated?.huntingSetMissed?.[set.id] || {},
-        }));
-        setInstanceHuntingSets(fixedSets.filter(set => set.hits.count || set.misses.count));
+        const fixedSets = aggregateHuntingSetData(newData.usedHuntingSets, newData?.aggregated);
+        setInstanceHuntingSets(Object.values(fixedSets).filter(set => set.hits || set.misses));
       }
 
       setAggregatedData({ allLoot, additionalCost });
@@ -36,17 +34,11 @@ const CalcView = () => {
     setAggregatedData({ ...aggregatedData, additionalCost: newCost });
   }, [aggregatedData]);
 
-  const totalWeaponCost = instanceHuntingSets.reduce((previous, current) => {
-    const hits = current.hits?.count ?? 0;
-    const misses = current.misses?.count ?? 0;
-    return previous + ((hits + misses) * (current.decay / 100));
-  }, 0);
-
-  const totalCost = totalWeaponCost + aggregatedData.additionalCost;
-  const resultValue = aggregatedData.allLoot - totalCost;
-  const resultRate = totalCost > 0
-    ? (aggregatedData.allLoot / totalCost) * 100 || 0
-    : null;
+  const { totalCost, totalWeaponCost, resultValue, resultRate } = calculateReturns(
+    instanceHuntingSets,
+    aggregatedData.allLoot,
+    aggregatedData.additionalCost,
+  );
 
   return (
     <div className="content box info-box">
@@ -61,8 +53,8 @@ const CalcView = () => {
         )}
 
         {instanceHuntingSets.map(set => {
-          const hits = set.hits?.count ?? 0;
-          const misses = set.misses?.count ?? 0;
+          const hits = set.hits ?? 0;
+          const misses = set.misses ?? 0;
 
           return (
             <tr key={set.id}>
