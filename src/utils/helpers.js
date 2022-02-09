@@ -1,5 +1,5 @@
 function aggregateHuntingSetData(usedHuntingSets, aggregated = {}, existingHuntingSets = {}) {
-  const { huntingSetDmg, huntingSetMissed, huntingSetLoot} = aggregated;
+  const { huntingSetDmg, huntingSetMissed, huntingSetLoot } = aggregated;
 
   for (const set of Object.values(usedHuntingSets || {})) {
     const { id } = set;

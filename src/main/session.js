@@ -217,6 +217,10 @@ class Session {
   }
 
   saveLootReturns() {
+    if (Object.keys(this.config.usedHuntingSets).length === 0) {
+      return;
+    }
+
     const aggregatedHuntingSet = aggregateHuntingSetData(this.config.usedHuntingSets, this.aggregated);
     const combinedValues = calculateReturns(
       aggregatedHuntingSet,
@@ -229,6 +233,8 @@ class Session {
         values: { ...combinedValues },
       });
     }
+
+    this.emitter.emit('session-updated');
   }
 
   saveLootEvent(updateDb = false) {
