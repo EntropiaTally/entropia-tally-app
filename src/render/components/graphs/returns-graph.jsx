@@ -67,8 +67,8 @@ const CustomTooltip = ({ active, label, payload }) => {
 
 CustomTooltip.propTypes = {
   active: PropTypes.bool, // eslint-disable-line react/boolean-prop-naming
-  label: PropTypes.string,
-  payload: PropTypes.object,
+  label: PropTypes.any,
+  payload: PropTypes.array,
 };
 
 const ReturnsGraph = ({ returnsOverTime, isPossible }) => {
