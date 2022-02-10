@@ -217,11 +217,13 @@ class Session {
   }
 
   saveLootReturns() {
-    if (Object.keys(this.config.usedHuntingSets).length === 0) {
+    const sets = this.config?.usedHuntingSets ?? {};
+
+    if (Object.keys(sets).length === 0) {
       return;
     }
 
-    const aggregatedHuntingSet = aggregateHuntingSetData(this.config.usedHuntingSets, this.aggregated);
+    const aggregatedHuntingSet = aggregateHuntingSetData(sets, this.aggregated);
     const combinedValues = calculateReturns(
       aggregatedHuntingSet,
       this.aggregated?.allLoot?.total ?? 0,
