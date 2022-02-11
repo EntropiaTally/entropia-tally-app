@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
+import { aggregateHuntingSetData, calculateReturns } from '../../utils/helpers';
 import { formatTime } from '../utils/formatting';
 
 import StatBox from './statbox';
@@ -33,37 +34,25 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
 
   const combinedSessionStats = useMemo(() =>
     sessionInstances.reduce((previous, current) => {
-      const currentLootTotal = current?.aggregated?.allLoot?.total || 0;
-      const currentGlobalTotal = current?.aggregated?.globals?.count || 0;
-      const currentHofTotal = current?.aggregated?.hofs?.count || 0;
-      const currentRareLootTotal = Object.values(current?.aggregated?.rareLoot || {})
-        .reduce((previousItem, currentItem) => previousItem + currentItem.count, 0);
-      const usedHuntingSets = current?.config?.usedHuntingSets;
-      const additionalCost = current?.config?.additionalCost || 0;
-      const lootEventTotal = current?.aggregated?.lootEvent?.count || 0;
-      const updatedSets = previous.usedSets;
+      const { aggregated, config } = current;
 
-      for (const set of Object.values(usedHuntingSets || {})) {
-        if (updatedSets[set.id]) {
-          updatedSets[set.id].hits.count += current?.aggregated?.huntingSetDmg?.[set.id]?.count || 0;
-          updatedSets[set.id].misses.count += current?.aggregated?.huntingSetMissed?.[set.id]?.count || 0;
-          updatedSets[set.id].loot.total += current?.aggregated?.huntingSetLoot?.[set.id]?.total || 0;
-        } else {
-          updatedSets[set.id] = {
-            ...set,
-            hits: { count: current?.aggregated?.huntingSetDmg?.[set.id]?.count || 0 },
-            misses: { count: current?.aggregated?.huntingSetMissed?.[set.id]?.count || 0 },
-            loot: { total: current?.aggregated?.huntingSetLoot?.[set.id]?.total || 0 },
-          };
-        }
-      }
+      const currentLootTotal = aggregated?.allLoot?.total || 0;
+      const currentGlobalTotal = aggregated?.globals?.count || 0;
+      const currentHofTotal = aggregated?.hofs?.count || 0;
+      const currentRareLootTotal = Object.values(aggregated?.rareLoot || {})
+        .reduce((previousItem, currentItem) => previousItem + currentItem.count, 0);
+      const usedHuntingSets = config?.usedHuntingSets;
+      const additionalCost = config?.additionalCost || 0;
+      const lootEventTotal = aggregated?.lootEvent?.count || 0;
+
+      aggregateHuntingSetData(usedHuntingSets, aggregated, previous.usedSets);
 
       return {
         total: previous.total + currentLootTotal,
         globals: previous.globals + currentGlobalTotal,
         hofs: previous.hofs + currentHofTotal,
         rareLoots: previous.rareLoots + currentRareLootTotal,
-        usedSets: updatedSets,
+        usedSets: previous.usedSets,
         additionalCost: previous.additionalCost + additionalCost,
         lootEvents: previous.lootEvents + lootEventTotal,
         runTime: previous.runTime + (current?.run_time ?? 0),
@@ -92,20 +81,11 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
     setIsDeleteModalOpen(true);
   };
 
-  const combinedValues = Object.values(combinedSessionStats.usedSets).reduce((previous, current) => {
-    const hits = current.hits?.count ?? 0;
-    const misses = current.misses?.count ?? 0;
-    const loot = current.loot?.total ?? 0;
-    return {
-      cost: previous.cost + ((hits + misses) * (current.decay / 100)),
-      loot: previous.loot + loot,
-    };
-  }, { cost: 0, loot: 0 });
-
-  const totalCost = combinedValues.cost + combinedSessionStats.additionalCost;
-  const resultRate = totalCost > 0
-    ? (combinedValues.loot / totalCost) * 100 || 0
-    : null;
+  const { trackedLoot, totalCost, resultRate } = calculateReturns(
+    combinedSessionStats.usedSets,
+    combinedSessionStats.total,
+    combinedSessionStats.additionalCost,
+  );
 
   const modifiedSessionInstances = sessionInstances.map(instance => {
     if (instance.notes && instance.notes.length > 24) {
@@ -130,10 +110,10 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
               value={combinedSessionStats?.total.toFixed(2)}
               suffix="PED"
             />
-            {combinedSessionStats?.total > combinedValues?.loot && (
+            {combinedSessionStats?.total > trackedLoot && (
               <StatBox
                 title="Tracked loot "
-                value={combinedValues?.loot.toFixed(2)}
+                value={trackedLoot.toFixed(2)}
                 suffix="PED"
               />
             )}

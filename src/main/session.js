@@ -2,6 +2,8 @@
 
 const EventEmitter = require('events');
 const { v4: uuidv4 } = require('uuid');
+
+const { aggregateHuntingSetData, calculateReturns } = require('../utils/helpers');
 const db = require('./database');
 
 class Session {
@@ -121,6 +123,11 @@ class Session {
 
     this.sessionTimer = setInterval(async () => {
       this.sessionTime += 1;
+
+      if (this.sessionTime % 60 === 0) {
+        this.saveLootReturns();
+      }
+
       await this.updateDb();
       this.emitter.emit('session-time-updated', this.sessionTime);
     }, 1000);
@@ -164,7 +171,15 @@ class Session {
       this.events[type] = [];
     }
 
-    this.events[type].push({ ...data.values, date: data.date });
+    const dataPoint = { ...data.values };
+
+    if (data?.date !== undefined) {
+      dataPoint.date = data.date;
+    } else if (data?.sessionTime !== undefined) {
+      dataPoint.sessionTime = data.sessionTime;
+    }
+
+    this.events[type].push(dataPoint);
   }
 
   aggregate(type, name, value, count = 1) {
@@ -199,6 +214,29 @@ class Session {
         this.aggregated[type][key].percent = Number((this.aggregated[type][key].total / typeTotal) * 100);
       }
     }
+  }
+
+  saveLootReturns() {
+    const sets = this.config?.usedHuntingSets ?? {};
+
+    if (Object.keys(sets).length === 0) {
+      return;
+    }
+
+    const aggregatedHuntingSet = aggregateHuntingSetData(sets, this.aggregated);
+    const combinedValues = calculateReturns(
+      aggregatedHuntingSet,
+      this.aggregated?.allLoot?.total ?? 0,
+      this.config?.additionalCost ?? 0,
+    );
+    if (combinedValues?.totalCost > 0) {
+      this.dataPoint('returnsOverTime', {
+        sessionTime: this.sessionTime,
+        values: { ...combinedValues },
+      });
+    }
+
+    this.emitter.emit('session-updated');
   }
 
   saveLootEvent(updateDb = false) {
