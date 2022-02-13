@@ -51,7 +51,7 @@ const Nav = () => {
 
 const App = () => (
   <Router>
-    <div className="wrapper">
+    <div className="wrapper is-flex">
       <Nav />
       <Routes>
         <Route path="/settings" element={<Settings />} />

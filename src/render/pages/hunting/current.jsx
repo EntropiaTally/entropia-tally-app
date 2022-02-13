@@ -50,7 +50,7 @@ const Current = () => {
       <SessionHuntingSet sets={huntingSets} activeSet={activeHuntingSet} />
 
       <div className="tabs">
-        <ul>
+        <ul className="ml-0 mt-0">
           <li className={currentTab === 'loot' ? 'is-active' : ''}>
             <a onClick={() => setCurrentTab('loot')}>Loot</a>
           </li>

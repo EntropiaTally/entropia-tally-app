@@ -22,7 +22,7 @@ const SessionHuntingSet = ({ sets, activeSet }) => {
 
   return (
     <div className="block">
-      <div className="field flex">
+      <div className="field flex-center">
         <label className="label inline-label">Weapon set</label>
         <div className="control flex-1">
           <div className="select is-small">

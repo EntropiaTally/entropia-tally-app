@@ -30,7 +30,7 @@ const SessionTimer = () => {
   }, []);
 
   return (
-    <div className="session-timer">
+    <div className="session-timer mr-4">
       {currentTime}
     </div>
   );

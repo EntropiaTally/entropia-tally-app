@@ -102,7 +102,7 @@ const LootView = () => {
         {(sortedLoot && sortedLoot.length > 0) && (
           <Table hasHover header={['Name', 'Amount', 'Value', 'Distribution']}>
             {sortedLoot.map(row => (
-              <tr key={row.key} className="clickable" title="Show events" onClick={() => openDropRateModal(row.key)}>
+              <tr key={row.key} className="is-clickable" title="Show events" onClick={() => openDropRateModal(row.key)}>
                 <td>{row.key}</td>
                 <td>{row.count.toLocaleString()}</td>
                 <td><span className="sum">{row.total.toFixed(2)}</span> PED</td>

@@ -5,9 +5,9 @@ const LogSelect = ({ currentLog, isReadAllEnabled, selectLog, updateReadAllStatu
   <div className="box block">
     <h3 className="title">System</h3>
     <div className="field">
-      <div className="control level">
-        <button className="button is-small is-info" type="button" onClick={selectLog}>Select log file</button>
-        <code className="current-log">{currentLog}</code>
+      <div className="control is-flex is-align-items-center">
+        <button className="button is-small is-info flex-1 is-flex-grow-0" type="button" onClick={selectLog}>Select log file</button>
+        <code className="current-log flex-1">{currentLog}</code>
       </div>
       <p className="help">Select the Entropia Universe <code>chat.log</code> file.</p>
     </div>
@@ -15,7 +15,7 @@ const LogSelect = ({ currentLog, isReadAllEnabled, selectLog, updateReadAllStatu
       <label className="checkbox">
         <input
           type="checkbox"
-          className="checkbox-center"
+          className="vert-align-middle"
           checked={isReadAllEnabled}
           onChange={updateReadAllStatus}
         />

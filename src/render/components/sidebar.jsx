@@ -20,7 +20,7 @@ const Sidebar = ({ active, setActivePage }) => {
   }, [sidebarStyle]);
 
   return (
-    <div className={`sidebar has-background-grey-darker ${sidebarStyle}`}>
+    <div className={`sidebar ${sidebarStyle}`}>
       <HuntingMenu
         active={active}
         setActivePage={setActivePage}

@@ -36,7 +36,7 @@ const History = () => {
 
   return (
     <>
-      <div className="block level block-top">
+      <div className="block block-top">
         <h2 className="title is-4">Session history</h2>
       </div>
 
@@ -47,7 +47,7 @@ const History = () => {
             {sessions.map(session => (
               <tr
                 key={session.id}
-                className="clickable"
+                className="is-clickable"
                 onClick={() => openSession(session.id)}
               >
                 <td>{session.created_at}</td>

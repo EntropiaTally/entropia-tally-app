@@ -46,8 +46,8 @@ const SessionHeader = () => {
   }, [sessionName]);
 
   return (
-    <div className="block level block-top">
-      <div className="session-name">
+    <div className="block is-flex block-top">
+      <div className="session-name flex-1 mr-4">
         {sessionNameActive && (
           <div className="control has-icons-right">
             <input
@@ -58,16 +58,16 @@ const SessionHeader = () => {
               defaultValue={sessionName}
               onChange={event => setSessionName(event.target.value)}
             />
-            <span className="icon is-right">
+            <span className="icon is-clickable is-right">
               <i className="ri-check-line" onClick={() => updateSessionName()} />
             </span>
           </div>
         )}
         {!sessionNameActive && (
-          <h2 className="title is-4">{sessionName ? sessionName : 'Session'} <span className="icon"><i className="ri-pencil-fill" onClick={() => setSessionNameActive(true)} /></span></h2>
+          <h2 className="title is-4 mb-0">{sessionName ? sessionName : 'Session'} <span className="icon"><i className="ri-pencil-fill" onClick={() => setSessionNameActive(true)} /></span></h2>
         )}
       </div>
-      <div className="flex">
+      <div className="is-flex">
         <SessionTimer />
         <button
           className={`button is-small ${isLogRunning ? 'is-danger' : 'is-success'}`}

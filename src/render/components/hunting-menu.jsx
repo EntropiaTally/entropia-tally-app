@@ -74,7 +74,7 @@ const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
     <>
       <div className="block">
         <aside className="menu">
-          <h2 className="title has-text-white">Hunting</h2>
+          <h2 className="title mt-4">Hunting</h2>
           <ul className="menu-list">
             <li>
               <MenuItem isActive={active === 'current'} onClick={() => setActivePage('current')}>
@@ -97,13 +97,13 @@ const HuntingMenu = ({ active, setActivePage, toggleSidebar }) => {
             </li>
           </ul>
         </aside>
-        <aside className="menu-mini">
+        <aside className="menu-mini mt-4">
           <ul>
             <li>
               <MenuItem
                 isActive={active === 'current'}
                 title="Current session"
-                iconClass={`ri-play-fill ${isLogRunning ? 'green' : 'red'}`}
+                iconClass={`ri-play-fill ${isLogRunning ? 'active' : 'inactive'}`}
                 onClick={() => setActivePage('current')}
               />
             </li>

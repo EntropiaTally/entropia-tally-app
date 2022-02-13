@@ -25,7 +25,7 @@ const HuntingSet = ({ set, saveSet, hasDefault }) => {
   };
 
   return (
-    <div className="columns">
+    <div className="is-flex">
       <div className="column">
         <input
           type="text"
