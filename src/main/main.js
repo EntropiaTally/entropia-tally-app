@@ -74,9 +74,11 @@ const createMainWindow = async () => {
 
 const createOverlayWindow = async _parent => {
   let resizeCooldown = null;
+  let moveCooldown = null;
   const overlaySize = config.get('overlaySize', [350, 60]);
+  const overlayPosition = config.get('overlayPosition', null);
 
-  const win = new BrowserWindow({
+  const overlayOptions = {
     title: `${app.name} - Overlay`,
     frame: false,
     show: false,
@@ -89,7 +91,14 @@ const createOverlayWindow = async _parent => {
       nodeIntegration: false,
       preload: path.resolve(app.getAppPath(), 'src/main/preload.js'),
     },
-  });
+  };
+
+  if (overlayPosition !== null) {
+    overlayOptions.x = overlayPosition[0];
+    overlayOptions.y = overlayPosition[1];
+  }
+
+  const win = new BrowserWindow(overlayOptions);
 
   win.on('ready-to-show', () => {
     win.show();
@@ -103,6 +112,17 @@ const createOverlayWindow = async _parent => {
 
     resizeCooldown = setTimeout(() => {
       config.set('overlaySize', win.getSize());
+    }, 1000);
+  });
+
+  win.on('move', () => {
+    if (moveCooldown) {
+      clearTimeout(moveCooldown);
+    }
+
+    moveCooldown = setTimeout(() => {
+      const bounds = win.getBounds();
+      config.set('overlayPosition', [bounds.x, bounds.y]);
     }, 1000);
   });
 
