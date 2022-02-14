@@ -321,6 +321,13 @@ span.sum {
 }
 
 
+/* Modals */
+
+.modal.wide-modal .modal-card {
+  width: 85%;
+}
+
+
 /* Tables */
 
 .table {

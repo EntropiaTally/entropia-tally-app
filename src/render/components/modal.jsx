@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Modal = ({ type, title, isOpen, closeModal, children }) => (
-  <div className={`modal ${isOpen ? 'is-active' : ''}`}>
+const Modal = ({ type, title, isOpen, closeModal, className, children }) => (
+  <div className={`modal ${isOpen ? 'is-active' : ''} ${className}`}>
     <div className="modal-background" />
     {type === 'simple' && (
       <div className="modal-content">
@@ -29,6 +29,7 @@ Modal.defaultProps = {
   type: 'simple',
   title: null,
   isOpen: false,
+  className: '',
 };
 
 Modal.propTypes = {
@@ -36,6 +37,7 @@ Modal.propTypes = {
   title: PropTypes.string,
   isOpen: PropTypes.bool,
   closeModal: PropTypes.func,
+  className: PropTypes.string,
   children: PropTypes.any,
 };
 

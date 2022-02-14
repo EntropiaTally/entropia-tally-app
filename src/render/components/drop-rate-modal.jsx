@@ -1,30 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { LineChart, XAxis, YAxis, Tooltip, CartesianGrid, Line } from 'recharts';
 
 import Modal from './modal';
-
-const XAxisTick = ({ x, y, payload }) => (
-  <g transform={`translate(${x},${y})`}>
-    <text
-      x={0}
-      y={0}
-      dy={16}
-      textAnchor="end"
-      fill="#666"
-      transform="rotate(-35)"
-      className="x-axis-ticks"
-    >
-      {payload.value}
-    </text>
-  </g>
-);
-
-XAxisTick.propTypes = {
-  x: PropTypes.number,
-  y: PropTypes.number,
-  payload: PropTypes.object,
-};
+import ItemGraph from './graphs/item-graph';
 
 const DropRateModal = ({ item, lootEvents, isOpen, closeModal }) => {
   if (!isOpen || !item || !lootEvents) {
@@ -67,28 +45,17 @@ const DropRateModal = ({ item, lootEvents, isOpen, closeModal }) => {
   }, {}) : {};
 
   const itemMaxAmount = Math.max(...lootEvents.map(row => row.name === item ? row.amount : 0), 0);
-  const tickCount = itemMaxAmount === 1 ? 1 : 3;
 
   return (
     <Modal
       type="card"
+      className="wide-modal"
       title={item}
       isOpen={isOpen}
       closeModal={closeModal}
     >
       <div className="tile tile-toplevel">
-        <LineChart
-          width={600}
-          height={300}
-          data={Object.values(preparedLoot)}
-          margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
-        >
-          <XAxis dataKey="date" height={60} tick={<XAxisTick />} />
-          <YAxis type="number" width={40} tickCount={tickCount} />
-          <Tooltip />
-          <CartesianGrid stroke="#f5f5f5" />
-          <Line type="monotone" dataKey="amount" stroke="#485fc7" yAxisId={0} />
-        </LineChart>
+        <ItemGraph itemLootEvents={Object.values(preparedLoot)} itemMaxAmount={itemMaxAmount} />
       </div>
     </Modal>
   );
