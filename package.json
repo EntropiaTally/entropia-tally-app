@@ -5,7 +5,7 @@
   "description": "Track Entropia Universe events",
   "license": "MIT",
   "repository": "EntropiaTally/entropia-tally-app",
-  "main": "src/main/main.js",
+  "main": "src/app.js",
   "author": {
     "name": "Slazor",
     "email": "no-email-support@example.com",

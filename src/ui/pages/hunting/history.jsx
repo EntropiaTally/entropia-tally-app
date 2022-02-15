@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
-import HistoryModal from '../../components/history-modal';
-import Table from '../../components/table';
+import HistoryModal from '@components/modals/history-modal';
+import Table from '@components/table';
 
 const History = () => {
   const [sessions, setSessions] = useState([]);

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
-import Table from '../components/table';
+import Table from '@components/table';
 
 const aggregatedDataDefault = { attributes: null, skills: null };
 

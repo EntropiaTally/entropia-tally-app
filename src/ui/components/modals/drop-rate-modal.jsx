@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import Modal from './modal';
-import ItemGraph from './graphs/item-graph';
+import Modal from '@components/modal';
+import ItemGraph from '@components/graphs/item-graph';
 
 const DropRateModal = ({ item, lootEvents, isOpen, closeModal }) => {
   if (!isOpen || !item || !lootEvents) {

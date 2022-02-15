@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
-import Sidebar from '../components/sidebar';
-import Current from './hunting/current';
-import History from './hunting/history';
+import Sidebar from './components/sidebar';
+import Current from './current';
+import History from './history';
 
 const Hunting = () => {
   const [activeSection, setActiveSection] = useState('current');

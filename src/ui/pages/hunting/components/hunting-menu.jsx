@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
-import Modal from './modal';
+import Modal from '@components/modal';
 
 const Tag = ({ isActive }) => (
   <span className={`tag is-${isActive ? 'success' : 'danger'}`}>

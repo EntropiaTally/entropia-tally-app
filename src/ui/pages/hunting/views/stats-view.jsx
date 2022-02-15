@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
-import StatBox from '../components/statbox';
-import Table from '../components/table';
+import StatBox from '@components/statbox';
+import Table from '@components/table';
 
 function makeNumber(value) {
   return value || 0;

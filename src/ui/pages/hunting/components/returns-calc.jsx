@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 
-import { aggregateHuntingSetData, calculateReturns } from '../../utils/helpers';
+import { aggregateHuntingSetData, calculateReturns } from '@utils/helpers';
 
-import Table from './table';
+import Table from '@components/table';
 
 const ReturnsCalc = () => {
   const [aggregatedData, setAggregatedData] = useState({ allLoot: 0, additionalCost: null });

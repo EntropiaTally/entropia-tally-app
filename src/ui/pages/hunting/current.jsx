@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
-import SessionHeader from '../../components/session-header';
-import SessionHuntingSet from '../../components/session-hunting-set';
-import LootView from '../../views/loot-view';
-import SkillView from '../../views/skill-view';
-import StatsView from '../../views/stats-view';
-import MiscView from '../../views/misc-view';
-import CalcView from '../../views/calc-view';
-import NotesView from '../../views/notes-view';
+import SessionHeader from './components/session-header';
+import SessionHuntingSet from './components/session-hunting-set';
+import LootView from './views/loot-view';
+import SkillView from './views/skill-view';
+import StatsView from './views/stats-view';
+import MiscView from './views/misc-view';
+import CalcView from './views/calc-view';
+import NotesView from './views/notes-view';
 
 const Current = () => {
   const [currentTab, setCurrentTab] = useState('loot');

@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 
-import LogSelect from '../components/log-select';
-import AvatarName from '../components/avatar-name';
-import HuntingSets from '../components/hunting-sets';
-import OverlaySettings from '../components/overlay-settings';
+import LogSelect from './components/log-select';
+import AvatarName from './components/avatar-name';
+import HuntingSets from './components/hunting-sets';
+import OverlaySettings from './components/overlay-settings';
 
 const Settings = () => {
   const [settings, setSettings] = useState({});

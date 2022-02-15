@@ -7,8 +7,8 @@ import {
   NavLink,
 } from 'react-router-dom';
 
-import Hunting from './pages/hunting';
-import Settings from './pages/settings';
+import Hunting from '@pages/hunting';
+import Settings from '@pages/settings';
 
 const Nav = () => {
   const navigate = useNavigate();

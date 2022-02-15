@@ -9,3 +9,5 @@ export const formatTime = seconds => {
 
   return `${values.hours}:${values.minutes}:${values.seconds}`;
 };
+
+export const formatPED = value => `${value.toFixed(2)} PED`;

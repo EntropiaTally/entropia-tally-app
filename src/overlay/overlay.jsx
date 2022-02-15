@@ -1,21 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import SessionTimer from '../render/components/session-timer';
 
-function formatPED(value) {
-  return `${value.toFixed(2)} PED`;
-}
+import { sum } from '@utils/helpers';
+import { formatPED } from '@uiUtils/formatting';
 
-function sum(...values) {
-  let result = 0;
-
-  for (const value of values) {
-    if (value) {
-      result += value;
-    }
-  }
-
-  return result;
-}
+import SessionTimer from '@components/session-timer';
 
 const Overlay = () => {
   const [settings, setSettings] = useState(null);
@@ -179,15 +167,6 @@ const Overlay = () => {
           <div className="overlay__value">{data.evadePercent.toFixed(2)}%</div>
         </div>
       )}
-
-      {/*
-        settings.sessionTime && (
-        <div className="overlay__item overlay__sessionTime">
-          <div className="overlay__label">Session time</div>
-          <div className="overlay__value">{formatTime(data.sessionTime)}</div>
-        </div>
-      )
-      */}
     </div>
   );
 };

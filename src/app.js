@@ -8,11 +8,11 @@ const unhandled = require('electron-unhandled');
 const debug = require('electron-debug');
 const contextMenu = require('electron-context-menu');
 
-const config = require('./config');
-const menu = require('./menu');
-const checkForUpdates = require('./updater');
-const Session = require('./session');
-const LogReader = require('./log-reader');
+const config = require('./main/config');
+const menu = require('./main/menu');
+const checkForUpdates = require('./main/updater');
+const Session = require('./main/session');
+const LogReader = require('./main/log-reader');
 
 let mainWindow;
 let overlayWindow;

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { AreaChart, XAxis, YAxis, Tooltip, CartesianGrid, Area, ResponsiveContainer, ReferenceLine, Label } from 'recharts';
 
-import { formatTime } from '../../utils/formatting';
+import { formatTime } from '@uiUtils/formatting';
 
 const XAxisTick = ({ x, y, payload }) => (
   <g transform={`translate(${x},${y})`}>

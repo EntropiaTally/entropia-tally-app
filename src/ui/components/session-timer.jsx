@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { formatTime } from '../utils/formatting';
+import { formatTime } from '@uiUtils/formatting';
 
 const defaultTime = '00:00:00';
 
@@ -29,11 +29,7 @@ const SessionTimer = () => {
     };
   }, []);
 
-  return (
-    <div className="session-timer mr-4">
-      {currentTime}
-    </div>
-  );
+  return currentTime;
 };
 
 export default SessionTimer;

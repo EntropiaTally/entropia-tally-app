@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import ReturnsCalc from '../components/returns-calc';
-import ReturnsGraph from '../components/graphs/returns-graph';
+import ReturnsGraph from '@components/graphs/returns-graph';
 
 const ReturnsOverTimeWrapper = () => {
   const [returnsOverTime, setReturnsOverTime] = useState([]);

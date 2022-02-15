@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
 
-import Table from '../components/table';
-import StatBox from '../components/statbox';
-import DropRateModal from '../components/drop-rate-modal';
+import Table from '@components/table';
+import StatBox from '@components/statbox';
+import DropRateModal from '@components/modals/drop-rate-modal';
 
 const LootView = () => {
   const [lootData, setLootData] = useState({});
