@@ -22,6 +22,7 @@ class Session {
     'Rutol',
     'Sopur',
     'Trutun',
+    'Vibrant Sweat',
   ];
 
   static async Load(id, instanceId = null) {

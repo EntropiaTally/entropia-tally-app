@@ -4,7 +4,7 @@ const isProduction = process.argv[process.argv.indexOf('--mode') + 1] === 'produ
 module.exports = {
   mode: isProduction ? 'production' : 'development',
   entry: {
-    render: "./src/render",
+    render: "./src/ui",
     overlay: "./src/overlay",
   },
   output: {
@@ -22,6 +22,12 @@ module.exports = {
   },
   resolve: {
     extensions: ["*", ".js", ".jsx"],
+    alias: {
+     '@components': path.resolve(__dirname, 'src/ui/components'),
+     '@pages': path.resolve(__dirname, 'src/ui/pages'),
+     '@uiUtils': path.resolve(__dirname, 'src/ui/utils'),
+     '@utils': path.resolve(__dirname, 'src/utils'),
+    }
   },
   watchOptions: {
     ignored: /node_modules/,

@@ -42,7 +42,20 @@ function calculateReturns(aggregatedHuntingSetData, totalLoot, additionalCost = 
   return { trackedLoot, totalCost, totalWeaponCost, resultValue, resultRate };
 }
 
+function sum(...values) {
+  let result = 0;
+
+  for (const value of values) {
+    if (value) {
+      result += value;
+    }
+  }
+
+  return result;
+}
+
 module.exports = {
   aggregateHuntingSetData,
   calculateReturns,
+  sum,
 };

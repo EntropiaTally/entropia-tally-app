@@ -46,6 +46,10 @@ const configStorage = new Store({
     type: 'array',
     items: { type: 'string' },
   },
+  overlayPosition: {
+    type: 'array',
+    items: { type: 'string' },
+  },
 });
 
 module.exports = configStorage;
