@@ -35,7 +35,7 @@ const EvenLabel = ({ value, offset, viewBox }) => (
     textAnchor="start"
     className="recharts-text recharts-label recharts-cartesian-axis-tick-value"
   >
-    <tspan x="929" dy="0.355em">{value}</tspan>
+    <tspan x={viewBox.width + viewBox.x + 5} dy="0.355em">{value}</tspan>
   </text>
 );
 
