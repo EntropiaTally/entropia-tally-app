@@ -20,6 +20,8 @@
   --main-border-color: #dbdbdb;
   --main-focus-color: #485fc7;
   --main-focus-box-shadow: rgba(72, 95,199, 0.01);
+  --main-link-color: #485fc7;
+  --main-link-hover-color: #363636;
 
   --tooltip-bg: #ffffff;
   --tooltip-border: #cccccc;
@@ -45,6 +47,11 @@
   --textarea-border-color: #b5b5b5;
   --textarea-text-color: #363636;
   --textarea-placeholder-color: #363636;
+
+  --input-placeholder-color: #808080;
+  --input-icon-placeholder-color: #808080;
+
+  --checkbox-hover: #363636;
 }
 
 .dark {
@@ -69,6 +76,8 @@
   --main-border-color: #757575;
   --main-focus-color: #000000;
   --main-focus-box-shadow: rgba(72, 72, 72, 0.01);
+  --main-link-color: #aaaaaa;
+  --main-link-hover-color: #ffffff;
 
   --tooltip-bg: #505050;
   --tooltip-border: #cccccc;
@@ -94,6 +103,11 @@
   --textarea-border-color: #2b2b2b;
   --textarea-text-color: #ffffff;
   --textarea-placeholder-color: #ffffff;
+
+  --input-placeholder-color: #808080;
+  --input-icon-placeholder-color: #808080;
+
+  --checkbox-hover: #aaaaaa;
 }
 
 html, body {
@@ -112,6 +126,14 @@ body {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
   font-feature-settings: 'liga', 'clig', 'kern';
   text-rendering: optimizeLegibility;
+}
+
+a {
+  color: var(--main-link-color);
+}
+
+a:hover {
+  color: var(--main-link-hover-color);
 }
 
 
@@ -314,7 +336,6 @@ a.navbar-item:focus {
 .main-content strong,
 .main-content .title,
 .main-content .label,
-.main-content .control .icon,
 .main-content .table,
 .settings-content div,
 .settings-content strong,
@@ -357,6 +378,10 @@ a.navbar-item:focus {
 
 .block-top.with-margin > .title {
   margin-bottom: 1.5rem;
+}
+
+.session-name .title .icon {
+  cursor: pointer;
 }
 
 .session-name .control .icon {
@@ -517,6 +542,19 @@ textarea.textarea:focus {
 
 textarea.textarea::placeholder {
   color: var(--textarea-placeholder-color);
+}
+
+input.input::placeholder {
+  color: var(--input-placeholder-color);
+}
+
+.control.has-icons-left .icon,
+.control.has-icons-right .icon {
+  color: var(--input-icon-placeholder-color);
+}
+
+.checkbox:hover {
+  color: var(--checkbox-hover);
 }
 
 

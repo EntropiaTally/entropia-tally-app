@@ -10,6 +10,8 @@ import {
 import Hunting from '@pages/hunting';
 import Settings from '@pages/settings';
 
+const bodyClasses = document.body.classList;
+
 const Nav = () => {
   const navigate = useNavigate();
   const [isDevelopment, setIsDevelopment] = useState(false);
@@ -19,11 +21,28 @@ const Nav = () => {
       navigate(`/${location}`);
     });
 
+    const removeSettingsListener = window.api.on('settings-updated', settings => {
+      if (settings.darkMode) {
+        bodyClasses.add('dark');
+      } else {
+        bodyClasses.remove('dark');
+      }
+    });
+
+    window.api.get('settings').then(settings => {
+      if (settings.darkMode) {
+        bodyClasses.add('dark');
+      }
+    });
+
     window.api.get('development-mode').then(isDevelopmentMode => {
       setIsDevelopment(isDevelopmentMode);
     });
 
-    return () => removeGotoListener();
+    return () => {
+      removeGotoListener();
+      removeSettingsListener();
+    };
   }, [navigate]);
 
   return (
