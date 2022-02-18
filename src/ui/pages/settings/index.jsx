@@ -53,9 +53,9 @@ const Settings = () => {
           />
 
           <div className="box block">
-            <h3 className="title">Extras</h3>
+            <h3 className="title">Options</h3>
             <div className="control">
-              <label className="label">
+              <label className="checkbox">
                 <input
                   type="checkbox"
                   className="checkbox mr-2"
@@ -64,6 +64,18 @@ const Settings = () => {
                 />
                 {' '}
                 Show kill count (May be inaccurate, looting multiple mobs at the same time or loot lag may skew results)
+              </label>
+            </div>
+            <div className="control">
+              <label className="checkbox">
+                <input
+                  type="checkbox"
+                  className="checkbox mr-2"
+                  checked={settings?.darkMode ?? false}
+                  onChange={evt => updateSettings('darkMode', evt.target.checked)}
+                />
+                {' '}
+                Dark mode
               </label>
             </div>
           </div>

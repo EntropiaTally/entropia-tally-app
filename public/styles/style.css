@@ -3,10 +3,12 @@
   --color-success: #48c78e;
   --color-danger: #f14668;
 
+  --nav-bg: #ffffff;
   --nav-item-color: #4a4a4a;
   --nav-item-active-color: #3273dc;
   --nav-item-hover-color: #485fc7;
   --nav-item-hover-bg: #fafafa;
+  --nav-brand-color: #4a4a4a;
 
   --sidebar-bg: #363636;
   --sidebar-headline-color: #ffffff;
@@ -15,14 +17,21 @@
   --sidebar-hover-bg: #ffffff;
 
   --main-text-color: #363636;
+  --main-border-color: #dbdbdb;
+  --main-focus-color: #485fc7;
+  --main-focus-box-shadow: rgba(72, 95,199, 0.01);
+  --main-link-color: #485fc7;
+  --main-link-hover-color: #363636;
 
   --tooltip-bg: #ffffff;
   --tooltip-border: #cccccc;
 
   --tabs-text-color: #4a4a4a;
   --tabs-hover-text-color: #363636;
+  --tabs-active-text-color: #485fc7;
   --tabs-border-color: #dbdbdb;
   --tabs-hover-border-color: #363636;
+  --tabs-active-border-color: #485fc7;
 
   --box-bg: #ffffff;
   --statbox-bg: #f5f5f5;
@@ -30,6 +39,75 @@
   --table-bg: transparent;
   --table-border-color: #dbdbdb;
   --table-row-hover-bg: #fafafa;
+
+  --modal-header-bg: #f5f5f5;
+  --modal-body-bg: #ffffff;
+
+  --textarea-bg: #ffffff;
+  --textarea-border-color: #b5b5b5;
+  --textarea-text-color: #363636;
+  --textarea-placeholder-color: #363636;
+
+  --input-placeholder-color: #808080;
+  --input-icon-placeholder-color: #808080;
+
+  --checkbox-hover: #363636;
+}
+
+.dark {
+  --color-bg: #505050;
+  --color-success: #48c78e;
+  --color-danger: #f14668;
+
+  --nav-bg: #2b2b2b;
+  --nav-item-color: #aaaaaa;
+  --nav-item-active-color: #ffffff;
+  --nav-item-hover-color: #4a4a4a;
+  --nav-item-hover-bg: #fafafa;
+  --nav-brand-color: #ffffff;
+
+  --sidebar-bg: #363636;
+  --sidebar-headline-color: #ffffff;
+  --sidebar-text-color: #f5f5f5;
+  --sidebar-hover-text-color: #363636;
+  --sidebar-hover-bg: #ffffff;
+
+  --main-text-color: #ffffff;
+  --main-border-color: #757575;
+  --main-focus-color: #000000;
+  --main-focus-box-shadow: rgba(72, 72, 72, 0.01);
+  --main-link-color: #aaaaaa;
+  --main-link-hover-color: #ffffff;
+
+  --tooltip-bg: #505050;
+  --tooltip-border: #cccccc;
+
+  --tabs-text-color: #ffffff;
+  --tabs-hover-text-color: #ffffff;
+  --tabs-active-text-color: #ffffff;
+  --tabs-border-color: #818181;
+  --tabs-hover-border-color: #ffffff;
+  --tabs-active-border-color: #ffffff;
+
+  --box-bg: #363636;
+  --statbox-bg: #505050;
+
+  --table-bg: transparent;
+  --table-border-color: var(--main-border-color);
+  --table-row-hover-bg: #505050;
+
+  --modal-header-bg: #202020;
+  --modal-body-bg: #363636;
+
+  --textarea-bg: #505050;
+  --textarea-border-color: #2b2b2b;
+  --textarea-text-color: #ffffff;
+  --textarea-placeholder-color: #ffffff;
+
+  --input-placeholder-color: #808080;
+  --input-icon-placeholder-color: #808080;
+
+  --checkbox-hover: #aaaaaa;
 }
 
 html, body {
@@ -48,6 +126,14 @@ body {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
   font-feature-settings: 'liga', 'clig', 'kern';
   text-rendering: optimizeLegibility;
+}
+
+a {
+  color: var(--main-link-color);
+}
+
+a:hover {
+  color: var(--main-link-hover-color);
 }
 
 
@@ -78,8 +164,9 @@ body {
 /* Navbar */
 
 .navbar {
-  min-height: 2.25rem;
+  background-color: var(--nav-bg);
   box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
+  min-height: 2.25rem;
 }
 
 .navbar,
@@ -98,6 +185,10 @@ body {
 .navbar-start {
   justify-content: flex-start;
   margin-right: auto;
+}
+
+.navbar-brand .navbar-item {
+  color: var(--nav-brand-color);
 }
 
 .navbar-item,
@@ -123,8 +214,10 @@ a.navbar-item:hover {
   padding: 0;
 }
 
-.navbar .active {
+.navbar .active,
+a.navbar-item:focus {
   color: var(--nav-item-active-color);
+  background-color: transparent;
 }
 
 
@@ -240,11 +333,19 @@ a.navbar-item:hover {
 }
 
 .main-content div,
+.main-content strong,
 .main-content .title,
 .main-content .label,
-.main-content .control .icon,
-.main-content .table {
+.main-content .table,
+.settings-content div,
+.settings-content strong,
+.settings-content .title,
+.settings-content .label {
   color: var(--main-text-color);
+}
+
+.tabs ul {
+  border-bottom-color: var(--tabs-border-color);
 }
 
 .tabs a {
@@ -255,6 +356,11 @@ a.navbar-item:hover {
 .tabs a:hover {
   border-bottom-color: var(--tabs-hover-border-color);
   color: var(--tabs-hover-text-color);
+}
+
+.tabs li.is-active a {
+  border-bottom-color: var(--tabs-active-border-color);
+  color: var(--tabs-active-text-color);
 }
 
 .box {
@@ -272,6 +378,10 @@ a.navbar-item:hover {
 
 .block-top.with-margin > .title {
   margin-bottom: 1.5rem;
+}
+
+.session-name .title .icon {
+  cursor: pointer;
 }
 
 .session-name .control .icon {
@@ -323,8 +433,22 @@ span.sum {
 
 /* Modals */
 
+.modal div,
+.modal .title,
+.modal .modal-card-title {
+  color: var(--main-text-color);
+}
+
 .modal.wide-modal .modal-card {
   width: 85%;
+}
+
+.modal .modal-card-head {
+  background-color: var(--modal-header-bg);
+  border-color: var(--main-border-color);
+}
+.modal .modal-card-body {
+  background-color: var(--modal-body-bg);
 }
 
 
@@ -336,6 +460,7 @@ span.sum {
 
 .table td,
 .table th {
+  color: var(--main-text-color) !important;
   border-color: var(--table-border-color) !important;
 }
 
@@ -377,6 +502,59 @@ span.sum {
 
 .graph-tooltip-label {
   color: #555;
+}
+
+.dark text.recharts-text.recharts-cartesian-axis-tick-value,
+.dark text.x-axis-ticks {
+  fill: #ffffff;
+}
+
+.dark line.recharts-reference-line-line {
+  stroke: white;
+}
+
+.dark .recharts-curve.recharts-area-area {
+  fill: #000;
+}
+
+.dark .recharts-curve.recharts-area-area,
+.dark .recharts-curve.recharts-area-curve {
+  stroke: #fff;
+}
+
+.dark .recharts-cartesian-grid line {
+  stroke: #222222;
+}
+
+
+/* Forms */
+
+textarea.textarea {
+  background-color: var(--textarea-bg);
+  border-color: var(--textarea-border-color);
+  color: var(--textarea-text-color);
+}
+
+textarea.textarea:focus {
+  border-color: var(--main-focus-color);
+  box-shadow: 0 0 0 0.125em var(--main-focus-box-shadow);
+}
+
+textarea.textarea::placeholder {
+  color: var(--textarea-placeholder-color);
+}
+
+input.input::placeholder {
+  color: var(--input-placeholder-color);
+}
+
+.control.has-icons-left .icon,
+.control.has-icons-right .icon {
+  color: var(--input-icon-placeholder-color);
+}
+
+.checkbox:hover {
+  color: var(--checkbox-hover);
 }
 
 

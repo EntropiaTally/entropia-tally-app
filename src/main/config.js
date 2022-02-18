@@ -19,6 +19,9 @@ const configStorage = new Store({
   killCount: {
     type: 'boolean',
   },
+  darkMode: {
+    type: 'boolean',
+  },
   huntingSets: {
     type: 'array',
     items: {

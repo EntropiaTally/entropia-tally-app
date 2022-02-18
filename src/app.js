@@ -188,6 +188,7 @@ function getSettings() {
     activeHuntingSet: activeHuntingSet?.id,
     overlay: config.get('overlay', {}),
     killCount: config.get('killCount', false),
+    darkMode: config.get('darkMode', false),
   };
 }
 
