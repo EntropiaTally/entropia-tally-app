@@ -151,7 +151,7 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
             )}
             <StatBox
               title="Total time"
-              value={formatTime(combinedSessionStats?.runTime ?? 0)}
+              value={formatTime(combinedSessionStats?.runTime ?? 0, true)}
             />
           </div>
         </div>
