@@ -21,7 +21,7 @@ const OverlaySettings = ({ settings, onChange }) => {
 
   const items = OVERLAY_TOGGLES.map(toggle => (
     <div key={toggle.key} className="control">
-      <label className="label">
+      <label className="checkbox">
         <input
           type="checkbox"
           className="checkbox mr-2"
