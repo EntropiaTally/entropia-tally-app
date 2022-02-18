@@ -10,7 +10,8 @@ export const formatTime = (seconds, days = false) => {
   };
 
   if (days && values.days > 0) {
-    return `${pad(values.days)} days, ${values.dayHours}:${values.minutes}:${values.seconds}`;
+    const dayLabel = values.days > 1 ? 'days' : 'day';
+    return `${values.days} ${dayLabel}, ${values.dayHours}:${values.minutes}:${values.seconds}`;
   }
 
   return `${values.hours}:${values.minutes}:${values.seconds}`;
