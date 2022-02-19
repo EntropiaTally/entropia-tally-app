@@ -35,11 +35,18 @@ const ReturnsOverTimeWrapper = () => {
     return () => removeSessionListener();
   }, [returnsOverTime, hasUsedHuntingSets]);
 
+  if (!hasUsedHuntingSets) {
+    return null;
+  }
+
   return (
-    <ReturnsGraph
-      returnsOverTime={returnsOverTime}
-      isPossible={hasUsedHuntingSets}
-    />
+    <div className="mt-5">
+      <h2 className="title is-5">Returns over time</h2>
+      <ReturnsGraph
+        returnsOverTime={returnsOverTime}
+        isPossible={hasUsedHuntingSets}
+      />
+    </div>
   );
 };
 
@@ -49,10 +56,8 @@ const CalcView = () => (
       <h2 className="title is-5">Returns</h2>
       <ReturnsCalc />
     </div>
-    <div className="mt-5">
-      <h2 className="title is-5">Returns over time</h2>
-      <ReturnsOverTimeWrapper />
-    </div>
+
+    <ReturnsOverTimeWrapper />
   </div>
 );
 
