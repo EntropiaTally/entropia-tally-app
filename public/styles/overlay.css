@@ -27,13 +27,29 @@ body {
   color: white;
 }
 
+.overlay__sessionTime {
+  flex: 0;
+  flex-direction: row;
+}
+.overlay__sessionTime .overlay__label {
+  display: none;
+}
+.overlay__sessionTime .overlay__value {
+  padding: 0 8px;
+}
+
 .overlay__value,
 .overlay__label {
   width: 100%;
   text-align: center;
 }
 
+.overlay__label {
+  font-size: 0.75rem;
+}
+
 .overlay__value {
   flex: 1;
+  font-size: 0.875rem;
   font-weight: 700;
 }

@@ -105,16 +105,23 @@ const Overlay = () => {
         </div>
       )}
 
+      {isKillCountEnabled && settings.killCount && (
+        <div className="overlay__item overlay__killCount">
+          <div className="overlay__label">Kills</div>
+          <div className="overlay__value">{data.numKills}</div>
+        </div>
+      )}
+
       {settings.lootTotal && (
         <div className="overlay__item overlay__totalLoot">
-          <div className="overlay__label">Total loot</div>
+          <div className="overlay__label">Loot</div>
           <div className="overlay__value">{formatPED(data.totalLoot)}</div>
         </div>
       )}
 
       {settings.spendTotal && (
         <div className="overlay__item overlay__totalSpend">
-          <div className="overlay__label">Total spent</div>
+          <div className="overlay__label">Spent</div>
           <div className="overlay__value">{formatPED(data.totalSpend)}</div>
         </div>
       )}
@@ -128,8 +135,8 @@ const Overlay = () => {
 
       {settings.returnPercent && (
         <div className="overlay__item overlay__returnPercent">
-          <div className="overlay__label">Return rate</div>
-          <div className="overlay__value">{data.returnPercent.toFixed(2)}%</div>
+          <div className="overlay__label">Returns</div>
+          <div className="overlay__value">{data.returnPercent.toFixed(2)} %</div>
         </div>
       )}
 
@@ -147,23 +154,16 @@ const Overlay = () => {
         </div>
       )}
 
-      {isKillCountEnabled && settings.killCount && (
-        <div className="overlay__item overlay__killCount">
-          <div className="overlay__label">Kills</div>
-          <div className="overlay__value">{data.numKills}</div>
-        </div>
-      )}
-
       {settings.hitPercent && (
         <div className="overlay__item overlay__hitPercent">
-          <div className="overlay__label">Hit%</div>
+          <div className="overlay__label">Hit</div>
           <div className="overlay__value">{data.hitPercent.toFixed(2)}%</div>
         </div>
       )}
 
       {settings.evadePercent && (
         <div className="overlay__item overlay__evadePercent">
-          <div className="overlay__label">Evade%</div>
+          <div className="overlay__label">Evade</div>
           <div className="overlay__value">{data.evadePercent.toFixed(2)}%</div>
         </div>
       )}
