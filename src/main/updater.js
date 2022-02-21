@@ -4,6 +4,9 @@ const { app, dialog, shell } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const semverGt = require('semver/functions/gt');
 const pck = require('../../package.json');
+const config = require('./config');
+
+autoUpdater.autoDownload = false;
 
 function checkLatestVersion(currentVersion) {
   const { net } = require('electron');
@@ -47,26 +50,56 @@ function checkLatestVersion(currentVersion) {
   });
 }
 
+autoUpdater.on('update-available', updateInfo => {
+  dialog.showMessageBox({
+    type: 'info',
+    title: 'New update available',
+    message: `A new version (v${updateInfo.version}) is available!\n\rDo you want update now?`,
+    buttons: ['Yes', 'No'],
+  }).then(status => {
+    if (status.response === 0) {
+      autoUpdater.downloadUpdate();
+    }
+  });
+});
+
+autoUpdater.on('update-downloaded', () => {
+  dialog.showMessageBox({
+    title: 'Update complete',
+    message: 'Application will be restarted.',
+  }).then(() => {
+    setImmediate(() => autoUpdater.quitAndInstall());
+  });
+});
+
 function checkForUpdates() {
-  if (autoUpdater.isUpdaterActive()) {
-    autoUpdater.checkForUpdatesAndNotify();
-  } else {
-    app.whenReady().then(() => {
-      checkLatestVersion(app.getVersion()).then(({ version, url }) => {
-        dialog.showMessageBox({
-          type: 'info',
-          title: 'Update',
-          message: `A new version (v${version}) is available!\n\rDo you want to check it out?`,
-          buttons: ['Yes', 'No'],
-        }).then(status => {
-          if (status.response === 0) {
-            shell.openExternal(url);
-          }
+  const currentTime = Date.now();
+  const lastUpdateCheck = config.get('lastUpdateCheck', 0);
+
+  // Check for update, if last check date + 24h is less than current time
+  if ((lastUpdateCheck + 86_400_000) <= currentTime) {
+    if (autoUpdater.isUpdaterActive()) {
+      autoUpdater.checkForUpdates();
+    } else {
+      app.whenReady().then(() => {
+        checkLatestVersion(app.getVersion()).then(({ version, url }) => {
+          dialog.showMessageBox({
+            type: 'info',
+            title: 'Update',
+            message: `A new version (v${version}) is available!\n\rDo you want to check it out?`,
+            buttons: ['Yes', 'No'],
+          }).then(status => {
+            if (status.response === 0) {
+              shell.openExternal(url);
+            }
+          });
+        }).catch(() => {
+          console.log('NO NEW VERSION FOUND');
         });
-      }).catch(() => {
-        console.log('NO NEW VERSION FOUND');
       });
-    });
+    }
+
+    config.set('lastUpdateCheck', currentTime);
   }
 }
 
