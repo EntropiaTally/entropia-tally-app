@@ -76,9 +76,9 @@ function checkForUpdates() {
   const currentTime = Date.now();
   const lastUpdateCheck = config.get('lastUpdateCheck', 0);
 
-  // Check for update, if last check date + 24h is less than current time
-  if ((lastUpdateCheck + 86_400_000) <= currentTime) {
-    if (autoUpdater.isUpdaterActive()) {
+  // Check for update, if last check date + 48h is less than current time
+  if ((lastUpdateCheck + 172_800_000) <= currentTime) {
+    if (autoUpdater.isUpdaterActive() && process.env.PORTABLE_EXECUTABLE_APP_FILENAME === undefined) {
       autoUpdater.checkForUpdates();
     } else {
       app.whenReady().then(() => {
