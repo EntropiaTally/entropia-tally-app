@@ -7,6 +7,9 @@ const configStorage = new Store({
     type: 'string',
     format: 'uri',
   },
+  lastUpdateCheck: {
+    type: 'number',
+  },
   logReadAll: {
     type: 'boolean',
   },
