@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 const OVERLAY_TOGGLES = [
@@ -15,6 +15,12 @@ const OVERLAY_TOGGLES = [
 ];
 
 const OverlaySettings = ({ settings, onChange }) => {
+  const [customCss, setCustomCss] = useState('');
+
+  useEffect(() => {
+    setCustomCss(settings?.customCss);
+  }, [settings?.customCss]);
+
   const handleChange = (key, value) => {
     onChange({ ...settings, [key]: value });
   };
@@ -37,7 +43,13 @@ const OverlaySettings = ({ settings, onChange }) => {
     <div className="box block">
       <h3 className="title">Overlay</h3>
 
-      {items}
+      <div className="block">{items}</div>
+
+      <div className="control">
+        <label className="label">Custom CSS</label>
+        <textarea className="textarea" value={customCss} onChange={event => setCustomCss(event.target.value)} />
+        <button type="button" className="button is-small is-info mt-2" onClick={() => handleChange('customCss', customCss)}>Save styles</button>
+      </div>
     </div>
   );
 };
