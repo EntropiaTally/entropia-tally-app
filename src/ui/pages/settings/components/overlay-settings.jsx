@@ -46,12 +46,12 @@ const OverlaySettings = ({ settings, onChange }) => {
       <div className="block">{items}</div>
 
       <div className="block">
-        <label className="label">Opacity</label>
+        <label className="label">Opacity (Windows only)</label>
         <input type="range" min="0.1" max="1.0" step="0.1" className="fullwidth" value={settings?.opacity ?? 1} onChange={event => handleChange('opacity', event.target.value)} />
       </div>
 
       <div className="control">
-        <label className="label">Custom CSS</label>
+        <label className="label">Custom CSS - <a onClick={() => window.api.call('goto-css-guide')}>Guide</a></label>
         <textarea className="textarea w-full" value={customCss} onChange={event => setCustomCss(event.target.value)} />
         <button type="button" className="button is-small is-info mt-2" onClick={() => handleChange('customCss', customCss)}>Save styles</button>
       </div>
