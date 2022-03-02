@@ -34,6 +34,7 @@ const configStorage = new Store({
         default: { type: 'boolean' },
         name: { type: 'string' },
         decay: { type: 'number' },
+        shortcut: { type: 'string' },
       },
     },
   },

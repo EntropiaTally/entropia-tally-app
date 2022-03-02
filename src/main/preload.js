@@ -4,7 +4,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 const getters = new Set(['active-session', 'session', 'sessions', 'instances', 'settings', 'logreader-status', 'development-mode', 'overlay-window-status']);
 const setters = new Set(['active-session', 'settings']);
-const actions = new Set(['new-session', 'new-instance', 'load-instance', 'overlay-window-toggle', 'logging-status-toggle', 'goto-wiki-weapontool', 'change-hunting-set']);
+const actions = new Set(['new-session', 'new-instance', 'load-instance', 'overlay-window-toggle', 'logging-status-toggle', 'goto-wiki-weapontool', 'goto-shortcut-guide', 'change-hunting-set']);
 const deletes = new Set(['session', 'instance']);
 
 contextBridge.exposeInMainWorld(

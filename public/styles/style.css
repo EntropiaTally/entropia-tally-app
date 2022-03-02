@@ -439,6 +439,10 @@ span.sum {
   color: var(--main-text-color);
 }
 
+.modal .modal-card-title {
+  margin-bottom: 0 !important;
+}
+
 .modal.wide-modal .modal-card {
   width: 85%;
 }
@@ -560,8 +564,8 @@ input.input::placeholder {
 
 /* Settings */
 
-.column-250 {
-  max-width: 250px;
+.column-325 {
+  min-width: 325px;
 }
 
 .help-inline {

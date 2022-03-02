@@ -1,9 +1,61 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
+import Modal from '@components/modal';
+
+const HuntingSetModal = ({ set, isOpen, setShortcut, closeModal }) => {
+  const [shortcutValue, setShortcutValue] = useState(set?.shortcut ?? '');
+
+  const save = () => {
+    setShortcut(shortcutValue);
+    closeModal();
+  };
+
+  return (
+    <Modal
+      type="card"
+      title={`Shortcut: ${set.name}`}
+      isOpen={isOpen}
+      closeModal={closeModal}
+    >
+      <p>Write the keyboard shortcut you want for this weapon set</p>
+      <p><a onClick={() => window.api.call('goto-shortcut-guide')}>Examples & available keys</a></p>
+      <div className="control">
+        <div className="block">
+          <input type="text" defaultValue={set.shortcut} className="input" onChange={event => setShortcutValue(event.target.value)} />
+        </div>
+        <button type="button" className="button is-info" onClick={save}>Save</button>
+      </div>
+    </Modal>
+  );
+};
+
+HuntingSetModal.propTypes = {
+  set: PropTypes.shape({
+    id: PropTypes.string,
+    name: PropTypes.string,
+    decay: PropTypes.string,
+    shortcut: PropTypes.string,
+    default: PropTypes.bool, // eslint-disable-line react/boolean-prop-naming
+  }),
+  isOpen: PropTypes.bool,
+  setShortcut: PropTypes.func.isRequired,
+  closeModal: PropTypes.func.isRequired,
+};
+
+HuntingSetModal.defaultProps = {
+  set: {},
+  isOpen: false,
+};
+
 const HuntingSet = ({ set, saveSet, hasDefault }) => {
-  const { id, name, decay } = set;
+  const { id, name, decay, shortcut } = set;
   const [values, setValues] = useState({});
+  const [isShortcutModalOpen, setIsShortcutModalOpen] = useState(false);
+
+  useEffect(() => {
+    setValues({ id, name, decay, shortcut });
+  }, [id, name, decay, shortcut, setValues]);
 
   const valueChanged = useCallback(event => {
     const value = event.target.value;
@@ -16,51 +68,74 @@ const HuntingSet = ({ set, saveSet, hasDefault }) => {
       newDecay = value;
     }
 
-    setValues({ id, name: newName, decay: newDecay });
-  }, [values, id, name, decay]);
+    setValues({ id, name: newName, decay: newDecay, shortcut });
+  }, [values, id, name, decay, shortcut]);
+
+  const setShortcut = useCallback(shortcut => {
+    if (values.id) {
+      const newValues = { ...values, shortcut };
+      setValues(newValues);
+      saveSet('save', newValues);
+    }
+  }, [values, saveSet]);
 
   const doAction = action => {
-    const newValues = values.decay ? values : { id, name, decay };
+    const newValues = values.decay ? values : { id, name, decay, shortcut };
     saveSet(action, newValues);
   };
 
   return (
-    <div className="is-flex">
-      <div className="column">
-        <input
-          type="text"
-          className="input is-small set-name"
-          placeholder="Name"
-          defaultValue={name}
-          onChange={valueChanged}
-        />
-      </div>
-      <div className="column">
-        <div className="control has-icons-right">
+    <>
+      <div className="is-flex">
+        <div className="column">
           <input
-            type="number"
-            className="input is-small set-decay"
-            placeholder="Weapon decay"
-            defaultValue={decay}
+            type="text"
+            className="input is-small set-name"
+            placeholder="Name"
+            defaultValue={name}
             onChange={valueChanged}
           />
-          <span className="icon is-medium is-right">PEC</span>
         </div>
-      </div>
-      <div className="column column-250">
-        <div className="buttons">
-          <button type="button" className="button is-small is-info" onClick={() => doAction('save')}>
-            { id ? 'Save' : 'Add' }
-          </button>
-          {id && <button type="button" className="button is-small is-danger" onClick={() => doAction('delete')}>Delete</button>}
-          {(id && hasDefault) && (
-            <button type="button" className={`button is-small ${set.default ? 'is-success' : 'is-warning'}`} onClick={() => doAction('set-default')}>
-              { set.default ? 'Default' : 'Set default' }
+        <div className="column">
+          <div className="control has-icons-right">
+            <input
+              type="number"
+              className="input is-small set-decay"
+              placeholder="Weapon decay"
+              defaultValue={decay}
+              onChange={valueChanged}
+            />
+            <span className="icon is-medium is-right">PEC</span>
+          </div>
+        </div>
+        <div className="column column-325">
+          <div className="buttons">
+            {id && (
+              <button type="button" className="button is-small is-link" onClick={() => setIsShortcutModalOpen(true)}>
+                Shortcut
+              </button>
+            )}
+            <button type="button" className="button is-small is-info" onClick={() => doAction('save')}>
+              { id ? 'Save' : 'Add' }
             </button>
-          )}
+            {id && <button type="button" className="button is-small is-danger" onClick={() => doAction('delete')}>Delete</button>}
+            {(id && hasDefault) && (
+              <button type="button" className={`button is-small ${set.default ? 'is-success' : 'is-warning'}`} onClick={() => doAction('set-default')}>
+                { set.default ? 'Default' : 'Set default' }
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+      {set.id && isShortcutModalOpen && (
+        <HuntingSetModal
+          set={set}
+          isOpen={isShortcutModalOpen}
+          setShortcut={setShortcut}
+          closeModal={() => setIsShortcutModalOpen(false)}
+        />
+      )}
+    </>
   );
 };
 
@@ -69,6 +144,7 @@ HuntingSet.propTypes = {
     id: PropTypes.string,
     name: PropTypes.string,
     decay: PropTypes.string,
+    shortcut: PropTypes.string,
     default: PropTypes.bool, // eslint-disable-line react/boolean-prop-naming
   }),
   saveSet: PropTypes.func.isRequired,

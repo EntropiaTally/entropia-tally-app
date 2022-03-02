@@ -90,7 +90,6 @@ const otherTemplate = [
     submenu: [
       {
         label: 'Settings',
-        accelerator: 'Control+,',
         click() {
           showPreferences();
         },
