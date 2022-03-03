@@ -8,6 +8,7 @@ import SessionTimer from '@components/session-timer';
 const Overlay = () => {
   const [settings, setSettings] = useState(null);
   const [isKillCountEnabled, setIsKillCountEnabled] = useState(false);
+  const [activeHuntingSet, setActiveHuntingSet] = useState(null);
   const [data, setData] = useState(null);
 
   function updateData(newData) {
@@ -60,6 +61,11 @@ const Overlay = () => {
     const updateSettings = newSettings => {
       setSettings(newSettings.overlay);
       setIsKillCountEnabled(newSettings.killCount);
+
+      if (newSettings?.activeHuntingSet && Array.isArray(newSettings?.huntingSets) && newSettings.huntingSets.length > 0) {
+        const activeSet = newSettings.huntingSets.find(set => set.id === newSettings?.activeHuntingSet);
+        setActiveHuntingSet(activeSet.name);
+      }
     };
 
     window.api.on('instance-loaded', console.log);
@@ -77,6 +83,7 @@ const Overlay = () => {
 
   const allDisabled = [
     settings.sessionTime,
+    settings.huntingSet,
     settings.lootTotal,
     settings.spendTotal,
     settings.returnTotal,
@@ -102,6 +109,13 @@ const Overlay = () => {
           <div className="overlay__value">
             <SessionTimer />
           </div>
+        </div>
+      )}
+
+      {settings.huntingSet && activeHuntingSet && (
+        <div className="overlay__item overlay__huntingSet">
+          <div className="overlay__label">Set</div>
+          <div className="overlay__value">{activeHuntingSet}</div>
         </div>
       )}
 
