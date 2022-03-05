@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 import { aggregateHuntingSetData, calculateReturns } from '@utils/helpers';
-import { formatTime } from '@uiUtils/formatting';
+import { formatTime, formatLocalTime } from '@uiUtils/formatting';
 
 import StatBox from '@components/statbox';
 import Table from '@components/table';
@@ -100,7 +100,7 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
       <Modal
         type="card"
         isOpen={isOpen}
-        title={sessionName ? sessionName : sessionCreatedAt}
+        title={sessionName ? sessionName : formatLocalTime(sessionCreatedAt)}
         closeModal={closeModal}
       >
         <div className="statboxes-wrapper block">
@@ -176,7 +176,7 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
           <Table header={['Run', 'Notes', 'Actions']}>
             {modifiedSessionInstances.map(instance => (
               <tr key={instance.id}>
-                <td className="halfwidth">{instance.created_at}</td>
+                <td className="halfwidth">{formatLocalTime(instance.created_at)}</td>
                 <td className="halfwidth">{instance.notes}</td>
                 <td className="has-text-right">
                   <a className="table-action" onClick={() => onLoadSessionInstance(instance.session_id, instance.id)}>Load</a>
