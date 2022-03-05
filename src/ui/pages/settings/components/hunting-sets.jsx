@@ -18,7 +18,7 @@ const HuntingSetModal = ({ set, isOpen, setShortcut, closeModal }) => {
       isOpen={isOpen}
       closeModal={closeModal}
     >
-      <p><small><strong className="has-text-danger">Not working on Windows with Entropia Universe in focus</strong></small></p>
+      <p><small className="has-text-danger">Not working on Windows with Entropia Universe in focus.<br />However, the set can be changed in the overlay.</small></p>
       <p>Enter keyboard shortcut you want for this weapon set</p>
       <p><a onClick={() => window.api.call('goto-shortcut-guide')}>Examples & available keys</a></p>
       <div className="control">
