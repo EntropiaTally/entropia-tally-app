@@ -107,7 +107,7 @@ const ReturnsCalc = () => {
         </td>
       </tr>
 
-      {killCountEnabled && (
+      {killCountEnabled && aggregatedData.killCount > 0 && (
         <>
           <tr>
             <td />
