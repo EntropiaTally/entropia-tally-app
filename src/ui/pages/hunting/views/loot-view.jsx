@@ -106,7 +106,7 @@ const LootView = () => {
                 <td>{row.key}</td>
                 <td>{row.count.toLocaleString()}</td>
                 <td><span className="sum">{row.total.toFixed(2)}</span> PED</td>
-                <td>{row.percent.toFixed(2)} %</td>
+                <td>{row.percent ? `${row.percent.toFixed(2)} %` : '--' }</td>
               </tr>
             ))}
           </Table>

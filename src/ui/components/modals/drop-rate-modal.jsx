@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { formatLocalTime } from '@uiUtils/formatting';
+
 import Modal from '@components/modal';
 import ItemGraph from '@components/graphs/item-graph';
 
@@ -9,8 +11,8 @@ const DropRateModal = ({ item, lootEvents, isOpen, closeModal }) => {
     return null;
   }
 
-  const firstDate = lootEvents[0] ? new Date(lootEvents[0]?.date) : null;
-  const lastDate = lootEvents[lootEvents.length - 1] ? new Date(lootEvents[lootEvents.length - 1]?.date) : null;
+  const firstDate = lootEvents[0] ? new Date(`${lootEvents[0]?.date} GMT`) : null;
+  const lastDate = lootEvents[lootEvents.length - 1] ? new Date(`${lootEvents[lootEvents.length - 1]?.date} GMT`) : null;
 
   if (!firstDate || !lastDate) {
     return null;
@@ -22,10 +24,10 @@ const DropRateModal = ({ item, lootEvents, isOpen, closeModal }) => {
 
   const preparedLoot = lootEvents ? lootEvents.reduce((result, loot) => {
     const amount = loot.name === item ? Number(loot.amount) : 0;
-    let date = loot.date;
+    let date = formatLocalTime(loot.date);
 
     if (allEventsSameDay) {
-      const lootDate = new Date(loot.date);
+      const lootDate = new Date(`${loot.date} GMT`);
       const hours = String(lootDate.getHours()).padStart(2, '0');
       const minutes = String(lootDate.getMinutes()).padStart(2, '0');
       const seconds = String(lootDate.getSeconds()).padStart(2, '0');
