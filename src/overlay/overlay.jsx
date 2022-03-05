@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import { sum } from '@utils/helpers';
 import { formatPED } from '@uiUtils/formatting';
@@ -8,6 +8,7 @@ import SessionTimer from '@components/session-timer';
 const Overlay = () => {
   const [settings, setSettings] = useState(null);
   const [isKillCountEnabled, setIsKillCountEnabled] = useState(false);
+  const [allHuntingSet, setAllHuntingSet] = useState(null);
   const [activeHuntingSet, setActiveHuntingSet] = useState(null);
   const [data, setData] = useState(null);
 
@@ -57,6 +58,13 @@ const Overlay = () => {
     });
   }
 
+  const onHuntingSetChange = useCallback(event => {
+    const newSet = allHuntingSet.find(set => set.id === event.target.value);
+    if (newSet) {
+      window.api.call('change-hunting-set', newSet);
+    }
+  }, [allHuntingSet]);
+
   useEffect(() => {
     const updateSettings = newSettings => {
       setSettings(newSettings.overlay);
@@ -65,6 +73,7 @@ const Overlay = () => {
       if (newSettings?.activeHuntingSet && Array.isArray(newSettings?.huntingSets) && newSettings.huntingSets.length > 0) {
         const activeSet = newSettings.huntingSets.find(set => set.id === newSettings?.activeHuntingSet);
         setActiveHuntingSet(activeSet.name);
+        setAllHuntingSet(newSettings.huntingSets);
       }
     };
 
@@ -115,7 +124,16 @@ const Overlay = () => {
       {settings.huntingSet && activeHuntingSet && (
         <div className="overlay__item overlay__huntingSet">
           <div className="overlay__label">Set</div>
-          <div className="overlay__value">{activeHuntingSet}</div>
+          <div className="overlay__value">
+            {activeHuntingSet}
+            {allHuntingSet && (
+              <select onChange={onHuntingSetChange}>
+                {allHuntingSet.map(set => (
+                  <option key={set.id} value={set.id}>{set.name}</option>
+                ))}
+              </select>
+            )}
+          </div>
         </div>
       )}
 
