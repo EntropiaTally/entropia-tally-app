@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 const OVERLAY_TOGGLES = [
@@ -15,6 +15,12 @@ const OVERLAY_TOGGLES = [
 ];
 
 const OverlaySettings = ({ settings, onChange }) => {
+  const [customCss, setCustomCss] = useState('');
+
+  useEffect(() => {
+    setCustomCss(settings?.customCss);
+  }, [settings?.customCss]);
+
   const handleChange = (key, value) => {
     onChange({ ...settings, [key]: value });
   };
@@ -37,7 +43,18 @@ const OverlaySettings = ({ settings, onChange }) => {
     <div className="box block">
       <h3 className="title">Overlay</h3>
 
-      {items}
+      <div className="block">{items}</div>
+
+      <div className="block">
+        <label className="label">Opacity (Windows only)</label>
+        <input type="range" min="0.1" max="1.0" step="0.1" className="fullwidth" value={settings?.opacity ?? 1} onChange={event => handleChange('opacity', event.target.value)} />
+      </div>
+
+      <div className="control">
+        <label className="label">Custom CSS - <a onClick={() => window.api.call('goto-css-guide')}>Guide</a></label>
+        <textarea className="textarea w-full" value={customCss} onChange={event => setCustomCss(event.target.value)} />
+        <button type="button" className="button is-small is-info mt-2" onClick={() => handleChange('customCss', customCss)}>Save styles</button>
+      </div>
     </div>
   );
 };
