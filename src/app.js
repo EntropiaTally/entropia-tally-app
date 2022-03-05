@@ -77,6 +77,10 @@ const createOverlayWindow = async _parent => {
   let moveCooldown = null;
   const overlaySize = config.get('overlaySize', [350, 60]);
   const overlayPosition = config.get('overlayPosition', null);
+  const overlaySettings = config.get('overlay', {});
+  const overlayOpacity = overlaySettings?.opacity !== undefined
+    ? Number(overlaySettings.opacity)
+    : 1;
 
   const overlayOptions = {
     title: `${app.name} - Overlay`,
@@ -86,6 +90,7 @@ const createOverlayWindow = async _parent => {
     height: overlaySize[1],
     resizable: true,
     alwaysOnTop: true,
+    opacity: overlayOpacity,
     webPreferences: {
       devTools: is.development,
       nodeIntegration: false,
@@ -358,6 +363,10 @@ ipcMain.on('goto-shortcut-guide', () => {
   shell.openExternal('https://entropiatally.github.io/keyboard-shortcuts/');
 });
 
+ipcMain.on('goto-css-guide', () => {
+  shell.openExternal('https://entropiatally.github.io/overlay/');
+});
+
 ipcMain.on('logging-status-toggle', () => {
   if (logReader) {
     if (!logReader.active) {
@@ -504,6 +513,8 @@ ipcMain.handle('set-data', async (_event, data) => {
         logReader.setAvatarName(setting.value);
       } else if (setting.name === 'logReadAll') {
         logReader.updateReadFullLogStatus(setting.value);
+      } else if (setting.name === 'overlay' && overlayWindow && setting?.value?.opacity) {
+        overlayWindow.setOpacity(Number(setting.value.opacity));
       }
     }
 

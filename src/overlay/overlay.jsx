@@ -66,9 +66,26 @@ const Overlay = () => {
   }, [allHuntingSet]);
 
   useEffect(() => {
+    const addCustomCss = css => {
+      const documentHead = document.querySelector('head');
+      const existingStyles = document.querySelector('.custom-style');
+
+      if (existingStyles) {
+        existingStyles.remove();
+      }
+
+      if (css && documentHead) {
+        const newStyles = document.createElement('style');
+        newStyles.classList.add('custom-style');
+        newStyles.innerHTML = css;
+        documentHead.append(newStyles);
+      }
+    };
+
     const updateSettings = newSettings => {
       setSettings(newSettings.overlay);
       setIsKillCountEnabled(newSettings.killCount);
+      addCustomCss(newSettings.overlay?.customCss);
 
       if (newSettings?.activeHuntingSet && Array.isArray(newSettings?.huntingSets) && newSettings.huntingSets.length > 0) {
         const activeSet = newSettings.huntingSets.find(set => set.id === newSettings?.activeHuntingSet);
@@ -77,7 +94,7 @@ const Overlay = () => {
       }
     };
 
-    window.api.on('instance-loaded', console.log);
+    window.api.on('instance-loaded', updateData);
     window.api.on('session-updated', updateData);
     window.api.on('session-data-updated', updateData);
     window.api.on('settings-updated', updateSettings);

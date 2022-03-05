@@ -148,6 +148,10 @@ a:hover {
   flex: 1;
 }
 
+.fullwidth {
+  width: 100%;
+}
+
 .halfwidth {
   width: 50%;
 }

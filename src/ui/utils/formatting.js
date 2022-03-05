@@ -17,4 +17,15 @@ export const formatTime = (seconds, days = false) => {
   return `${values.hours}:${values.minutes}:${values.seconds}`;
 };
 
+export const formatLocalTime = datetime => {
+  let formattedTime = datetime;
+  try {
+    const timestamp = new Date(`${datetime} GMT`);
+    const localString = timestamp.toISOString().split('T')[0];
+    formattedTime = `${localString} ${pad(timestamp.getHours())}:${pad(timestamp.getMinutes())}:${pad(timestamp.getSeconds())}`;
+  } catch {}
+
+  return formattedTime;
+};
+
 export const formatPED = value => `${value.toFixed(2)} PED`;

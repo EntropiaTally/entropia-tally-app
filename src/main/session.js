@@ -212,7 +212,11 @@ class Session {
         .reduce((previous, current) => previous + current.total, 0);
 
       for (const key in this.aggregated[type]) {
-        this.aggregated[type][key].percent = Number((this.aggregated[type][key].total / typeTotal) * 100);
+        if (this.aggregated[type][key].total > 0 && typeTotal > 0) {
+          this.aggregated[type][key].percent = Number((this.aggregated[type][key].total / typeTotal) * 100);
+        } else {
+          this.aggregated[type][key].percent = null;
+        }
       }
     }
   }

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import { formatLocalTime } from '@uiUtils/formatting';
+
 import HistoryModal from '@components/modals/history-modal';
 import Table from '@components/table';
 
@@ -50,7 +52,7 @@ const History = () => {
                 className="is-clickable"
                 onClick={() => openSession(session.id)}
               >
-                <td>{session.created_at}</td>
+                <td>{formatLocalTime(session.created_at)}</td>
                 <td>{session.name ? session.name : '-'}</td>
               </tr>
             ))}
