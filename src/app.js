@@ -1,6 +1,6 @@
 'use strict';
 
-const { app, BrowserWindow, Menu, ipcMain, dialog, shell } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog, globalShortcut, shell } = require('electron');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { is } = require('electron-util');
@@ -170,16 +170,45 @@ app.on('activate', async () => {
   }
 });
 
-(async () => {
-  await app.whenReady();
-  session = await Session.Create();
-  session.setHuntingSet(activeHuntingSet);
-  session.emitter.on('session-updated', sessionForcedUpdate);
-  session.emitter.on('session-time-updated', sessionTimeUpdated);
+function registerShortcuts() {
+  const huntingSets = config.get('huntingSets', []);
+  const registrationStatus = {};
 
-  Menu.setApplicationMenu(menu);
-  mainWindow = await createMainWindow();
-})();
+  globalShortcut.unregisterAll();
+
+  // Register keyboard shortcuts
+  for (const huntingSet of huntingSets) {
+    if (huntingSet.shortcut) {
+      registrationStatus[huntingSet.id] = globalShortcut.register(huntingSet.shortcut, () => {
+        setSelectedHuntingSet(huntingSet);
+      });
+    }
+  }
+
+  // Remove shortcuts that failed to register
+  if (Object.keys(registrationStatus).length > 0) {
+    const cleanedHuntingSets = huntingSets.map(set => {
+      const updatedSet = { ...set };
+
+      if (registrationStatus[set.id] === false && updatedSet?.shortcut) {
+        delete updatedSet.shortcut;
+      }
+
+      return updatedSet;
+    });
+
+    config.set('huntingSets', cleanedHuntingSets);
+
+    if (mainWindow) {
+      const updatedSettings = getSettings();
+      mainWindow.webContents.send('settings-updated', updatedSettings);
+
+      if (overlayWindow) {
+        overlayWindow.webContents.send('settings-updated', updatedSettings);
+      }
+    }
+  }
+}
 
 // Functions
 
@@ -330,6 +359,10 @@ ipcMain.on('goto-wiki-weapontool', () => {
   shell.openExternal('http://www.entropiawiki.com/WeaponCompareV2.aspx');
 });
 
+ipcMain.on('goto-shortcut-guide', () => {
+  shell.openExternal('https://entropiatally.github.io/keyboard-shortcuts/');
+});
+
 ipcMain.on('goto-css-guide', () => {
   shell.openExternal('https://entropiatally.github.io/overlay/');
 });
@@ -395,7 +428,7 @@ ipcMain.on('load-instance', async (_event, { sessionId, instanceId }) => {
   }
 });
 
-ipcMain.on('change-hunting-set', (_event, selectedHuntingSet) => {
+function setSelectedHuntingSet(selectedHuntingSet) {
   if (session) {
     activeHuntingSet = selectedHuntingSet;
     session.setHuntingSet(selectedHuntingSet);
@@ -407,6 +440,10 @@ ipcMain.on('change-hunting-set', (_event, selectedHuntingSet) => {
       overlayWindow.webContents.send('settings-updated', updatedSettings);
     }
   }
+}
+
+ipcMain.on('change-hunting-set', (_event, selectedHuntingSet) => {
+  setSelectedHuntingSet(selectedHuntingSet);
 });
 
 // Ipc Events with response
@@ -545,6 +582,8 @@ ipcMain.handle('set-hunting-sets', (_event, sets) => {
     overlayWindow.webContents.send('settings-updated', updatedSettings);
   }
 
+  registerShortcuts();
+
   return response;
 });
 
@@ -576,3 +615,18 @@ ipcMain.handle('delete', async (_event, { type, id }) => {
 
   return status.success;
 });
+
+(async () => {
+  await app.whenReady();
+  session = await Session.Create();
+  session.setHuntingSet(activeHuntingSet);
+  session.emitter.on('session-updated', sessionForcedUpdate);
+  session.emitter.on('session-time-updated', sessionTimeUpdated);
+
+  setTimeout(() => {
+    registerShortcuts();
+  }, 1000);
+
+  Menu.setApplicationMenu(menu);
+  mainWindow = await createMainWindow();
+})();

@@ -27,6 +27,21 @@ body {
   color: white;
 }
 
+.overlay__huntingSet .overlay__value {
+  -webkit-app-region: no-drag;
+  position: relative;
+}
+
+.overlay__huntingSet select {
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
 .overlay__sessionTime {
   flex: 0;
   flex-direction: row;
