@@ -38,6 +38,8 @@ if (!activeHuntingSet) {
   activeHuntingSet = initialHuntingSets[0];
 }
 
+let customIgnoreList = config.get('ignoreLoot', []);
+
 const createMainWindow = async () => {
   const win = new BrowserWindow({
     icon: path.join(assetPath, 'assets/icon.png'),
@@ -223,6 +225,7 @@ function getSettings() {
     overlay: config.get('overlay', {}),
     killCount: config.get('killCount', false),
     darkMode: config.get('darkMode', false),
+    ignoreLoot: config.get('ignoreLoot', []),
   };
 }
 
@@ -242,7 +245,7 @@ function setDefaultHuntingSet() {
 }
 
 function receivedLoggerEvent({ data, lastLine }) {
-  session.newEvent(data).then(() => {
+  session.newEvent(data, false, customIgnoreList).then(() => {
     // Only send the complete package
     if (lastLine) {
       const sessionData = session.getData();
@@ -515,6 +518,8 @@ ipcMain.handle('set-data', async (_event, data) => {
         logReader.updateReadFullLogStatus(setting.value);
       } else if (setting.name === 'overlay' && overlayWindow && setting?.value?.opacity) {
         overlayWindow.setOpacity(Number(setting.value.opacity));
+      } else if (setting.name === 'ignoreLoot') {
+        customIgnoreList = config.get('ignoreLoot', []);
       }
     }
 

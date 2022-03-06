@@ -115,6 +115,7 @@ class Session {
     this.currentEventTimer = null;
     this.sessionTime = options?.sessionTime ?? 0;
     this.sessionTimer = null;
+    this.customIgnoreList = [];
 
     this.emitter = new EventEmitter();
   }
@@ -155,11 +156,13 @@ class Session {
     }
   }
 
-  newEvent(eventData, updateDb = false) {
+  newEvent(eventData, updateDb = false, customIgnoreList = []) {
     const eventName = eventData.event
       .split('_')
       .map(event => event[0].toUpperCase() + event.slice(1))
       .join('');
+
+    this.customIgnoreList = customIgnoreList;
 
     const handler = `handle${eventName}Event`;
     this?.[handler]?.(eventData);
@@ -281,7 +284,7 @@ class Session {
   handleLootEvent(data) {
     const { name, amount, value } = data.values;
 
-    if (Session.IGNORE_LOOT.includes(name)) {
+    if (Session.IGNORE_LOOT.includes(name) || this.customIgnoreList.includes(name)) {
       return;
     }
 

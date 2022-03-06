@@ -59,6 +59,10 @@ const configStorage = new Store({
     type: 'array',
     items: { type: 'string' },
   },
+  ignoreLoot: {
+    type: 'array',
+    items: { type: 'string' },
+  },
 });
 
 module.exports = configStorage;
