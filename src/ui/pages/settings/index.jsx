@@ -103,6 +103,7 @@ const Settings = () => {
                 onBlur={evt => setIgnoreLootValue(evt.target.value)}
               />
               <button
+                className="button is-info is-small mt-2"
                 type="button"
                 onClick={() => updateSettings('ignoreLoot', ignoreLootValue?.split(/\r?\n/)?.filter(item => item !== ''))}
               >
