@@ -53,10 +53,10 @@ const ReturnsCalc = () => {
   );
 
   const avg = useMemo(() => {
-    if (totalCost > 0 && aggregatedData.killCount > 0) {
+    if (aggregatedData.killCount > 0) {
       return {
         loot: (aggregatedData.allLoot / aggregatedData.killCount) || 0,
-        cost: (totalCost / aggregatedData.killCount) || 0,
+        cost: totalCost > 0 ? (totalCost / aggregatedData.killCount) : 0,
       };
     }
 
@@ -118,10 +118,13 @@ const ReturnsCalc = () => {
             <td>Avg. loot size</td>
             <td className="calc-col-width"><span className="sum">{avg.loot.toFixed(4)}</span> PED</td>
           </tr>
-          <tr>
-            <td>Avg. kill cost</td>
-            <td className="calc-col-width"><span className="sum">{avg.cost.toFixed(4)}</span> PED</td>
-          </tr>
+
+          {totalCost > 0 && (
+            <tr>
+              <td>Avg. kill cost</td>
+              <td className="calc-col-width"><span className="sum">{avg.cost.toFixed(4)}</span> PED</td>
+            </tr>
+          )}
         </>
       )}
 
