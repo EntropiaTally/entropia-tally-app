@@ -7,6 +7,7 @@ import OverlaySettings from './components/overlay-settings';
 
 const Settings = () => {
   const [settings, setSettings] = useState({});
+  const [ignoreLootValue, setIgnoreLootValue] = useState('');
 
   useEffect(() => {
     const removeSettingsUpdateListener = window.api.on('settings-updated', setSettings);
@@ -26,6 +27,10 @@ const Settings = () => {
       setSettings(updatedSettings);
     });
   }, []);
+
+  useEffect(() => {
+    setIgnoreLootValue(settings?.ignoreLoot?.join('\r\n'));
+  }, [settings?.ignoreLoot]);
 
   return (
     <div className="container">
@@ -86,6 +91,25 @@ const Settings = () => {
             settings={settings.overlay}
             onChange={overlaySettings => updateSettings('overlay', overlaySettings)}
           />
+
+          <div className="box block">
+            <h3 className="title">Loot ignore list</h3>
+            <div className="control">
+              <label><small>One item per line</small></label>
+              <textarea
+                className="textarea"
+                defaultValue={settings?.ignoreLoot?.join('\r\n')}
+                onChange={evt => setIgnoreLootValue(evt.target.value)}
+                onBlur={evt => setIgnoreLootValue(evt.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => updateSettings('ignoreLoot', ignoreLootValue?.split(/\r?\n/)?.filter(item => item !== ''))}
+              >
+                Save
+              </button>
+            </div>
+          </div>
 
           <div className="block-top" />
         </div>
