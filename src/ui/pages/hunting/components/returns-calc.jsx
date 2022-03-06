@@ -1,14 +1,19 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import { aggregateHuntingSetData, calculateReturns } from '@utils/helpers';
 
 import Table from '@components/table';
 
 const ReturnsCalc = () => {
-  const [aggregatedData, setAggregatedData] = useState({ allLoot: 0, additionalCost: null });
+  const [aggregatedData, setAggregatedData] = useState({ allLoot: 0, additionalCost: null, killCount: 0 });
   const [instanceHuntingSets, setInstanceHuntingSets] = useState([]);
+  const [killCountEnabled, setKillCountEnabled] = useState(false);
 
   useEffect(() => {
+    const updateSettings = settings => {
+      setKillCountEnabled(Boolean(settings?.killCount));
+    };
+
     const updateAggregatedData = newData => {
       const allLoot = newData?.aggregated?.allLoot?.total ?? 0;
       const additionalCost = newData?.additionalCost ?? 0;
@@ -18,14 +23,21 @@ const ReturnsCalc = () => {
         setInstanceHuntingSets(Object.values(fixedSets).filter(set => set.hits || set.misses));
       }
 
-      setAggregatedData({ allLoot, additionalCost });
+      const killCount = newData?.aggregated?.lootEvent?.count ?? 0;
+
+      setAggregatedData({ allLoot, additionalCost, killCount });
     };
 
+    const removeSettingsUpdatedListener = window.api.on('settings-updated', updateSettings);
     const removeAggregatedListener = window.api.on('session-data-updated', updateAggregatedData);
 
+    window.api.get('settings').then(updateSettings);
     window.api.get('active-session').then(updateAggregatedData);
 
-    return () => removeAggregatedListener();
+    return () => {
+      removeSettingsUpdatedListener();
+      removeAggregatedListener();
+    };
   }, []);
 
   const updateAdditionalCost = useCallback(event => {
@@ -39,6 +51,17 @@ const ReturnsCalc = () => {
     aggregatedData.allLoot,
     aggregatedData.additionalCost,
   );
+
+  const avg = useMemo(() => {
+    if (aggregatedData.killCount > 0) {
+      return {
+        loot: (aggregatedData.allLoot / aggregatedData.killCount) || 0,
+        cost: totalCost > 0 ? (totalCost / aggregatedData.killCount) : 0,
+      };
+    }
+
+    return { loot: 0, cost: 0};
+  }, [totalCost, aggregatedData.killCount, aggregatedData.allLoot]);
 
   return (
     <Table hasBorder header={['Description', 'Value']}>
@@ -83,6 +106,28 @@ const ReturnsCalc = () => {
           </div>
         </td>
       </tr>
+
+      {killCountEnabled && aggregatedData.killCount > 0 && (
+        <>
+          <tr>
+            <td />
+            <td />
+          </tr>
+
+          <tr>
+            <td>Avg. loot size</td>
+            <td className="calc-col-width"><span className="sum">{avg.loot.toFixed(4)}</span> PED</td>
+          </tr>
+
+          {totalCost > 0 && (
+            <tr>
+              <td>Avg. kill cost</td>
+              <td className="calc-col-width"><span className="sum">{avg.cost.toFixed(4)}</span> PED</td>
+            </tr>
+          )}
+        </>
+      )}
+
       <tr>
         <td />
         <td />
