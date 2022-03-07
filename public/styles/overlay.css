@@ -27,8 +27,17 @@ body {
   color: white;
 }
 
-.overlay__huntingSet .overlay__value {
+.overlay__sessionTimeToggle,
+.overlay__huntingSet .overlay__value,
+.overlay__loggingToggle .overlay__value {
   -webkit-app-region: no-drag;
+}
+
+.overlay__sessionTimeToggle .icon{
+  height: 0;
+}
+
+.overlay__huntingSet .overlay__value {
   position: relative;
 }
 
@@ -42,13 +51,16 @@ body {
   cursor: pointer;
 }
 
+.overlay__loggingToggle,
 .overlay__sessionTime {
   flex: 0;
   flex-direction: row;
 }
+.overlay__loggingToggle .overlay__label,
 .overlay__sessionTime .overlay__label {
   display: none;
 }
+.overlay__loggingToggle .overlay__value,
 .overlay__sessionTime .overlay__value {
   padding: 0 8px;
 }
