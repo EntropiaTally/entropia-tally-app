@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { sum } from '@utils/helpers';
@@ -8,6 +9,7 @@ import SessionTimer from '@components/session-timer';
 const Overlay = () => {
   const [settings, setSettings] = useState(null);
   const [isKillCountEnabled, setIsKillCountEnabled] = useState(false);
+  const [isLogRunning, setIsLogRunning] = useState(false);
   const [allHuntingSet, setAllHuntingSet] = useState(null);
   const [activeHuntingSet, setActiveHuntingSet] = useState(null);
   const [data, setData] = useState(null);
@@ -94,6 +96,10 @@ const Overlay = () => {
       }
     };
 
+    const updateLogStatus = status => setIsLogRunning(status === 'enabled');
+
+    const removeLoggerListener = window.api.on('logger-status-changed', updateLogStatus);
+
     window.api.on('instance-loaded', updateData);
     window.api.on('session-updated', updateData);
     window.api.on('session-data-updated', updateData);
@@ -101,25 +107,35 @@ const Overlay = () => {
 
     window.api.get('active-session').then(updateData);
     window.api.get('settings').then(updateSettings);
+    window.api.get('logreader-status').then(updateLogStatus);
+
+    return () => removeLoggerListener();
   }, []);
+
+  const toggleLogging = useCallback(() => {
+    window.api.call('logging-status-toggle');
+  }, []);
+
+  const allDisabled = [
+    settings?.loggingToggle,
+    settings?.sessionTime,
+    settings?.huntingSet,
+    settings?.lootTotal,
+    settings?.spendTotal,
+    settings?.returnTotal,
+    settings?.returnPercent,
+    settings?.numGlobals,
+    settings?.numHofs,
+    settings?.hitPercent,
+    settings?.evadePercent,
+    settings?.killCount && isKillCountEnabled,
+  ].filter(value => Boolean(value)).length === 0;
+
+  const toggleIcon = isLogRunning ? 'ri-pause-fill' : 'ri-play-fill';
 
   if (!settings || !data) {
     return null;
   }
-
-  const allDisabled = [
-    settings.sessionTime,
-    settings.huntingSet,
-    settings.lootTotal,
-    settings.spendTotal,
-    settings.returnTotal,
-    settings.returnPercent,
-    settings.numGlobals,
-    settings.numHofs,
-    settings.hitPercent,
-    settings.evadePercent,
-    settings.killCount && isKillCountEnabled,
-  ].filter(value => Boolean(value)).length === 0;
 
   return (
     <div className="overlay p-2">
@@ -129,11 +145,25 @@ const Overlay = () => {
         </div>
       )}
 
+      {settings.loggingToggle && (
+        <div className="overlay__item overlay__loggingToggle">
+          <div className="overlay__label">Logging status</div>
+          <div className="overlay__value" onClick={toggleLogging}>
+            <i className={`icon ${toggleIcon}`} />
+          </div>
+        </div>
+      )}
+
       {settings.sessionTime && (
         <div className="overlay__item overlay__sessionTime">
           <div className="overlay__label">Time</div>
           <div className="overlay__value">
             <SessionTimer />
+            {settings.sessionTimeToggle && (
+              <div className="overlay__sessionTimeToggle" onClick={toggleLogging}>
+                <i className={`icon ${toggleIcon}`} />
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -39,6 +39,7 @@ const configStorage = new Store({
     },
   },
   overlay: {
+    loggingToggle: { type: 'boolean' },
     lootTotal: { type: 'boolean' },
     spendTotal: { type: 'boolean' },
     returnPercent: { type: 'boolean' },
@@ -49,6 +50,7 @@ const configStorage = new Store({
     hitPercent: { type: 'boolean' },
     evadePercent: { type: 'boolean' },
     sessionTime: { type: 'boolean' },
+    sessionTimeToggle: { type: 'boolean' },
     huntingSet: { type: 'boolean' },
   },
   overlaySize: {
