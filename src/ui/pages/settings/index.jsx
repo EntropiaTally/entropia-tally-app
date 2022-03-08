@@ -95,10 +95,10 @@ const Settings = () => {
           <div className="box block">
             <h3 className="title">Loot ignore list</h3>
             <div className="control">
-              <label><small>One item per line</small></label>
               <textarea
                 className="textarea"
                 defaultValue={settings?.ignoreLoot?.join('\r\n')}
+                placeholder="One item per line"
                 onChange={evt => setIgnoreLootValue(evt.target.value)}
                 onBlur={evt => setIgnoreLootValue(evt.target.value)}
               />
