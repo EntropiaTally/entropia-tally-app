@@ -51,6 +51,11 @@ body {
   cursor: pointer;
 }
 
+.overlay__loggingToggle .overlay__value,
+.overlay__sessionTime .overlay__sessionTimeToggle {
+  cursor: pointer;
+}
+
 .overlay__loggingToggle,
 .overlay__sessionTime {
   flex: 0;
