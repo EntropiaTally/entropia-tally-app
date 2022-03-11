@@ -3,7 +3,7 @@
 > Tracking software for Entropia Universe
 
 
-## Features (v0.9.x)
+## Features (v0.10.x)
 - Keeps track of
   - Loot, Globals, HoFs and rare items
   - Attributes & Skills
@@ -12,12 +12,12 @@
   - Kill count
   - Session time
 - Hunting returns
-- Graphs (item, returns over time)
+- Graphs (item drop rate, returns over time)
 - Combined stats for multiple runs
 - Saves data historically
 - Weapon sets
 - Hunting notes
-- Overlay
+- Overlay (with custom css support)
 
 ##  Getting started
 
