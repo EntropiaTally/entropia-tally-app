@@ -8,11 +8,13 @@ import StatBox from '@components/statbox';
 import Table from '@components/table';
 import Modal from '@components/modal';
 
-const HistoryModal = ({ session, isOpen, closeModal }) => {
+const HistoryModal = ({ session, sessions, isOpen, closeModal }) => {
   const [sessionInstances, setSessionInstances] = useState([]);
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [activeDeleteData, setActiveDeleteData] = useState(null);
   const [isKillCountEnabled, setIsKillCountEnabled] = useState(false);
+  const [instanceMoveTarget, setInstanceMoveTarget] = useState(null);
 
   const { id, sessionName, sessionCreatedAt } = session;
 
@@ -31,6 +33,10 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
 
     return () => removeInstanceDeletedListener();
   }, [id]);
+
+  useEffect(() => {
+    setInstanceMoveTarget(null);
+  }, [isMoveModalOpen]);
 
   const combinedSessionStats = useMemo(() =>
     sessionInstances.reduce((previous, current) => {
@@ -79,6 +85,11 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
   const openDeleteModal = (type, id) => {
     setActiveDeleteData({ type, id });
     setIsDeleteModalOpen(true);
+  };
+
+  const moveInstanceToSession = targetSessionId => {
+    window.api.call('move-instance', { targetSessionId, instanceId: session.id });
+    closeModal();
   };
 
   const { trackedLoot, totalCost, resultRate } = calculateReturns(
@@ -179,6 +190,7 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
                 <td className="halfwidth">{formatLocalTime(instance.created_at)}</td>
                 <td className="halfwidth">{instance.notes}</td>
                 <td className="has-text-right">
+                  <a className="table-action" onClick={() => setIsMoveModalOpen(true)}>Move</a>
                   <a className="table-action" onClick={() => onLoadSessionInstance(instance.session_id, instance.id)}>Load</a>
                   <a className="table-action has-text-danger" onClick={() => openDeleteModal('instance', instance.id)}>Delete</a>
                 </td>
@@ -216,17 +228,58 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
           </div>
         </Modal>
       )}
+
+      {isMoveModalOpen && (
+        <Modal
+          type="card"
+          isOpen={isMoveModalOpen}
+          title="Move run to another session"
+          closeModal={() => setIsMoveModalOpen(false)}
+        >
+          <p>
+            Select the session you want to move this instance to.
+          </p>
+          <div className="block">
+            <select className="select fullwidth" onChange={event => setInstanceMoveTarget(event.target.value)}>
+              <option key="0">---</option>
+              {sessions.map(sessionObject => (
+                <option key={sessionObject.id} value={sessionObject.id}>
+                  {`${sessionObject.name ? `${sessionObject.name} - ` : ''}${formatLocalTime(sessionObject.created_at)}`}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="buttons">
+            <button
+              className="button is-danger"
+              type="button"
+              onClick={() => moveInstanceToSession(instanceMoveTarget)}
+            >
+              Confirm
+            </button>
+            <button
+              className="button"
+              type="button"
+              onClick={() => setIsMoveModalOpen(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </Modal>
+      )}
     </>
   );
 };
 
 HistoryModal.defaultProps = {
   session: {},
+  sessions: [],
   isOpen: false,
 };
 
 HistoryModal.propTypes = {
   session: PropTypes.object,
+  sessions: PropTypes.array,
   isOpen: PropTypes.bool,
   closeModal: PropTypes.func,
 };

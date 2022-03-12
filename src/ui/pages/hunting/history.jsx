@@ -63,6 +63,7 @@ const History = () => {
       {selectedSessionData && (
         <HistoryModal
           session={selectedSessionData}
+          sessions={sessions}
           isOpen={historyModalOpen}
           closeModal={closeSession}
         />
