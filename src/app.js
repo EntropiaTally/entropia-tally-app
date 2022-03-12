@@ -362,7 +362,6 @@ ipcMain.on('check-updates', () => {
   checkForUpdates(true);
 });
 
-
 ipcMain.on('goto-wiki-weapontool', () => {
   shell.openExternal('http://www.entropiawiki.com/WeaponCompareV2.aspx');
 });
