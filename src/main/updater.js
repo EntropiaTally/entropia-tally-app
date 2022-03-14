@@ -72,12 +72,12 @@ autoUpdater.on('update-downloaded', () => {
   });
 });
 
-function checkForUpdates() {
+function checkForUpdates(force = false) {
   const currentTime = Date.now();
   const lastUpdateCheck = config.get('lastUpdateCheck', 0);
 
   // Check for update, if last check date + 168h(7d) is less than current time
-  if ((lastUpdateCheck + 604_800_000) <= currentTime) {
+  if (force || (lastUpdateCheck + 604_800_000) <= currentTime) {
     if (autoUpdater.isUpdaterActive() && process.env.PORTABLE_EXECUTABLE_APP_FILENAME === undefined) {
       autoUpdater.checkForUpdates();
     } else {

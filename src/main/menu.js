@@ -23,6 +23,12 @@ const helpSubmenu = [
     url: 'https://github.com/EntropiaTally/entropia-tally-app',
   }),
   {
+    label: 'Check for updates',
+    click() {
+      ipcMain.emit('check-updates', true);
+    },
+  },
+  {
     label: 'Report an Issue…',
     click() {
       const body = `
