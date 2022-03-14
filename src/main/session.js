@@ -27,10 +27,10 @@ class Session {
 
   static async Load(id, instanceId = null) {
     const data = await (instanceId
-      ? db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated, si.config, si.notes, si.run_time FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ? AND si.id = ?', [id, instanceId])
-      : db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.events, si.aggregated, si.config, si.notes, si.run_time FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ?', [id]));
+      ? db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.created_at AS instance_created_at, si.events, si.aggregated, si.config, si.notes, si.run_time FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ? AND si.id = ?', [id, instanceId])
+      : db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.created_at AS instance_created_at, si.events, si.aggregated, si.config, si.notes, si.run_time FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ?', [id]));
 
-    const options = { name: data?.name, createdAt: data?.created_at, sessionTime: data?.run_time };
+    const options = { name: data?.name, createdAt: data?.created_at, instanceCreatedAt: data?.instance_created_at, sessionTime: data?.run_time };
     const config = data?.config ? JSON.parse(data.config) : 0;
 
     const instance = new Session(id, data?.instance_id, options, config);
@@ -104,6 +104,7 @@ class Session {
     this.id = id;
     this.instanceId = instanceId;
     this.name = options?.name;
+    this.instanceCreatedAt = options?.instanceCreatedAt;
     this.createdAt = options?.createdAt;
     this.events = {};
     this.aggregated = {};
@@ -457,6 +458,8 @@ class Session {
   createNewInstance() {
     this.instanceId = uuidv4();
     this.aggregated = {};
+    this.instanceCreatedAt = null;
+    this.createdAt = null;
     this.events = {};
     this.config = {};
     this.notes = '';
@@ -475,15 +478,21 @@ class Session {
 
   async updateDb() {
     await this.createNewSession();
-    await db.run('REPLACE INTO session_instances(id, session_id, events, aggregated, config, notes, run_time) VALUES(?, ?, ?, ?, ?, ?, ?)', [
+    await db.run('REPLACE INTO session_instances(id, session_id, created_at, events, aggregated, config, notes, run_time) VALUES(?, ?, ?, ?, ?, ?, ?, ?)', [
       this.instanceId,
       this.id,
+      this.instanceCreatedAt,
       JSON.stringify(this.events),
       JSON.stringify(this.aggregated),
       JSON.stringify(this.config),
       this.notes,
       this.sessionTime,
     ]);
+
+    if (!this.instanceCreatedAt) {
+      const result = await db.get('SELECT created_at FROM session_instances WHERE id = ? AND session_id = ?', [this.instanceId, this.id]);
+      this.instanceCreatedAt = result?.created_at;
+    }
   }
 
   async setName(name) {
