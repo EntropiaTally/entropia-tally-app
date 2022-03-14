@@ -190,8 +190,8 @@ const HistoryModal = ({ session, sessions, isOpen, closeModal }) => {
                 <td className="halfwidth">{formatLocalTime(instance.created_at)}</td>
                 <td className="halfwidth">{instance.notes}</td>
                 <td className="has-text-right">
-                  <a className="table-action" onClick={() => setIsMoveModalOpen(true)}>Move</a>
                   <a className="table-action" onClick={() => onLoadSessionInstance(instance.session_id, instance.id)}>Load</a>
+                  <a className="table-action has-text-info" onClick={() => setIsMoveModalOpen(true)}>Move</a>
                   <a className="table-action has-text-danger" onClick={() => openDeleteModal('instance', instance.id)}>Delete</a>
                 </td>
               </tr>
