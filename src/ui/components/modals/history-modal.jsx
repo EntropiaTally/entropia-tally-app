@@ -15,6 +15,7 @@ const HistoryModal = ({ session, sessions, isOpen, closeModal }) => {
   const [activeDeleteData, setActiveDeleteData] = useState(null);
   const [isKillCountEnabled, setIsKillCountEnabled] = useState(false);
   const [instanceMoveTarget, setInstanceMoveTarget] = useState(null);
+  const [instanceMoveSource, setInstanceMoveSource] = useState(null);
 
   const { id, sessionName, sessionCreatedAt } = session;
 
@@ -33,10 +34,6 @@ const HistoryModal = ({ session, sessions, isOpen, closeModal }) => {
 
     return () => removeInstanceDeletedListener();
   }, [id]);
-
-  useEffect(() => {
-    setInstanceMoveTarget(null);
-  }, [isMoveModalOpen]);
 
   const combinedSessionStats = useMemo(() =>
     sessionInstances.reduce((previous, current) => {
@@ -87,8 +84,16 @@ const HistoryModal = ({ session, sessions, isOpen, closeModal }) => {
     setIsDeleteModalOpen(true);
   };
 
-  const moveInstanceToSession = targetSessionId => {
-    window.api.call('move-instance', { targetSessionId, instanceId: session.id });
+  const moveModalOpen = instanceId => {
+    setInstanceMoveSource(instanceId);
+    setInstanceMoveTarget(null);
+    setIsMoveModalOpen(true);
+  };
+
+  const moveInstanceToSession = (targetSessionId, instanceId) => {
+    window.api.call('move-instance', { targetSessionId, instanceId });
+    setInstanceMoveSource(null);
+    setIsMoveModalOpen(false);
     closeModal();
   };
 
@@ -191,7 +196,7 @@ const HistoryModal = ({ session, sessions, isOpen, closeModal }) => {
                 <td className="halfwidth">{instance.notes}</td>
                 <td className="has-text-right">
                   <a className="table-action" onClick={() => onLoadSessionInstance(instance.session_id, instance.id)}>Load</a>
-                  <a className="table-action has-text-info" onClick={() => setIsMoveModalOpen(true)}>Move</a>
+                  <a className="table-action has-text-info" onClick={() => moveModalOpen(instance.id)}>Move</a>
                   <a className="table-action has-text-danger" onClick={() => openDeleteModal('instance', instance.id)}>Delete</a>
                 </td>
               </tr>
@@ -253,7 +258,7 @@ const HistoryModal = ({ session, sessions, isOpen, closeModal }) => {
             <button
               className="button is-danger"
               type="button"
-              onClick={() => moveInstanceToSession(instanceMoveTarget)}
+              onClick={() => moveInstanceToSession(instanceMoveTarget, instanceMoveSource)}
             >
               Confirm
             </button>
