@@ -111,6 +111,8 @@ const HistoryModal = ({ session, sessions, isOpen, closeModal }) => {
     return instance;
   });
 
+  const filteredSessions = sessions.filter(sessionData => sessionData.id !== session.id);
+
   return (
     <>
       <Modal
@@ -247,9 +249,9 @@ const HistoryModal = ({ session, sessions, isOpen, closeModal }) => {
           <div className="block">
             <select className="select fullwidth" onChange={event => setInstanceMoveTarget(event.target.value)}>
               <option key="0">---</option>
-              {sessions.map(sessionObject => (
-                <option key={sessionObject.id} value={sessionObject.id}>
-                  {`${sessionObject.name ? `${sessionObject.name} - ` : ''}${formatLocalTime(sessionObject.created_at)}`}
+              {filteredSessions.map(sessionData => (
+                <option key={sessionData.id} value={sessionData.id}>
+                  {`${sessionData.name ? `${sessionData.name} - ` : ''}${formatLocalTime(sessionData.created_at)}`}
                 </option>
               ))}
             </select>
