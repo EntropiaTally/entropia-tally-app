@@ -517,7 +517,7 @@ class Session {
       await this.updateDb();
     }
 
-    return this.getData(false);
+    return this.getData(true);
   }
 }
 

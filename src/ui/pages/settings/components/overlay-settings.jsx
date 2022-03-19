@@ -15,6 +15,8 @@ const OVERLAY_TOGGLES = [
   { label: 'Kill count (requires \'Show kill count\' to be enabled)', key: 'killCount', default: false },
   { label: 'Hit rate (%)', key: 'hitPercent', default: false },
   { label: 'Evade rate (%)', key: 'evadePercent', default: false },
+  { label: 'Avg. loot size (requires \'Show kill count\' to be enabled)', key: 'avgLootValue', default: false },
+  { label: 'Avg. kill cost (requires \'Show kill count\' to be enabled)', key: 'avgKillCost', default: false },
 ];
 
 const OverlaySettings = ({ settings, onChange }) => {
