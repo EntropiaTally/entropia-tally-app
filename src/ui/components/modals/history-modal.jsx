@@ -81,6 +81,15 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
     setIsDeleteModalOpen(true);
   };
 
+  const exportInstance = (sessionId, instanceId) => {
+    console.log('export', sessionId, instanceId);
+    window.api.exportInstance(sessionId, instanceId).then(success => {
+      if (!success) {
+        console.error('FAILED TO EXPORT');
+      }
+    });
+  };
+
   const { trackedLoot, totalCost, resultRate } = calculateReturns(
     combinedSessionStats.usedSets,
     combinedSessionStats.total,
@@ -180,6 +189,7 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
                 <td className="halfwidth">{instance.notes}</td>
                 <td className="has-text-right">
                   <a className="table-action" onClick={() => onLoadSessionInstance(instance.session_id, instance.id)}>Load</a>
+                  <a className="table-action has-text-warning" onClick={() => exportInstance(instance.session_id, instance.id)}>Export</a>
                   <a className="table-action has-text-danger" onClick={() => openDeleteModal('instance', instance.id)}>Delete</a>
                 </td>
               </tr>

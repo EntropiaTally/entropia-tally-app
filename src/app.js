@@ -1,18 +1,21 @@
 'use strict';
 
 const { app, BrowserWindow, Menu, ipcMain, dialog, globalShortcut, shell } = require('electron');
+const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { is } = require('electron-util');
 const unhandled = require('electron-unhandled');
 const debug = require('electron-debug');
 const contextMenu = require('electron-context-menu');
+const xlsx = require('node-xlsx').default;
 
 const config = require('./main/config');
 const menu = require('./main/menu');
 const checkForUpdates = require('./main/updater');
 const Session = require('./main/session');
 const LogReader = require('./main/log-reader');
+const { exportXls } = require('./main/exporter');
 
 let mainWindow;
 let overlayWindow;
@@ -453,6 +456,54 @@ ipcMain.on('change-hunting-set', (_event, selectedHuntingSet) => {
   setSelectedHuntingSet(selectedHuntingSet);
 });
 
+/* Async function testFunc(sessionId, instanceId) {
+  const exportSession = await Session.Load(sessionId, instanceId);
+  const exportData = exportSession.getData();
+  const exportSheets = await exportXls(exportData);
+
+  const buffer = xlsx.build(exportSheets);
+
+  const options = {
+    title: 'Save file',
+    defaultPath: 'test.xls',
+    buttonLabel: 'Save',
+
+    filters: [
+      {name: 'file', extensions: ['xls']},
+      {name: 'All Files', extensions: ['*']},
+    ],
+  };
+
+  return dialog.showSaveDialog(null, options)
+    .then(({ filePath }) => fs.writeFileSync(filePath, buffer, 'utf-8'))
+    .then(() => true)
+    .catch(() => false);
+} */
+
+ipcMain.handle('export-instance', async (_event, { sessionId, instanceId }) => {
+  const exportSession = await Session.Load(sessionId, instanceId);
+  const exportData = exportSession.getData();
+  const exportSheets = await exportXls(exportData);
+
+  const buffer = xlsx.build(exportSheets);
+
+  const options = {
+    title: 'Save file',
+    defaultPath: 'test.xls',
+    buttonLabel: 'Save',
+
+    filters: [
+      {name: 'file', extensions: ['xls']},
+      {name: 'All Files', extensions: ['*']},
+    ],
+  };
+
+  return dialog.showSaveDialog(null, options)
+    .then(({ filePath }) => fs.writeFileSync(filePath, buffer, 'utf-8'))
+    .then(() => true)
+    .catch(() => false);
+});
+
 // Ipc Events with response
 
 ipcMain.handle('select-logfile', async () => {
@@ -627,6 +678,7 @@ ipcMain.handle('delete', async (_event, { type, id }) => {
 
 (async () => {
   await app.whenReady();
+
   session = await Session.Create();
   session.setHuntingSet(activeHuntingSet);
   session.emitter.on('session-updated', sessionForcedUpdate);
@@ -638,4 +690,6 @@ ipcMain.handle('delete', async (_event, { type, id }) => {
 
   Menu.setApplicationMenu(menu);
   mainWindow = await createMainWindow();
+
+  // TestFunc('e7e272f9-6459-4447-984a-6a00d5a29108', '2e0f756c-e717-4c79-b037-13e238ed22ed');
 })();
