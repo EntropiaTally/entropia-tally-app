@@ -489,7 +489,7 @@ ipcMain.handle('export-instance', async (_event, { sessionId, instanceId }) => {
 
   const options = {
     title: 'Save file',
-    defaultPath: 'test.xls',
+    defaultPath: `${exportData.sessionCreatedAt}.xls`,
     buttonLabel: 'Save',
 
     filters: [
