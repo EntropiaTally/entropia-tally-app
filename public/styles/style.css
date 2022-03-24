@@ -156,6 +156,10 @@ a:hover {
   width: 50%;
 }
 
+.threequarterwidth {
+  width: 75%;
+}
+
 .vert-align-middle {
   vertical-align: middle !important;
 }
@@ -384,8 +388,28 @@ a.navbar-item:focus {
   margin-bottom: 1.5rem;
 }
 
-.session-name .title .icon {
+.session-name {
+  overflow: hidden;
+  position: relative;
+}
+
+.session-name .title {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  margin-left: 25px;
+}
+.session-name .title.small {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.session-name .icon.edit {
   cursor: pointer;
+  position: absolute;
+  top: 1px;
+  left: 0;
+  z-index: 1;
 }
 
 .session-name .control .icon {
@@ -445,6 +469,7 @@ span.sum {
 
 .modal .modal-card-title {
   margin-bottom: 0 !important;
+  width: 90%;
 }
 
 .modal.wide-modal .modal-card {

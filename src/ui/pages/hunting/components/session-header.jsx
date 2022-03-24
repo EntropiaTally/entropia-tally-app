@@ -46,6 +46,8 @@ const SessionHeader = () => {
     setSessionNameActive(false);
   }, [sessionName]);
 
+  const nameLength = sessionName ? sessionName.length : 0;
+
   return (
     <div className="block is-flex block-top">
       <div className="session-name flex-1 mr-4">
@@ -65,7 +67,10 @@ const SessionHeader = () => {
           </div>
         )}
         {!sessionNameActive && (
-          <h2 className="title is-4 mb-0">{sessionName ? sessionName : 'Session'} <span className="icon"><i className="ri-pencil-fill" onClick={() => setSessionNameActive(true)} /></span></h2>
+          <>
+            <span className="icon edit"><i className="ri-pencil-fill" onClick={() => setSessionNameActive(true)} /></span>
+            <h2 className={`title is-4 mb-0 ${nameLength >= 60 ? 'small' : ''}`}>{sessionName ? sessionName : 'Session'}</h2>
+          </>
         )}
       </div>
       <div className="flex-center">
