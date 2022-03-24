@@ -438,6 +438,26 @@ ipcMain.on('load-instance', async (_event, { sessionId, instanceId }) => {
   }
 });
 
+ipcMain.on('move-instance', async (_event, { targetSessionId, instanceId }) => {
+  if (logReader) {
+    logReader.stop();
+    logReader.removeListener('event', receivedLoggerEvent);
+    mainWindow.webContents.send('logger-status-changed', 'disabled');
+
+    if (overlayWindow) {
+      overlayWindow.webContents.send('logger-status-changed', 'disabled');
+    }
+  }
+
+  if (instanceId && targetSessionId) {
+    await Session.MoveInstance(instanceId, targetSessionId);
+
+    if (session.instanceId === instanceId) {
+      session = await Session.Load(targetSessionId, instanceId);
+    }
+  }
+});
+
 function setSelectedHuntingSet(selectedHuntingSet) {
   if (session) {
     activeHuntingSet = selectedHuntingSet;

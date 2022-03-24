@@ -1,5 +1,5 @@
 /* eslint-disable complexity */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
 import { sum } from '@utils/helpers';
 import { formatPED } from '@uiUtils/formatting';
@@ -14,32 +14,34 @@ const Overlay = () => {
   const [activeHuntingSet, setActiveHuntingSet] = useState(null);
   const [data, setData] = useState(null);
 
-  function updateData(newData) {
+  const updateData = useCallback(newData => {
+    const aggregated = newData?.aggregated;
     const additionalCost = newData?.additionalCost ?? 0;
-    const spentPED = Object.keys(newData?.aggregated?.huntingSetDmg ?? {}).reduce((all, key) => {
-      const numberHits = newData.aggregated?.huntingSetDmg?.[key]?.count ?? 0;
-      const numberMiss = newData.aggregated?.huntingSetMissed?.[key]?.count ?? 0;
+
+    const spentPED = Object.keys(aggregated?.huntingSetDmg ?? {}).reduce((all, key) => {
+      const numberHits = aggregated?.huntingSetDmg?.[key]?.count ?? 0;
+      const numberMiss = aggregated?.huntingSetMissed?.[key]?.count ?? 0;
       const costPerShot = newData.usedHuntingSets[key].decay / 100;
 
       return all + ((numberHits + numberMiss) * costPerShot);
     }, 0) + additionalCost;
 
-    const lootedPED = Object.values(newData.aggregated?.huntingSetLoot ?? {}).reduce((all, set) => all + (set.total ?? 0), 0);
+    const lootedPED = Object.values(aggregated?.huntingSetLoot ?? {}).reduce((all, set) => all + (set.total ?? 0), 0);
 
-    const damageInflictedCount = newData?.aggregated?.damageInflicted?.count ?? 0;
+    const damageInflictedCount = aggregated?.damageInflicted?.count ?? 0;
     const playerAttackCount = sum(
       damageInflictedCount,
-      newData?.aggregated?.playerMiss?.count,
-      newData?.aggregated?.enemyDodge?.count,
-      newData?.aggregated?.enemyEvade?.count,
-      newData?.aggregated?.enemyJam?.count,
+      aggregated?.playerMiss?.count,
+      aggregated?.enemyDodge?.count,
+      aggregated?.enemyEvade?.count,
+      aggregated?.enemyJam?.count,
     );
 
     const playerAttackHitRate = (damageInflictedCount / playerAttackCount) * 100;
-    const damageTakenCount = newData?.aggregated?.damageTaken?.count ?? 0;
-    const playerDeflectCount = newData?.aggregated?.playerDeflect?.count ?? 0;
-    const enemyMissCountValue = newData?.aggregated?.enemyMiss?.count ?? 0;
-    const playerEvadeCount = sum(newData?.aggregated?.playerEvade?.count, newData?.aggregated?.playerDodge?.count);
+    const damageTakenCount = aggregated?.damageTaken?.count ?? 0;
+    const playerDeflectCount = aggregated?.playerDeflect?.count ?? 0;
+    const enemyMissCountValue = aggregated?.enemyMiss?.count ?? 0;
+    const playerEvadeCount = sum(aggregated?.playerEvade?.count, aggregated?.playerDodge?.count);
     const enemyAttackCount = sum(damageTakenCount, playerDeflectCount, enemyMissCountValue, playerEvadeCount);
     const enemyAttackMissRate = ((playerEvadeCount + enemyMissCountValue) / enemyAttackCount) * 100;
 
@@ -49,16 +51,16 @@ const Overlay = () => {
     setData({
       ...data,
       returnTotal,
-      totalLoot: newData?.aggregated?.allLoot?.total ?? 0,
+      totalLoot: aggregated?.allLoot?.total ?? 0,
       totalSpend: spentPED,
       returnPercent: Number.isNaN(returnPercent) ? 0 : returnPercent,
-      numGlobals: newData.aggregated?.globals?.count || 0,
-      numHofs: newData.aggregated?.hofs?.count || 0,
-      numKills: newData.aggregated?.lootEvent?.count || 0,
+      numGlobals: aggregated?.globals?.count || 0,
+      numHofs: aggregated?.hofs?.count || 0,
+      numKills: aggregated?.lootEvent?.count || 0,
       hitPercent: Number.isNaN(playerAttackHitRate) ? 0 : playerAttackHitRate,
       evadePercent: Number.isNaN(enemyAttackMissRate) ? 0 : enemyAttackMissRate,
     });
-  }
+  }, [data, setData]);
 
   const onHuntingSetChange = useCallback(event => {
     const newSet = allHuntingSet.find(set => set.id === event.target.value);
@@ -99,22 +101,40 @@ const Overlay = () => {
     const updateLogStatus = status => setIsLogRunning(status === 'enabled');
 
     const removeLoggerListener = window.api.on('logger-status-changed', updateLogStatus);
-
-    window.api.on('instance-loaded', updateData);
-    window.api.on('session-updated', updateData);
-    window.api.on('session-data-updated', updateData);
-    window.api.on('settings-updated', updateSettings);
+    const removeInstanceListener = window.api.on('instance-loaded', updateData);
+    const removeSessionListener = window.api.on('session-updated', updateData);
+    const removeSessionDataListener = window.api.on('session-data-updated', updateData);
+    const removeSettingsListener = window.api.on('settings-updated', updateSettings);
 
     window.api.get('active-session').then(updateData);
     window.api.get('settings').then(updateSettings);
     window.api.get('logreader-status').then(updateLogStatus);
 
-    return () => removeLoggerListener();
-  }, []);
+    return () => {
+      removeLoggerListener();
+      removeInstanceListener();
+      removeSessionListener();
+      removeSessionDataListener();
+      removeSettingsListener();
+    };
+  }, [updateData]);
 
   const toggleLogging = useCallback(() => {
     window.api.call('logging-status-toggle');
   }, []);
+
+  const avg = useMemo(() => {
+    if (data?.numKills > 0) {
+      const totalLoot = data?.totalLoot ?? 0;
+      const totalSpend = data?.totalSpend ?? 0;
+      return {
+        loot: (totalLoot / data.numKills) || 0,
+        cost: totalSpend > 0 ? (totalSpend / data.numKills) : 0,
+      };
+    }
+
+    return { loot: 0, cost: 0};
+  }, [data?.totalSpend, data?.numKills, data?.totalLoot]);
 
   const allDisabled = [
     settings?.loggingToggle,
@@ -129,6 +149,8 @@ const Overlay = () => {
     settings?.hitPercent,
     settings?.evadePercent,
     settings?.killCount && isKillCountEnabled,
+    settings?.avgLootValue && isKillCountEnabled,
+    settings?.avgKillCost && isKillCountEnabled,
   ].filter(value => Boolean(value)).length === 0;
 
   const toggleIcon = isLogRunning ? 'ri-pause-fill' : 'ri-play-fill';
@@ -244,6 +266,20 @@ const Overlay = () => {
         <div className="overlay__item overlay__evadePercent">
           <div className="overlay__label">Evade</div>
           <div className="overlay__value">{data.evadePercent.toFixed(2)}%</div>
+        </div>
+      )}
+
+      {isKillCountEnabled && settings.avgLootValue && (
+        <div className="overlay__item overlay__avgLootValue">
+          <div className="overlay__label">Avg. loot</div>
+          <div className="overlay__value">{avg.loot.toFixed(2)} PED</div>
+        </div>
+      )}
+
+      {isKillCountEnabled && settings.avgKillCost && (
+        <div className="overlay__item overlay__avgKillCost">
+          <div className="overlay__label">Avg. cost</div>
+          <div className="overlay__value">{avg.cost.toFixed(2)} PED</div>
         </div>
       )}
     </div>

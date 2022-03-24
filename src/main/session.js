@@ -100,6 +100,10 @@ class Session {
     return { success, sessionId, instanceId: id };
   }
 
+  static async MoveInstance(id, newSessionId) {
+    await db.run('UPDATE session_instances SET session_id = ? WHERE id = ?', [newSessionId, id]);
+  }
+
   constructor(id = null, instanceId = null, options = {}, config = null) {
     this.id = id;
     this.instanceId = instanceId;
@@ -517,7 +521,7 @@ class Session {
       await this.updateDb();
     }
 
-    return this.getData(false);
+    return this.getData(true);
   }
 }
 

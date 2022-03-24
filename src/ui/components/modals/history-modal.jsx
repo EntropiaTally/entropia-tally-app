@@ -8,11 +8,14 @@ import StatBox from '@components/statbox';
 import Table from '@components/table';
 import Modal from '@components/modal';
 
-const HistoryModal = ({ session, isOpen, closeModal }) => {
+const HistoryModal = ({ session, sessions, isOpen, closeModal }) => {
   const [sessionInstances, setSessionInstances] = useState([]);
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [activeDeleteData, setActiveDeleteData] = useState(null);
   const [isKillCountEnabled, setIsKillCountEnabled] = useState(false);
+  const [instanceMoveTarget, setInstanceMoveTarget] = useState(null);
+  const [instanceMoveSource, setInstanceMoveSource] = useState(null);
 
   const { id, sessionName, sessionCreatedAt } = session;
 
@@ -90,6 +93,19 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
     });
   };
 
+  const moveModalOpen = instanceId => {
+    setInstanceMoveSource(instanceId);
+    setInstanceMoveTarget(null);
+    setIsMoveModalOpen(true);
+  };
+
+  const moveInstanceToSession = (targetSessionId, instanceId) => {
+    window.api.call('move-instance', { targetSessionId, instanceId });
+    setInstanceMoveSource(null);
+    setIsMoveModalOpen(false);
+    closeModal();
+  };
+
   const { trackedLoot, totalCost, resultRate } = calculateReturns(
     combinedSessionStats.usedSets,
     combinedSessionStats.total,
@@ -103,6 +119,8 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
 
     return instance;
   });
+
+  const filteredSessions = sessions.filter(sessionData => sessionData.id !== session.id);
 
   return (
     <>
@@ -189,6 +207,7 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
                 <td className="halfwidth">{instance.notes}</td>
                 <td className="has-text-right">
                   <a className="table-action" onClick={() => onLoadSessionInstance(instance.session_id, instance.id)}>Load</a>
+                  <a className="table-action has-text-info" onClick={() => moveModalOpen(instance.id)}>Move</a>
                   <a className="table-action has-text-warning-dark" onClick={() => exportInstance(instance.session_id, instance.id)}>Export</a>
                   <a className="table-action has-text-danger" onClick={() => openDeleteModal('instance', instance.id)}>Delete</a>
                 </td>
@@ -226,17 +245,58 @@ const HistoryModal = ({ session, isOpen, closeModal }) => {
           </div>
         </Modal>
       )}
+
+      {isMoveModalOpen && (
+        <Modal
+          type="card"
+          isOpen={isMoveModalOpen}
+          title="Move run to another session"
+          closeModal={() => setIsMoveModalOpen(false)}
+        >
+          <p>
+            Select the session you want to move this instance to.
+          </p>
+          <div className="block">
+            <select className="select fullwidth" onChange={event => setInstanceMoveTarget(event.target.value)}>
+              <option key="0">---</option>
+              {filteredSessions.map(sessionData => (
+                <option key={sessionData.id} value={sessionData.id}>
+                  {`${sessionData.name ? `${sessionData.name} - ` : ''}${formatLocalTime(sessionData.created_at)}`}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="buttons">
+            <button
+              className="button is-danger"
+              type="button"
+              onClick={() => moveInstanceToSession(instanceMoveTarget, instanceMoveSource)}
+            >
+              Confirm
+            </button>
+            <button
+              className="button"
+              type="button"
+              onClick={() => setIsMoveModalOpen(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </Modal>
+      )}
     </>
   );
 };
 
 HistoryModal.defaultProps = {
   session: {},
+  sessions: [],
   isOpen: false,
 };
 
 HistoryModal.propTypes = {
   session: PropTypes.object,
+  sessions: PropTypes.array,
   isOpen: PropTypes.bool,
   closeModal: PropTypes.func,
 };
