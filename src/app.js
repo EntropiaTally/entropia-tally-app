@@ -456,30 +456,6 @@ ipcMain.on('change-hunting-set', (_event, selectedHuntingSet) => {
   setSelectedHuntingSet(selectedHuntingSet);
 });
 
-/* Async function testFunc(sessionId, instanceId) {
-  const exportSession = await Session.Load(sessionId, instanceId);
-  const exportData = exportSession.getData();
-  const exportSheets = await exportXls(exportData);
-
-  const buffer = xlsx.build(exportSheets);
-
-  const options = {
-    title: 'Save file',
-    defaultPath: 'test.xls',
-    buttonLabel: 'Save',
-
-    filters: [
-      {name: 'file', extensions: ['xls']},
-      {name: 'All Files', extensions: ['*']},
-    ],
-  };
-
-  return dialog.showSaveDialog(null, options)
-    .then(({ filePath }) => fs.writeFileSync(filePath, buffer, 'utf-8'))
-    .then(() => true)
-    .catch(() => false);
-} */
-
 ipcMain.handle('export-instance', async (_event, { sessionId, instanceId }) => {
   const exportSession = await Session.Load(sessionId, instanceId);
   const exportData = exportSession.getData();
@@ -489,7 +465,7 @@ ipcMain.handle('export-instance', async (_event, { sessionId, instanceId }) => {
 
   const options = {
     title: 'Save file',
-    defaultPath: `${exportData.sessionCreatedAt}.xls`,
+    defaultPath: `entropia_tally_run_${exportData.sessionCreatedAt.replaceAll(' ', '_').replaceAll(':', '')}.xls`,
     buttonLabel: 'Save',
 
     filters: [

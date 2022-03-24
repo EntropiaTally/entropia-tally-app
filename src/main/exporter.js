@@ -126,7 +126,7 @@ async function exportXls(sessionData) {
       rareLoots.push([rareLoot.date, Number(rareLoot.value), rareLoot.item]);
     }
 
-    sheets.push({ name: 'Rare loot', data: rareLoots, options: {'!cols': [{wch: 19}, {wch: 30}]} });
+    sheets.push({ name: 'Rare loot', data: rareLoots, options: {'!cols': [{wch: 19}, {wch: 10}, {wch: 30}]} });
   }
 
   if (events.loot) {
