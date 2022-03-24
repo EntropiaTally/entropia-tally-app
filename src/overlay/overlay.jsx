@@ -1,7 +1,7 @@
 /* eslint-disable complexity */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
-import { sum } from '@utils/helpers';
+import { aggregateHuntingSetData, sum } from '@utils/helpers';
 import { formatPED } from '@uiUtils/formatting';
 
 import SessionTimer from '@components/session-timer';
@@ -17,6 +17,7 @@ const Overlay = () => {
   const updateData = useCallback(newData => {
     const aggregated = newData?.aggregated;
     const additionalCost = newData?.additionalCost ?? 0;
+    const usedHuntingSets = newData?.usedHuntingSets;
 
     const spentPED = Object.keys(aggregated?.huntingSetDmg ?? {}).reduce((all, key) => {
       const numberHits = aggregated?.huntingSetDmg?.[key]?.count ?? 0;
@@ -48,6 +49,18 @@ const Overlay = () => {
     const returnPercent = (lootedPED / spentPED) * 100;
     const returnTotal = lootedPED - spentPED;
 
+    let avgDpp = 0;
+    if (usedHuntingSets) {
+      const fixedSets = aggregateHuntingSetData(usedHuntingSets, aggregated);
+      const activeSets = Object.values(fixedSets).filter(set => set.hits || set.misses);
+
+      console.log(activeSets);
+      const combinedDpp = activeSets.reduce((previous, current) => previous + current.dpp, 0);
+      avgDpp = combinedDpp
+        ? combinedDpp / activeSets.length
+        : 0;
+    }
+
     setData({
       ...data,
       returnTotal,
@@ -59,6 +72,7 @@ const Overlay = () => {
       numKills: aggregated?.lootEvent?.count || 0,
       hitPercent: Number.isNaN(playerAttackHitRate) ? 0 : playerAttackHitRate,
       evadePercent: Number.isNaN(enemyAttackMissRate) ? 0 : enemyAttackMissRate,
+      dpp: Number(avgDpp),
     });
   }, [data, setData]);
 
@@ -148,6 +162,7 @@ const Overlay = () => {
     settings?.numHofs,
     settings?.hitPercent,
     settings?.evadePercent,
+    settings?.dpp,
     settings?.killCount && isKillCountEnabled,
     settings?.avgLootValue && isKillCountEnabled,
     settings?.avgKillCost && isKillCountEnabled,
@@ -266,6 +281,13 @@ const Overlay = () => {
         <div className="overlay__item overlay__evadePercent">
           <div className="overlay__label">Evade</div>
           <div className="overlay__value">{data.evadePercent.toFixed(2)}%</div>
+        </div>
+      )}
+
+      {settings.dpp && (
+        <div className="overlay__item overlay__dpp">
+          <div className="overlay__label">DPP</div>
+          <div className="overlay__value">{data.dpp.toFixed(4)}</div>
         </div>
       )}
 

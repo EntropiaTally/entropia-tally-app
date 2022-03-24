@@ -52,6 +52,7 @@ const configStorage = new Store({
     sessionTime: { type: 'boolean' },
     sessionTimeToggle: { type: 'boolean' },
     huntingSet: { type: 'boolean' },
+    dpp: { type: 'boolean' },
     avgLootValue: { type: 'boolean' },
     avgKillCost: { type: 'boolean' },
   },
