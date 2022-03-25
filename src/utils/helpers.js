@@ -11,11 +11,17 @@ function aggregateHuntingSetData(usedHuntingSets, aggregated = {}, existingHunti
     } else {
       existingHuntingSets[id] = {
         ...set,
+        dmg: huntingSetDmg?.[id]?.total || 0,
         hits: huntingSetDmg?.[id]?.count || 0,
         misses: huntingSetMissed?.[id]?.count || 0,
         loot: huntingSetLoot?.[id]?.total || 0,
       };
     }
+
+    const totalAttacks = existingHuntingSets[id].hits + existingHuntingSets[id].misses;
+    existingHuntingSets[id].dpp = totalAttacks
+      ? existingHuntingSets[id].dmg / (totalAttacks * Number(existingHuntingSets[id].decay))
+      : 0;
   }
 
   return existingHuntingSets;

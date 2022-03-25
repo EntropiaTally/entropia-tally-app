@@ -24,7 +24,7 @@ const SessionHuntingSet = ({ sets, activeSet }) => {
     <div className="block">
       <div className="field flex-center">
         <label className="label inline-label">Weapon set</label>
-        <div className="control flex-1">
+        <div className="control flex-1 threequarterwidth">
           <div className="select is-small">
             <select value={selectedSet} onChange={changeActiveSet}>
               {sets && sets.map(set => (
