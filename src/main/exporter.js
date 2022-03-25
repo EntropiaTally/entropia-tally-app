@@ -33,7 +33,7 @@ async function exportXls(sessionData) {
   let general = [];
   general.push(
     ['Session name', sessionData.sessionName],
-    ['Session created at', sessionData.sessionCreatedAt],
+    ['Run created at', sessionData.instanceCreatedAt],
     ['Run time (seconds)', sessionData.sessionTime],
     ['Total looted (PED)', totalLootValue],
     ['Kills/Loot events', killCount],
@@ -145,6 +145,16 @@ async function exportXls(sessionData) {
     sheets.push({ name: 'Loot (aggregated)', data: aggLoot, options: {'!cols': [{wch: 35}, {wch: 15}, {wch: 10}]} });
   }
 
+  if (events.lootEvent) {
+    const lootEvents = [['Date', 'Items']];
+    for (const lootEvent of events.lootEvent) {
+      const lootEventItems = lootEvent.items.map(item => `${item.name} (${item.amount})`);
+      lootEvents.push([lootEvent.date, lootEventItems.join(', ')]);
+    }
+
+    sheets.push({ name: 'Loot Events', data: lootEvents, options: {'!cols': [{wch: 19}, {wch: 100}]} });
+  }
+
   if (events.skills) {
     const skills = [['Date', 'Value', 'Skill']];
     for (const skill of events.skills) {
@@ -193,6 +203,15 @@ async function exportXls(sessionData) {
     }
 
     sheets.push({ name: 'Enhancer breaks', data: enhancerBreaks, options: {'!cols': [{wch: 19}, {wch: 10}, {wch: 10}, {wch: 30}, {wch: 30}]} });
+  }
+
+  if (aggregated.heal) {
+    const heals = [['Player', 'Total healed (hp)']];
+    for (const player of Object.keys(aggregated.heal)) {
+      heals.push([player, Number(aggregated.heal[player].total)]);
+    }
+
+    sheets.push({ name: 'Healing (aggregated)', data: heals, options: {'!cols': [{wch: 35}, {wch: 20}]} });
   }
 
   return sheets;

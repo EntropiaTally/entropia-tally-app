@@ -85,7 +85,6 @@ const HistoryModal = ({ session, sessions, isOpen, closeModal }) => {
   };
 
   const exportInstance = (sessionId, instanceId) => {
-    console.log('export', sessionId, instanceId);
     window.api.exportInstance(sessionId, instanceId).then(success => {
       if (!success) {
         console.error('FAILED TO EXPORT');

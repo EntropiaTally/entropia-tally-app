@@ -481,21 +481,22 @@ ipcMain.handle('export-instance', async (_event, { sessionId, instanceId }) => {
   const exportData = exportSession.getData();
   const exportSheets = await exportXls(exportData);
 
-  const buffer = xlsx.build(exportSheets);
-
   const options = {
     title: 'Save file',
-    defaultPath: `entropia_tally_run_${exportData.sessionCreatedAt.replaceAll(' ', '_').replaceAll(':', '')}.xls`,
+    defaultPath: `entropia_tally_run_${exportData.instanceCreatedAt.replaceAll(' ', '_').replaceAll(':', '')}.xls`,
     buttonLabel: 'Save',
 
     filters: [
-      {name: 'file', extensions: ['xls']},
+      {name: 'Excel (xls)', extensions: ['xls']},
       {name: 'All Files', extensions: ['*']},
     ],
   };
 
   return dialog.showSaveDialog(null, options)
-    .then(({ filePath }) => fs.writeFileSync(filePath, buffer, 'utf-8'))
+    .then(({ filePath }) => {
+      const buffer = xlsx.build(exportSheets);
+      fs.writeFileSync(filePath, buffer, 'utf-8');
+    })
     .then(() => true)
     .catch(() => false);
 });
@@ -686,6 +687,4 @@ ipcMain.handle('delete', async (_event, { type, id }) => {
 
   Menu.setApplicationMenu(menu);
   mainWindow = await createMainWindow();
-
-  // TestFunc('e7e272f9-6459-4447-984a-6a00d5a29108', '2e0f756c-e717-4c79-b037-13e238ed22ed');
 })();

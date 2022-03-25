@@ -445,6 +445,7 @@ class Session {
       instanceId: this.instanceId,
       sessionName: this.name,
       sessionCreatedAt: this.createdAt,
+      instanceCreatedAt: this.instanceCreatedAt,
       usedHuntingSets: this.config.usedHuntingSets,
       additionalCost: this.config.additionalCost,
       notes: this.notes,
