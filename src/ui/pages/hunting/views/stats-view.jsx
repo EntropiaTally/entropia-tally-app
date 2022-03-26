@@ -50,7 +50,7 @@ const StatsView = ({ avatarName, isKillCountEnabled }) => {
       const enemyMissCount = enemyAttackCount - enemyHitCount; // Enemy attacks that missed
 
       const playerAttackHitRate = makeNumber(damageInflictedCount / playerAttackCount) * 100;
-      const playerAttackCritRate = makeNumber(makeNumber(aggregated?.damageInflictedCrit?.count) / damageInflictedCount) * 100;
+      const playerAttackCritRate = makeNumber(damageInflictedCritCount / damageInflictedCount) * 100;
       const enemyAttackHitCritRate = makeNumber(damageTakenCritCount / enemyHitCount) * 100;
       const enemyAttackMissRate = makeNumber((playerEvadeCount + enemyMissCountValue) / enemyAttackCount) * 100;
 

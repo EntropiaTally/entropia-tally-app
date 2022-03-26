@@ -1,18 +1,21 @@
 'use strict';
 
 const { app, BrowserWindow, Menu, ipcMain, dialog, globalShortcut, shell } = require('electron');
+const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { is } = require('electron-util');
 const unhandled = require('electron-unhandled');
 const debug = require('electron-debug');
 const contextMenu = require('electron-context-menu');
+const xlsx = require('node-xlsx').default;
 
 const config = require('./main/config');
 const menu = require('./main/menu');
 const checkForUpdates = require('./main/updater');
 const Session = require('./main/session');
 const LogReader = require('./main/log-reader');
+const { exportXls } = require('./main/exporter');
 
 let mainWindow;
 let overlayWindow;
@@ -473,6 +476,31 @@ ipcMain.on('change-hunting-set', (_event, selectedHuntingSet) => {
   setSelectedHuntingSet(selectedHuntingSet);
 });
 
+ipcMain.handle('export-instance', async (_event, { sessionId, instanceId }) => {
+  const exportSession = await Session.Load(sessionId, instanceId);
+  const exportData = exportSession.getData();
+  const exportSheets = await exportXls(exportData);
+
+  const options = {
+    title: 'Save file',
+    defaultPath: `entropia_tally_run_${exportData.instanceCreatedAt.replaceAll(' ', '_').replaceAll(':', '')}.xlsx`,
+    buttonLabel: 'Save',
+
+    filters: [
+      {name: 'Excel (xlsx)', extensions: ['xlsx']},
+      {name: 'All Files', extensions: ['*']},
+    ],
+  };
+
+  return dialog.showSaveDialog(null, options)
+    .then(({ filePath }) => {
+      const buffer = xlsx.build(exportSheets);
+      fs.writeFileSync(filePath, buffer, 'utf-8');
+    })
+    .then(() => true)
+    .catch(() => false);
+});
+
 // Ipc Events with response
 
 ipcMain.handle('select-logfile', async () => {
@@ -647,6 +675,7 @@ ipcMain.handle('delete', async (_event, { type, id }) => {
 
 (async () => {
   await app.whenReady();
+
   session = await Session.Create();
   session.setHuntingSet(activeHuntingSet);
   session.emitter.on('session-updated', sessionForcedUpdate);

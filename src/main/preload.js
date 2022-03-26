@@ -48,6 +48,9 @@ contextBridge.exposeInMainWorld(
     selectLogFile() {
       return ipcRenderer.invoke('select-logfile');
     },
+    exportInstance(sessionId, instanceId) {
+      return ipcRenderer.invoke('export-instance', { sessionId, instanceId });
+    },
     removeListener: (eventName, callback) => {
       ipcRenderer.removeListener(eventName, callback);
     },
