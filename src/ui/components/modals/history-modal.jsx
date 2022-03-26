@@ -112,8 +112,8 @@ const HistoryModal = ({ session, sessions, isOpen, closeModal }) => {
   );
 
   const modifiedSessionInstances = sessionInstances.map(instance => {
-    if (instance.notes && instance.notes.length > 24) {
-      instance.notes = instance.notes.slice(0, 24) + '...';
+    if (instance.notes && instance.notes.length > 36) {
+      instance.notes = instance.notes.slice(0, 36) + '...';
     }
 
     return instance;
@@ -203,7 +203,7 @@ const HistoryModal = ({ session, sessions, isOpen, closeModal }) => {
             {modifiedSessionInstances.map(instance => (
               <tr key={instance.id}>
                 <td className="halfwidth">{formatLocalTime(instance.created_at)}</td>
-                <td className="halfwidth">{instance.notes}</td>
+                <td className="halfwidth">{instance.notes ? instance.notes : '-'}</td>
                 <td className="has-text-right">
                   <a className="table-action" onClick={() => onLoadSessionInstance(instance.session_id, instance.id)}>Load</a>
                   <a className="table-action has-text-info" onClick={() => moveModalOpen(instance.id)}>Move</a>

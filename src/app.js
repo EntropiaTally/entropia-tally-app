@@ -483,11 +483,11 @@ ipcMain.handle('export-instance', async (_event, { sessionId, instanceId }) => {
 
   const options = {
     title: 'Save file',
-    defaultPath: `entropia_tally_run_${exportData.instanceCreatedAt.replaceAll(' ', '_').replaceAll(':', '')}.xls`,
+    defaultPath: `entropia_tally_run_${exportData.instanceCreatedAt.replaceAll(' ', '_').replaceAll(':', '')}.xlsx`,
     buttonLabel: 'Save',
 
     filters: [
-      {name: 'Excel (xls)', extensions: ['xls']},
+      {name: 'Excel (xlsx)', extensions: ['xlsx']},
       {name: 'All Files', extensions: ['*']},
     ],
   };
