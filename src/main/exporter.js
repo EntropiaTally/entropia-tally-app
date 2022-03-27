@@ -40,7 +40,7 @@ async function exportXls(sessionData) {
     instanceHuntingSets = Object.values(fixedSets).filter(set => set.hits || set.misses);
   }
 
-  const { totalCost, totalWeaponCost, resultValue, resultRate } = calculateReturns(
+  const { totalCost, resultValue, resultRate } = calculateReturns(
     instanceHuntingSets,
     totalLootValue,
     additionalCost,
