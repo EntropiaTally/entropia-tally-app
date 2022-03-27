@@ -51,11 +51,7 @@ contextBridge.exposeInMainWorld(
     exportInstance(sessionId, instanceId) {
       return ipcRenderer.invoke('export-instance', { sessionId, instanceId });
     },
-    removeListener: (eventName, callback) => {
-      ipcRenderer.removeListener(eventName, callback);
-    },
-    removeAllListeners: eventName => {
-      ipcRenderer.removeAllListeners(eventName);
-    },
+    removeListener: (eventName, callback) => ipcRenderer.removeListener(eventName, callback),
+    removeAllListeners: eventName => ipcRenderer.removeAllListeners(eventName),
   },
 );

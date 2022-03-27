@@ -45,7 +45,7 @@
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-react": "^7.16.7",
     "babel-loader": "^8.2.4",
-    "concurrently": "^6.5.0",
+    "concurrently": "^7.0.0",
     "electron": "^17.2.0",
     "electron-builder": "^22.14.13",
     "eslint-config-xo-react": "^0.27.0",
@@ -76,7 +76,8 @@
       "node/file-extension-in-import": 0,
       "import/extensions": 0,
       "react/jsx-tag-spacing": 0,
-      "node/prefer-global/process": 0
+      "node/prefer-global/process": 0,
+      "react/function-component-definition": 0
     }
   },
   "build": {
