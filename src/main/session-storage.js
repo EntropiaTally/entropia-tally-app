@@ -6,35 +6,57 @@ const db = require('./database');
 const Session = require('./session');
 
 const SessionStorage = {
+  ALL_DATA_QUERY: 'SELECT s.id, si.id AS instanceId, s.name, s.created_at AS createdAt, si.created_at AS instanceCreatedAt, si.events, si.aggregated, si.config, si.notes, si.run_time AS sessionTime FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE',
+
+  prepareLoaded(sessionData) {
+    const { name, createdAt, instanceCreatedAt, sessionTime } = sessionData;
+    const options = {
+      name,
+      createdAt,
+      instanceCreatedAt,
+      sessionTime,
+    };
+
+    const config = sessionData?.config
+      ? JSON.parse(sessionData.config)
+      : null;
+
+    const events = sessionData?.events
+      ? JSON.parse(sessionData.events)
+      : {};
+
+    const aggregated = sessionData?.aggregated
+      ? JSON.parse(sessionData.aggregated)
+      : {};
+
+    const notes = sessionData?.notes ?? null;
+
+    return { options, config, events, aggregated, notes };
+  },
+
   async Load(id, instanceId = null) {
-    const data = await (instanceId
-      ? db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.created_at AS instance_created_at, si.events, si.aggregated, si.config, si.notes, si.run_time FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ? AND si.id = ?', [id, instanceId])
-      : db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.created_at AS instance_created_at, si.events, si.aggregated, si.config, si.notes, si.run_time FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ?', [id]));
+    const query = [SessionStorage.ALL_DATA_QUERY, 's.id = ?'];
+    const conditions = [id];
 
-    const options = { name: data?.name, createdAt: data?.created_at, instanceCreatedAt: data?.instance_created_at, sessionTime: data?.run_time };
-    const config = data?.config ? JSON.parse(data.config) : 0;
-
-    const instance = new Session(id, data?.instance_id, options, config);
-
-    if (data?.events) {
-      instance.events = JSON.parse(data.events);
+    if (instanceId) {
+      query.push('AND si.id = ?');
+      conditions.push(instanceId);
     }
 
-    if (data?.aggregated) {
-      instance.aggregated = JSON.parse(data.aggregated);
-    }
+    const data = await db.get(query.join(' '), conditions);
 
-    if (data?.notes) {
-      instance.notes = data.notes;
-    }
+    const { options, config, events, aggregated, notes } = SessionStorage.prepareLoaded(data);
+
+    const instance = new Session(id, instanceId, options, config);
+    instance.events = events;
+    instance.aggregated = aggregated;
+    instance.notes = notes;
 
     return instance;
   },
 
-  async Create(name = null, config = null) {
-    const id = uuidv4();
-    const options = { name };
-    const instance = new Session(id, null, options, config);
+  async Create(options = {}, config = {}) {
+    const instance = new Session(uuidv4(), null, options, config);
     return instance;
   },
 
@@ -44,20 +66,24 @@ const SessionStorage = {
   },
 
   async FetchInstances(id) {
-    const rows = await db.all('SELECT id, session_id, created_at, aggregated, config, notes, run_time FROM session_instances WHERE session_id = ? ORDER BY DATETIME(created_at) DESC', [id]);
+    const rows = await db.all('SELECT id, session_id, created_at, events, aggregated, config, notes, run_time FROM session_instances WHERE session_id = ? ORDER BY DATETIME(created_at) DESC', [id]);
     return rows.map(row => {
-      row.aggregated = JSON.parse(row.aggregated);
-      row.config = JSON.parse(row.config);
+      const { config, events, aggregated } = SessionStorage.prepareLoaded(row);
+
+      row.config = config;
+      row.events = events;
+      row.aggregated = aggregated;
+
       return row;
     });
   },
 
   async Delete(id) {
     let success = true;
-
+    const condition = [id];
     try {
-      await db.all('DELETE FROM session_instances WHERE session_id = ?', [id]);
-      await db.all('DELETE FROM sessions WHERE id = ?', [id]);
+      await db.all('DELETE FROM session_instances WHERE session_id = ?', condition);
+      await db.all('DELETE FROM sessions WHERE id = ?', condition);
     } catch (error) {
       success = false;
       console.error(error);
@@ -68,11 +94,12 @@ const SessionStorage = {
 
   async DeleteInstance(id) {
     let success = true;
+    const condition = [id];
 
-    const { session_id: sessionId } = await db.get('SELECT session_id FROM session_instances WHERE id = ?', [id]);
+    const { session_id: sessionId } = await db.get('SELECT session_id FROM session_instances WHERE id = ?', condition);
 
     try {
-      await db.all('DELETE FROM session_instances WHERE id = ?', [id]);
+      await db.all('DELETE FROM session_instances WHERE id = ?', condition);
     } catch (error) {
       success = false;
       console.error(error);
