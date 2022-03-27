@@ -13,7 +13,7 @@ const xlsx = require('node-xlsx').default;
 const config = require('./main/config');
 const menu = require('./main/menu');
 const checkForUpdates = require('./main/updater');
-const Session = require('./main/session');
+const SessionStorage = require('./main/session-storage');
 const LogReader = require('./main/log-reader');
 const { exportXls } = require('./main/exporter');
 
@@ -305,7 +305,7 @@ async function startNewSession(emit = true) {
   setDefaultHuntingSet();
 
   session.emitter.removeAllListeners();
-  session = await Session.Create();
+  session = await SessionStorage.Create();
   session.setHuntingSet(activeHuntingSet);
   session.emitter.on('session-updated', sessionForcedUpdate);
   session.emitter.on('session-time-updated', sessionTimeUpdated);
@@ -415,7 +415,7 @@ ipcMain.on('load-instance', async (_event, { sessionId, instanceId }) => {
   if (session) {
     session.emitter.removeAllListeners();
     const selectedInstanceId = (instanceId === 'new') ? null : instanceId;
-    session = await Session.Load(sessionId, selectedInstanceId);
+    session = await SessionStorage.Load(sessionId, selectedInstanceId);
 
     if (instanceId === 'new') {
       session.createNewInstance();
@@ -450,10 +450,10 @@ ipcMain.on('move-instance', async (_event, { targetSessionId, instanceId }) => {
   }
 
   if (instanceId && targetSessionId) {
-    await Session.MoveInstance(instanceId, targetSessionId);
+    await SessionStorage.MoveInstance(instanceId, targetSessionId);
 
     if (session.instanceId === instanceId) {
-      session = await Session.Load(targetSessionId, instanceId);
+      session = await SessionStorage.Load(targetSessionId, instanceId);
     }
   }
 });
@@ -477,7 +477,7 @@ ipcMain.on('change-hunting-set', (_event, selectedHuntingSet) => {
 });
 
 ipcMain.handle('export-instance', async (_event, { sessionId, instanceId }) => {
-  const exportSession = await Session.Load(sessionId, instanceId);
+  const exportSession = await SessionStorage.Load(sessionId, instanceId);
   const exportData = exportSession.getData();
   const exportSheets = await exportXls(exportData);
 
@@ -537,14 +537,14 @@ ipcMain.handle('get-data', async (_event, { dataType, args }) => {
       response = session ? session.getData() : {};
       break;
     case 'session':
-      loadedSession = await Session.Load(args.id, args?.instanceId);
+      loadedSession = await SessionStorage.Load(args.id, args?.instanceId);
       response = loadedSession.getData();
       break;
     case 'sessions':
-      response = await Session.FetchAll();
+      response = await SessionStorage.FetchAll();
       break;
     case 'instances':
-      response = await Session.FetchInstances(args.id);
+      response = await SessionStorage.FetchInstances(args.id);
       break;
     case 'overlay-window-status':
       response = overlayWindow && overlayWindow.isVisible() ? 'enabled' : 'disabled';
@@ -649,9 +649,9 @@ ipcMain.handle('delete', async (_event, { type, id }) => {
   const currentSessionData = session ? session.getData(false) : null;
 
   if (type === 'session') {
-    status = await Session.Delete(id);
+    status = await SessionStorage.Delete(id);
   } else if (type === 'instance') {
-    status = await Session.DeleteInstance(id);
+    status = await SessionStorage.DeleteInstance(id);
   }
 
   if (status.success) {
@@ -676,7 +676,7 @@ ipcMain.handle('delete', async (_event, { type, id }) => {
 (async () => {
   await app.whenReady();
 
-  session = await Session.Create();
+  session = await SessionStorage.Create();
   session.setHuntingSet(activeHuntingSet);
   session.emitter.on('session-updated', sessionForcedUpdate);
   session.emitter.on('session-time-updated', sessionTimeUpdated);
