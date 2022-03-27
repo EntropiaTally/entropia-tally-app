@@ -1,3 +1,5 @@
+const { aggregateHuntingSetData, calculateReturns } = require('../utils/helpers');
+
 function makeNumber(value) {
   return value || 0;
 }
@@ -30,12 +32,25 @@ async function exportXls(sessionData) {
   const playerAttackHitRate = makeNumber(damageInflictedCount / playerAttackCount) * 100;
   const playerAttackCritRate = makeNumber(damageInflictedCritCount / damageInflictedCount) * 100;
 
+  const additionalCost = sessionData?.additionalCost ?? 0;
+
+  let instanceHuntingSets = [];
+  if (sessionData.usedHuntingSets) {
+    const fixedSets = aggregateHuntingSetData(sessionData?.usedHuntingSets, aggregated);
+    instanceHuntingSets = Object.values(fixedSets).filter(set => set.hits || set.misses);
+  }
+
+  const { totalCost, resultValue, resultRate } = calculateReturns(
+    instanceHuntingSets,
+    totalLootValue,
+    additionalCost,
+  );
+
   let general = [];
   general.push(
     ['Session name', sessionData.sessionName],
     ['Run created at', sessionData.instanceCreatedAt],
     ['Run time (seconds)', sessionData.sessionTime],
-    ['Total looted (PED)', totalLootValue],
     ['Kills/Loot events', killCount],
     [''],
     ['Offensive stats'],
@@ -58,7 +73,19 @@ async function exportXls(sessionData) {
     ['Enemy attacks', enemyAttackCount],
     ['Enemy hit count', enemyHitCount],
     ['Enemy miss count', enemyMissCount],
+    [''],
+    ['Returns'],
+    ['Total spent', totalCost],
+    ['Total looted (PED)', totalLootValue],
+    ['Additional cost (PED)', additionalCost],
   );
+
+  if (resultRate !== null) {
+    general.push(
+      ['Returns (PED)', resultValue],
+      ['Returns rate', `${resultRate?.toFixed(4)}%`],
+    );
+  }
 
   if (sessionData.usedHuntingSets) {
     const huntingSets = [];
