@@ -58,11 +58,7 @@ class Session extends SessionBase {
   }
 
   newEvent(eventData, updateDb = false, customIgnoreList = []) {
-    const eventName = eventData.event
-      .split('_')
-      .map(event => event[0].toUpperCase() + event.slice(1))
-      .join('');
-
+    const eventName = this.snakeToCamel(eventData.event);
     this.customIgnoreList = customIgnoreList;
 
     this?.[`event${eventName}`]?.(eventData);
