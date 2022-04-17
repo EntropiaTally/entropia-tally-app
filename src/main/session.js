@@ -30,6 +30,19 @@ class Session extends SessionBase {
     }
   }
 
+  snakeToCamel(snakeString, capital = true) {
+    let camelString = snakeString
+      .split('_')
+      .map(part => part[0].toUpperCase() + part.slice(1))
+      .join('');
+
+    if (!capital) {
+      camelString = camelString.charAt(0).toLowerCase() + camelString.slice(1);
+    }
+
+    return camelString;
+  }
+
   setHuntingSet(huntingSet) {
     if (huntingSet && huntingSet.id) {
       if (!this.config.usedHuntingSets) {
@@ -52,8 +65,7 @@ class Session extends SessionBase {
 
     this.customIgnoreList = customIgnoreList;
 
-    const handler = `handle${eventName}Event`;
-    this?.[handler]?.(eventData);
+    this?.[`event${eventName}`]?.(eventData);
 
     return updateDb ? this.updateDb() : Promise.resolve();
   }
@@ -169,7 +181,7 @@ class Session extends SessionBase {
     }
   }
 
-  handleLootEvent(data) {
+  eventLoot(data) {
     const { name, amount, value } = data.values;
 
     if (Session.IGNORE_LOOT.includes(name) || this.customIgnoreList.includes(name)) {
@@ -208,88 +220,49 @@ class Session extends SessionBase {
     }
   }
 
-  handleRareLootEvent(data) {
-    this.dataPoint('rareLoot', data);
-    this.aggregate('rareLoot', data.values.item, data.values.value);
+  eventSpecialLoot(data) {
+    const keyName = this.snakeToCamel(data.values.type, false);
+    // TODO: Remove when ready to use new keys
+    const temporaryReplaceMe = {
+      hallOfFame: 'hofs',
+      global: 'globals',
+      rareLoot: 'rareLoot',
+    };
+
+    this.dataPoint(temporaryReplaceMe[keyName], data);
+    this.aggregate(temporaryReplaceMe[keyName], data.values.item, data.values.value);
   }
 
-  handleGlobalEvent(data) {
-    this.dataPoint('globals', data);
-    this.aggregate('globals', null, data.values.value);
-  }
+  eventDamageInflicted(data) {
+    const { amount, critical } = data.values;
+    this.aggregate('damageInflicted', null, amount);
 
-  handleHallOfFameEvent(data) {
-    this.dataPoint('hofs', data);
-    this.aggregate('hofs', null, data.values.value);
-  }
-
-  handleSkillEvent(data) {
-    this.dataPoint('skills', data);
-    this.aggregate('skills', data.values.name, data.values.value);
-  }
-
-  handleAttributeEvent(data) {
-    this.dataPoint('attributes', data);
-    this.aggregate('attributes', data.values.name, data.values.value);
-  }
-
-  handleDamageInflictedEvent(data) {
-    this.aggregate('damageInflicted', null, data.values.amount);
-
-    if (data.values.critical === '1') {
-      this.aggregate('damageInflictedCrit', null, data.values.amount);
+    if (critical) {
+      this.aggregate('damageInflictedCrit', null, amount);
     }
 
     if (this.currentHuntingSet) {
-      this.aggregate('huntingSetDmg', this.currentHuntingSet, data.values.amount);
+      this.aggregate('huntingSetDmg', this.currentHuntingSet, amount);
     }
   }
 
-  handleDamageTakenEvent(data) {
-    this.aggregate('damageTaken', null, data.values.amount);
+  eventDamageTaken(data) {
+    const { amount, critical } = data.values;
+    this.aggregate('damageTaken', null, amount);
 
-    if (data.values.critical === '1') {
-      this.aggregate('damageTakenCrit', null, data.values.amount);
+    if (critical) {
+      this.aggregate('damageTakenCrit', null, amount);
     }
   }
 
-  handleEnemyMissEvent() {
-    this.aggregate('enemyMiss', null, 1);
+  eventPlayerEvade(data) {
+    // Evade, Dodge, Deflect
+    const evadeType = this.snakeToCamel(data.values.reason);
+
+    this.aggregate(`player${evadeType}`, null, 1);
   }
 
-  handleEnemyEvadeEvent() {
-    this.aggregate('enemyEvade', null, 1);
-
-    if (this.currentHuntingSet) {
-      this.aggregate('huntingSetMissed', this.currentHuntingSet, 1);
-    }
-  }
-
-  handleEnemyDodgeEvent() {
-    this.aggregate('enemyDodge', null, 1);
-
-    if (this.currentHuntingSet) {
-      this.aggregate('huntingSetMissed', this.currentHuntingSet, 1);
-    }
-  }
-
-  handleEnemyJamEvent() {
-    this.aggregate('enemyJam', null, 1);
-
-    if (this.currentHuntingSet) {
-      this.aggregate('huntingSetMissed', this.currentHuntingSet, 1);
-    }
-  }
-
-  handlePlayerDodgeEvent() {
-    this.aggregate('playerDodge', null, 1);
-  }
-
-  handlePlayerEvadeEvent() {
-    this.aggregate('playerEvade', null, 1);
-  }
-
-  handlePlayerMissEvent() {
+  eventPlayerMiss() {
     this.aggregate('playerMiss', null, 1);
 
     if (this.currentHuntingSet) {
@@ -297,25 +270,41 @@ class Session extends SessionBase {
     }
   }
 
-  handlePlayerDeflectEvent() {
-    this.aggregate('playerDeflect', null, 1);
+  eventEnemyEvade(data) {
+    // Evade, Dodge, Jam
+    const evadeType = this.snakeToCamel(data.values.reason);
+    this.aggregate(`enemy${evadeType}`, null, 1);
+
+    if (this.currentHuntingSet) {
+      this.aggregate('huntingSetMissed', this.currentHuntingSet, 1);
+    }
   }
 
-  handleHealEvent(data) {
-    this.aggregate('heal', data.values.target, data.values.amount);
+  eventEnemyMiss() {
+    this.aggregate('enemyMiss', null, 1);
   }
 
-  handlePositionEvent(data) {
-    this.dataPoint('position', data);
+  eventPointsGained(data) {
+    const { type } = data.values;
+    this.dataPoint(`${type}s`, data);
+    this.aggregate(`${type}s`, data.values.name, data.values.value);
   }
 
-  handleTierUpEvent(data) {
+  eventEnhancerBreak(data) {
+    this.dataPoint('enhancerBreak', data);
+  }
+
+  eventTierUp(data) {
     this.dataPoint('tierUp', data);
     this.aggregate('tierUp', data.values.item, 0.01);
   }
 
-  handleEnhancerBreakEvent(data) {
-    this.dataPoint('enhancerBreak', data);
+  eventHeal(data) {
+    this.aggregate('heal', data.values.target, data.values.amount);
+  }
+
+  eventPosition(data) {
+    this.dataPoint('position', data);
   }
 }
 
