@@ -13,6 +13,7 @@ const xlsx = require('node-xlsx').default;
 const config = require('./main/config');
 const menu = require('./main/menu');
 const checkForUpdates = require('./main/updater');
+const appEvents = require('./main/app-events');
 const SessionStorage = require('./main/session-storage');
 const LogReader = require('./main/log-reader');
 const { exportXls } = require('./main/exporter');
@@ -175,6 +176,59 @@ app.on('activate', async () => {
   }
 });
 
+
+/**
+ * REFACTOR STUFF 
+ */
+
+
+function sendToWindow(event, data) {
+  mainWindow.webContents.send(event, data);
+
+  if (overlayWindow) {
+    overlayWindow.webContents.send(event, data);
+  }
+}
+
+function sendEventToWindow(data) {
+  sendToWindow('event', data)
+}
+
+appEvents.on('session:updated', (data) => {
+  sendEventToWindow({ type: 'session:updated', data });
+});
+
+appEvents.on('settings:updated', (data) => {
+  sendEventToWindow({ type: 'settings:updated', data });
+});
+
+ipcMain.on('event', (_event, { eventKey, options }) => {
+  console.log(eventKey, options)
+  appEvents.emit(eventKey, options);
+});
+
+ipcMain.handle('direct', async (_event, { eventKey, options }) => {
+  return true;
+});
+
+logReader.on('event', receivedLoggerEvent);
+
+/*setInterval(() => {
+  logReader.stop();
+  logReader.start();
+}, 5000);*/
+
+setTimeout(() => {
+  //logReader.stop();
+  logReader.start();
+}, 5000);
+
+appEvents.on('settings:update')
+
+/**
+ * END REFACTOR STUFF
+ */
+
 function registerShortcuts() {
   const huntingSets = config.get('huntingSets', []);
   const registrationStatus = {};
@@ -215,6 +269,7 @@ function registerShortcuts() {
   }
 }
 
+
 // Functions
 
 function getSettings() {
@@ -248,7 +303,9 @@ function setDefaultHuntingSet() {
 }
 
 function receivedLoggerEvent({ data, lastLine }) {
-  session.newEvent(data, false, customIgnoreList).then(() => {
+  appEvents.emit('logger:event', data, true, customIgnoreList);
+
+  /*session.newEvent(data, false, customIgnoreList).then(() => {
     // Only send the complete package
     if (lastLine) {
       const sessionData = session.getData();
@@ -263,7 +320,7 @@ function receivedLoggerEvent({ data, lastLine }) {
         overlayWindow.webContents.send('session-data-updated-events', sessionData?.events);
       }
     }
-  });
+  });*/
 }
 
 function sessionTimeUpdated(seconds) {

@@ -55,3 +55,24 @@ contextBridge.exposeInMainWorld(
     removeAllListeners: eventName => ipcRenderer.removeAllListeners(eventName),
   },
 );
+
+contextBridge.exposeInMainWorld(
+  'api2', {
+    on(eventName, callback) {
+      const subscription = (event, data) => callback(data);
+      ipcRenderer.on(eventName, subscription);
+
+      return () => {
+        ipcRenderer.removeListener(eventName, subscription);
+      };
+    },
+    get(dataType, args) {
+      return ipcRenderer.invoke('get-data', { dataType, args });
+    },
+    call(action, args = {}) {
+      ipcRenderer.send(action, args);
+    },
+    removeListener: (eventName, callback) => ipcRenderer.removeListener(eventName, callback),
+    removeAllListeners: eventName => ipcRenderer.removeAllListeners(eventName),
+  },
+);
