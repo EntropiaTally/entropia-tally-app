@@ -1,14 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useContext, createContext } from 'react';
 import { MemoryRouter as Router } from 'react-router-dom';
-import { styled } from '@mui/material/styles';
+import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import {
   Box,
-  Button,
   CssBaseline,
   List,
   ListItem,
+  ListItemButton,
+  ListItemText,
   Drawer,
+  Typography,
+  Divider,
 } from '@mui/material';
+
+const themeDark = createTheme({
+  palette: {
+    type: 'dark',
+    primary: {
+      main: '#43a047',
+    },
+    secondary: {
+      main: '#f50057',
+    },
+    background: {
+      default: '#505050',
+      paper: '#424242',
+    },
+    sidebar: {
+      text: '#ffffff',
+      divider: 'rgba(255, 255, 255, 0.12)',
+    },
+  },
+});
+
+const themeLight = createTheme({
+  palette: {
+    type: 'light',
+    primary: {
+      main: '#ff0000',
+    },
+    secondary: {
+      main: '#f50057',
+    },
+    background: {
+      default: '#f5f5f5',
+      paper: '#424242',
+    },
+    sidebar: {
+      text: '#ffffff',
+      divider: 'rgba(255, 255, 255, 0.12)',
+    },
+  },
+});
+
+const ColorModeContext = createContext({
+  toggleColorMode() {},
+  setColorMode() {},
+});
 
 const drawerWidth = 240;
 
@@ -52,34 +100,59 @@ const CustomDrawer = styled(Drawer, { shouldForwardProp: prop => prop !== 'open'
 
 const Nav = () => {
   const [open, setOpen] = useState(true);
+  const colorMode = useContext(ColorModeContext);
 
   return (
     <CustomDrawer variant="permanent" open={open}>
-      <h1>Entropia Tally</h1>
-      <List>
+      <Typography variant="h5" sx={{ mx: 2, my: 1, color: 'sidebar.text' }}>Entropia Tally</Typography>
+      <Divider sx={{ backgroundColor: 'sidebar.divider' }} />
+      <List sx={{ color: 'sidebar.text' }}>
         {['Current run', 'New Run', 'New Session', 'History'].map((text, _index) => (
           <ListItem key={text} button>
             {text}
           </ListItem>
         ))}
       </List>
-      <Button onClick={() => setOpen(!open)}>
-        Toggle
-      </Button>
+      <Divider sx={{ backgroundColor: 'sidebar.divider' }} />
+      <List style={{ marginTop: 'auto' }} >
+        <ListItem>
+          <ListItemButton variant="outlined" onClick={() => colorMode.toggleColorMode()}>
+            <ListItemText primary="Toggle darkmode" />
+          </ListItemButton>
+        </ListItem>
+        <ListItem>
+          <ListItemButton variant="outlined" onClick={() => setOpen(!open)}>
+            <ListItemText primary="Toggle size" sx={{ opacity: open ? 1 : 0 }} />
+          </ListItemButton>
+        </ListItem>
+      </List>
     </CustomDrawer>
   );
 };
 
-const App = () => (
-  <Router>
-    <CssBaseline />
-    <Box sx={{ display: 'flex' }}>
-      <Nav />
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        Main content
-      </Box>
-    </Box>
-  </Router>
-);
+const App = () => {
+  const [mode, setMode] = useState('light');
+  const colorMode = React.useMemo(() => ({
+    toggleColorMode: () => setMode(previousMode => (previousMode === 'light' ? 'dark' : 'light')),
+    setColorMode: newMode => setMode(newMode),
+  }), []);
+  const theme = useMemo(() => mode === 'dark' ? themeDark : themeLight, [mode]);
+
+  return (
+    <ColorModeContext.Provider value={colorMode}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Router>
+          <Box sx={{ display: 'flex' }}>
+            <Nav />
+            <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+              Main content
+            </Box>
+          </Box>
+        </Router>
+      </ThemeProvider>
+    </ColorModeContext.Provider>
+  );
+};
 
 export default App;
