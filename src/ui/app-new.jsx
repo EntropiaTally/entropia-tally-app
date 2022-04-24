@@ -26,7 +26,7 @@ const EventManager = () => {
   useEffect(() => {
     const newData = (eventData) => {
       const { type, data } = eventData;
-      console.log(type, data)
+      //console.log(type, data)
       
       if (type === "session:updated") {
         setActiveSessionAggregated(data.aggregated);
@@ -40,7 +40,8 @@ const EventManager = () => {
     const eventListener = window.api2.on('event', newData);
 
     setTimeout(() => {
-      window.api2.call('event', { eventKey: 'session:data:get' });
+      window.api2.request('session:data');
+      //window.api2.call('event', { eventKey: 'session:data:get' });
     }, 5000)
 
     return () => eventListener.removeListener(); 
@@ -52,9 +53,7 @@ const EventManager = () => {
 const App = () => {
   return (
     <RecoilRoot>
-      <div>
-        <Test />
-      </div>
+      <Test />
       <EventManager />
     </RecoilRoot>
   );

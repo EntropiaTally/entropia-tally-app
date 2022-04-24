@@ -18,7 +18,7 @@
     "build": "webpack --mode production",
     "build-dev": "webpack --mode development",
     "watch": "webpack --mode development --watch",
-    "dev": "yarn build-dev && concurrently \"electron .\" \"BROWSER=none yarn watch\"",
+    "dev": "yarn build-dev && concurrently \"electron --ozone-platform=wayland .\" \"BROWSER=none yarn watch\"",
     "pack": "electron-builder --dir",
     "dist": "electron-builder --linux --win"
   },

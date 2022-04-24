@@ -72,6 +72,9 @@ contextBridge.exposeInMainWorld(
     call(action, args = {}) {
       ipcRenderer.send(action, args);
     },
+    request(key, args = {}) {
+      ipcRenderer.send('request', { key, args });
+    },
     removeListener: (eventName, callback) => ipcRenderer.removeListener(eventName, callback),
     removeAllListeners: eventName => ipcRenderer.removeAllListeners(eventName),
   },

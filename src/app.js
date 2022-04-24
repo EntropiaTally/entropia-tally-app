@@ -202,9 +202,9 @@ appEvents.on('settings:updated', (data) => {
   sendEventToWindow({ type: 'settings:updated', data });
 });
 
-ipcMain.on('event', (_event, { eventKey, options }) => {
-  console.log(eventKey, options)
-  appEvents.emit(eventKey, options);
+ipcMain.on('request', (_event, { key, args }) => {
+  console.log(key, args)
+  appEvents.emit(key, args);
 });
 
 ipcMain.handle('direct', async (_event, { eventKey, options }) => {
@@ -223,7 +223,7 @@ setTimeout(() => {
   logReader.start();
 }, 5000);
 
-appEvents.on('settings:update')
+//appEvents.on('settings:update')
 
 /**
  * END REFACTOR STUFF

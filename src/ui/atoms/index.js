@@ -1,4 +1,4 @@
-import { atom, selector } from 'recoil';
+import { atom, selector, selectorFamily } from 'recoil';
 
 export const activeSessionState = atom({
   key: 'activeSessionState',
@@ -23,6 +23,40 @@ export const activeSessionEventState = atom({
 export const settingsState = atom({
   key: 'settingsState',
   default: {},
+});
+
+export const lootState = selector({
+  key: 'lootState', // unique ID (with respect to other atoms/selectors)
+  get: ({ get }) => {
+    const aggregated = get(activeSessionAggregatedState);
+
+    return JSON.stringify(aggregated.loot);
+  },
+});
+
+export const skillState = selector({
+  key: 'skillState', // unique ID (with respect to other atoms/selectors)
+  get: ({ get }) => {
+    const aggregated = get(activeSessionAggregatedState);
+
+    return JSON.stringify(aggregated.skills);
+  },
+});
+
+export const lootCacheState = selectorFamily({
+  key: 'lootCacheState',
+  get: () => ({get}) => {
+    const lootStateString = get(lootState);
+    return lootStateString ? JSON.parse(lootStateString) : {};
+  },
+});
+
+export const skillCacheState = selectorFamily({
+  key: 'skillCacheState',
+  get: () => ({get}) => {
+    const skillStateString = get(skillState);
+    return skillStateString ? JSON.parse(skillStateString) : {};
+  },
 });
 
 /*export const sessionOneState = selector({
