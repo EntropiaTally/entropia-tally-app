@@ -18,7 +18,7 @@
     "build": "webpack --mode production",
     "build-dev": "webpack --mode development",
     "watch": "webpack --mode development --watch",
-    "dev": "yarn build-dev && concurrently \"electron --ozone-platform=wayland .\" \"BROWSER=none yarn watch\"",
+    "dev": "yarn build-dev && concurrently \"electron --enable-features=WaylandWindowDecorations --ozone-platform=wayland .\" \"BROWSER=none yarn watch\"",
     "pack": "electron-builder --dir",
     "dist": "electron-builder --linux --win"
   },
@@ -49,7 +49,7 @@
     "@babel/preset-react": "^7.16.7",
     "babel-loader": "^8.2.4",
     "concurrently": "^7.0.0",
-    "electron": "^17.2.0",
+    "electron": "^18.2.0",
     "electron-builder": "^22.14.13",
     "eslint-config-xo-react": "^0.27.0",
     "eslint-plugin-react": "^7.29.4",
