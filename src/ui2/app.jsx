@@ -28,7 +28,7 @@ const App = () => {
         <Router>
           <Box sx={{ display: 'flex' }}>
             <Sidebar />
-            <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+            <Box component="main" sx={{ flexGrow: 1 }}>
               <Routes>
                 <Route exact path="/settings" element={<Settings />} />
                 <Route exact path="/" element={<MainContent />} />
