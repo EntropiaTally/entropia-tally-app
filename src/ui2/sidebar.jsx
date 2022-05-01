@@ -1,15 +1,20 @@
 import React, { useState, useContext } from 'react';
+import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import {
   List,
-  ListItem,
   ListItemButton,
   ListItemText,
   Drawer,
   Typography,
   Divider,
 } from '@mui/material';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import SettingsIcon from '@mui/icons-material/Settings';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import ToggleOffIcon from '@mui/icons-material/ToggleOff';
 
 import { ColorModeContext } from './contexts.js';
 
@@ -31,9 +36,6 @@ const closedMixin = theme => ({
   }),
   overflowX: 'hidden',
   width: `calc(${theme.spacing(7)} + 1px)`,
-  [theme.breakpoints.up('sm')]: {
-    width: `calc(${theme.spacing(8)} + 1px)`,
-  },
 });
 
 const CustomDrawer = styled(Drawer, { shouldForwardProp: prop => prop !== 'open' })(
@@ -53,6 +55,41 @@ const CustomDrawer = styled(Drawer, { shouldForwardProp: prop => prop !== 'open'
   }),
 );
 
+const SidebarItem = ({ text, isOpen, icon, onClick }) => (
+  <ListItemButton
+    sx={{
+      minHeight: 48,
+      justifyContent: isOpen ? 'initial' : 'center',
+      px: 2.5,
+    }}
+    onClick={onClick}
+  >
+    <ListItemIcon
+      sx={{
+        minWidth: 0,
+        mr: isOpen ? 3 : 'auto',
+        justifyContent: 'center',
+      }}
+    >
+      {icon}
+    </ListItemIcon>
+    <ListItemText primary={text} sx={{ opacity: isOpen ? 1 : 0 }} />
+  </ListItemButton>
+);
+
+SidebarItem.defaultProps = {
+  isOpen: true,
+  icon: null,
+  onClick: null,
+};
+
+SidebarItem.propTypes = {
+  text: PropTypes.string.isRequired,
+  isOpen: PropTypes.bool,
+  icon: PropTypes.any,
+  onClick: PropTypes.func,
+};
+
 const Sidebar = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(true);
@@ -62,32 +99,49 @@ const Sidebar = () => {
 
   return (
     <CustomDrawer variant="permanent" open={open} PaperProps={{ sx: { backgroundColor: 'background.sidebar' }}}>
-      <Typography variant="h5" sx={{ mx: 2, my: 1, color: 'sidebar.text' }}>Entropia Tally</Typography>
+      <Typography
+        variant="h6"
+        sx={{ mx: 2, my: 1, color: 'sidebar.text' }}
+      >
+        Entropia Tally
+      </Typography>
+
       <Divider sx={{ backgroundColor: 'sidebar.divider' }} />
+
       <List sx={{ color: 'sidebar.text' }}>
         {['Current run', 'New Run', 'New Session', 'History'].map((text, _index) => (
-          <ListItem key={text} button>
-            {text}
-          </ListItem>
+          <SidebarItem
+            key={text}
+            text={text}
+            isOpen={open}
+            icon={<PlayArrowIcon color="sidebar" />}
+          />
         ))}
       </List>
+
       <Divider sx={{ backgroundColor: 'sidebar.divider' }} />
-      <List style={{ marginTop: 'auto' }} >
-        <ListItem>
-          <ListItemButton variant="outlined" onClick={() => colorMode.toggleColorMode()}>
-            <ListItemText primary="Toggle darkmode" />
-          </ListItemButton>
-        </ListItem>
-        <ListItem>
-          <ListItemButton variant="outlined" onClick={() => setOpen(!open)}>
-            <ListItemText primary="Toggle size" sx={{ opacity: open ? 1 : 0 }} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem>
-          <ListItemButton variant="outlined" onClick={openSettings}>
-            <ListItemText primary="Settings" sx={{ opacity: open ? 1 : 0 }} />
-          </ListItemButton>
-        </ListItem>
+
+      <List sx={{ color: 'sidebar.text' }} style={{ marginTop: 'auto' }} >
+        <SidebarItem
+          text="Toggle darkmode"
+          isOpen={open}
+          icon={<ToggleOffIcon color="sidebar" />}
+          onClick={() => colorMode.toggleColorMode()}
+        />
+
+        <SidebarItem
+          text="Toggle size"
+          isOpen={open}
+          icon={<CompareArrowsIcon color="sidebar" />}
+          onClick={() => setOpen(!open)}
+        />
+
+        <SidebarItem
+          text="Settings"
+          isOpen={open}
+          icon={<SettingsIcon color="sidebar" />}
+          onClick={openSettings}
+        />
       </List>
     </CustomDrawer>
   );

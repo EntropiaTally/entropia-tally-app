@@ -24,6 +24,7 @@ export const darkTheme = createTheme({
       main: '#f50057',
     },
     sidebar: {
+      main: '#ffffff',
       text: '#ffffff',
       divider: 'rgba(255, 255, 255, 0.12)',
     },
@@ -54,6 +55,7 @@ export const lightTheme = createTheme({
       main: '#f50057',
     },
     sidebar: {
+      main: '#ffffff',
       text: '#ffffff',
       divider: 'rgba(255, 255, 255, 0.12)',
     },
