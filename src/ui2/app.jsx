@@ -6,7 +6,7 @@ import {
   CssBaseline,
 } from '@mui/material';
 
-import MainContent from './main-content.jsx';
+import HuntingPage from './hunting-page.jsx';
 import Settings from './settings/settings.jsx';
 import Sidebar from './sidebar.jsx';
 import { ColorModeContext } from './contexts.js';
@@ -31,7 +31,7 @@ const App = () => {
             <Box component="main" sx={{ flexGrow: 1 }}>
               <Routes>
                 <Route exact path="/settings" element={<Settings />} />
-                <Route exact path="/" element={<MainContent />} />
+                <Route exact path="/" element={<HuntingPage />} />
               </Routes>
             </Box>
           </Box>
