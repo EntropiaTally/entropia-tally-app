@@ -1,6 +1,7 @@
 'use strict';
 
 const { aggregateHuntingSetData, calculateReturns } = require('../utils/helpers');
+const appEvents = require('./app-events');
 const SessionBase = require('./session-base');
 
 class Session extends SessionBase {
@@ -30,19 +31,6 @@ class Session extends SessionBase {
     }
   }
 
-  snakeToCamel(snakeString, capital = true) {
-    let camelString = snakeString
-      .split('_')
-      .map(part => part[0].toUpperCase() + part.slice(1))
-      .join('');
-
-    if (!capital) {
-      camelString = camelString.charAt(0).toLowerCase() + camelString.slice(1);
-    }
-
-    return camelString;
-  }
-
   setHuntingSet(huntingSet) {
     if (huntingSet && huntingSet.id) {
       if (!this.config.usedHuntingSets) {
@@ -55,15 +43,6 @@ class Session extends SessionBase {
     } else {
       this.currentHuntingSet = null;
     }
-  }
-
-  newEvent(eventData, updateDb = false, customIgnoreList = []) {
-    const eventName = this.snakeToCamel(eventData.event);
-    this.customIgnoreList = customIgnoreList;
-
-    this?.[`event${eventName}`]?.(eventData);
-
-    return updateDb ? this.updateDb() : Promise.resolve();
   }
 
   dataPoint(type, data) {

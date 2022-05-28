@@ -4,6 +4,7 @@ const EventEmitter = require('events');
 const { v4: uuidv4 } = require('uuid');
 
 const db = require('./database');
+const appEvents = require('./app-events');
 
 class SessionBase {
   static IGNORE_LOOT = ['Universal Ammo', 'Strongbox Key'];
@@ -43,6 +44,42 @@ class SessionBase {
     this.customIgnoreList = [];
 
     this.emitter = new EventEmitter();
+
+    this.newEventBind = this.newEvent.bind(this);
+    appEvents.on('logger:event', this.newEventBind);
+
+    this.getDataBind = this.getData.bind(this);
+    appEvents.on('session:data:get', this.getDataBind);
+  }
+
+  destruct() {
+    appEvents.removeListener('logger:event', this.newEventBind);
+    appEvents.removeListener('session:data:get', this.getDataBind);
+  }
+
+  snakeToCamel(snakeString, capital = true) {
+    let camelString = snakeString
+      .split('_')
+      .map(part => part[0].toUpperCase() + part.slice(1))
+      .join('');
+
+    if (!capital) {
+      camelString = camelString.charAt(0).toLowerCase() + camelString.slice(1);
+    }
+
+    return camelString;
+  }
+
+  newEvent(eventData, updateDb = false, customIgnoreList = []) {
+    console.log('EVENT', eventData, updateDb, customIgnoreList);
+    const eventName = this.snakeToCamel(eventData.event);
+    this.customIgnoreList = customIgnoreList;
+
+    this?.[`event${eventName}`]?.(eventData);
+
+    appEvents.emit('session:updated', this.getData());
+
+    return updateDb ? this.updateDb() : Promise.resolve();
   }
 
   getData(events = true) {
@@ -62,6 +99,9 @@ class SessionBase {
       data.events = this.events;
       data.aggregated = this.aggregated;
     }
+
+    console.log('EMIT GET DATA');
+    appEvents.emit('session:updated', data);
 
     return data;
   }
