@@ -4,7 +4,7 @@ const isProduction = process.argv[process.argv.indexOf('--mode') + 1] === 'produ
 module.exports = {
   mode: isProduction ? 'production' : 'development',
   entry: {
-    render: "./src/ui",
+    render: "./src/ui2",
     overlay: "./src/overlay",
   },
   output: {
