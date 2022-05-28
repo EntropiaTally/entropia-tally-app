@@ -176,11 +176,9 @@ app.on('activate', async () => {
   }
 });
 
-
 /**
- * REFACTOR STUFF 
+ * REFACTOR STUFF
  */
-
 
 function sendToWindow(event, data) {
   mainWindow.webContents.send(event, data);
@@ -191,39 +189,37 @@ function sendToWindow(event, data) {
 }
 
 function sendEventToWindow(data) {
-  sendToWindow('event', data)
+  sendToWindow('event', data);
 }
 
-appEvents.on('session:updated', (data) => {
+appEvents.on('session:updated', data => {
   sendEventToWindow({ type: 'session:updated', data });
 });
 
-appEvents.on('settings:updated', (data) => {
+appEvents.on('settings:updated', data => {
   sendEventToWindow({ type: 'settings:updated', data });
 });
 
 ipcMain.on('request', (_event, { key, args }) => {
-  console.log(key, args)
+  console.log(key, args);
   appEvents.emit(key, args);
 });
 
-ipcMain.handle('direct', async (_event, { eventKey, options }) => {
-  return true;
-});
+ipcMain.handle('direct', async (_event, { eventKey, options }) => true);
 
 logReader.on('event', receivedLoggerEvent);
 
-/*setInterval(() => {
+/* SetInterval(() => {
   logReader.stop();
   logReader.start();
-}, 5000);*/
+}, 5000); */
 
 setTimeout(() => {
-  //logReader.stop();
+  // LogReader.stop();
   logReader.start();
 }, 5000);
 
-//appEvents.on('settings:update')
+// AppEvents.on('settings:update')
 
 /**
  * END REFACTOR STUFF
@@ -269,7 +265,6 @@ function registerShortcuts() {
   }
 }
 
-
 // Functions
 
 function getSettings() {
@@ -305,7 +300,7 @@ function setDefaultHuntingSet() {
 function receivedLoggerEvent({ data, lastLine }) {
   appEvents.emit('logger:event', data, true, customIgnoreList);
 
-  /*session.newEvent(data, false, customIgnoreList).then(() => {
+  /* Session.newEvent(data, false, customIgnoreList).then(() => {
     // Only send the complete package
     if (lastLine) {
       const sessionData = session.getData();
@@ -320,7 +315,7 @@ function receivedLoggerEvent({ data, lastLine }) {
         overlayWindow.webContents.send('session-data-updated-events', sessionData?.events);
       }
     }
-  });*/
+  }); */
 }
 
 function sessionTimeUpdated(seconds) {
