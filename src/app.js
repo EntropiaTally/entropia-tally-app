@@ -13,6 +13,7 @@ const xlsx = require('node-xlsx').default;
 const config = require('./main/config');
 const menu = require('./main/menu');
 const checkForUpdates = require('./main/updater');
+const appEvents = require('./main/app-events');
 const SessionStorage = require('./main/session-storage');
 const LogReader = require('./main/log-reader');
 const { exportXls } = require('./main/exporter');
@@ -175,6 +176,55 @@ app.on('activate', async () => {
   }
 });
 
+/**
+ * REFACTOR STUFF
+ */
+
+function sendToWindow(event, data) {
+  mainWindow.webContents.send(event, data);
+
+  if (overlayWindow) {
+    overlayWindow.webContents.send(event, data);
+  }
+}
+
+function sendEventToWindow(data) {
+  sendToWindow('event', data);
+}
+
+appEvents.on('session:updated', data => {
+  sendEventToWindow({ type: 'session:updated', data });
+});
+
+appEvents.on('settings:updated', data => {
+  sendEventToWindow({ type: 'settings:updated', data });
+});
+
+ipcMain.on('request', (_event, { key, args }) => {
+  console.log(key, args);
+  appEvents.emit(key, args);
+});
+
+ipcMain.handle('direct', async (_event, { eventKey, options }) => true);
+
+logReader.on('event', receivedLoggerEvent);
+
+/* SetInterval(() => {
+  logReader.stop();
+  logReader.start();
+}, 5000); */
+
+setTimeout(() => {
+  // LogReader.stop();
+  logReader.start();
+}, 5000);
+
+// AppEvents.on('settings:update')
+
+/**
+ * END REFACTOR STUFF
+ */
+
 function registerShortcuts() {
   const huntingSets = config.get('huntingSets', []);
   const registrationStatus = {};
@@ -248,7 +298,9 @@ function setDefaultHuntingSet() {
 }
 
 function receivedLoggerEvent({ data, lastLine }) {
-  session.newEvent(data, false, customIgnoreList).then(() => {
+  appEvents.emit('logger:event', data, true, customIgnoreList);
+
+  /* Session.newEvent(data, false, customIgnoreList).then(() => {
     // Only send the complete package
     if (lastLine) {
       const sessionData = session.getData();
@@ -263,7 +315,7 @@ function receivedLoggerEvent({ data, lastLine }) {
         overlayWindow.webContents.send('session-data-updated-events', sessionData?.events);
       }
     }
-  });
+  }); */
 }
 
 function sessionTimeUpdated(seconds) {
