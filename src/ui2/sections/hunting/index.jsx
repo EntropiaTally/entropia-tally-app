@@ -4,8 +4,8 @@ import AppBar from '@mui/material/AppBar';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 
-import General from './hunting/general';
-import Loot from './hunting/loot';
+import General from './general';
+import Loot from './loot';
 
 const tabList = ['General', 'Loot', 'Misc', 'Returns', 'Notes'].map(tab => (
   <Tab key={tab} label={tab} />
