@@ -68,5 +68,5 @@ module.exports = {
   aggregateHuntingSetData,
   calculateReturns,
   sum,
-  toNum: toNumber,
+  toNumber,
 };

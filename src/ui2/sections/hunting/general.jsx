@@ -8,11 +8,13 @@ import InfoBox from '@components2/InfoBox';
 import { useGeneralLoot } from '@hooks/loot';
 import { useStats } from '@hooks/stats';
 import { useHeal } from '@hooks/heal';
+import { useDpp } from '@hooks/hunting';
 
 const General = () => {
   const lootData = useGeneralLoot();
   const huntingStats = useStats();
   const heal = useHeal();
+  const dpp = useDpp();
 
   return (
     <Box sx={{ m: 2 }}>
@@ -47,31 +49,35 @@ const General = () => {
 
         <Grid container spacing={2}>
           <Grid item xs={6} md={3}>
-            <InfoBox title="Damage inflicted" subtitle="80,157 hp" />
+            <InfoBox title="Damage inflicted" subtitle={`${huntingStats.damageInflictedTotal.toLocaleString()} hp`} />
           </Grid>
 
           <Grid item xs={6} md={3}>
-            <InfoBox title="Hit rate" subtitle="89.98%" />
+            <InfoBox title="Hit rate" subtitle={`${huntingStats.playerAttackHitRate.toFixed(2)}%`} />
           </Grid>
 
           <Grid item xs={6} md={3}>
-            <InfoBox title="Crit rate" subtitle="5.38%" />
+            <InfoBox title="Crit rate" subtitle={`${huntingStats.playerAttackCritRate.toFixed(2)}%`} />
           </Grid>
 
           <Grid item xs={6} md={3}>
-            <InfoBox title="Total attacks" subtitle="2,602" />
+            <InfoBox title="Total attacks" subtitle={huntingStats.playerAttackCount.toLocaleString()} />
           </Grid>
 
           <Grid item xs={6} md={3}>
-            <InfoBox title="Total hits" subtitle="2,341" />
+            <InfoBox title="Total hits" subtitle={huntingStats.damageInflictedCount.toLocaleString()} />
           </Grid>
 
           <Grid item xs={6} md={3}>
-            <InfoBox title="Total crits" subtitle="126" />
+            <InfoBox title="Total crits" subtitle={huntingStats.damageInflictedCritCount.toLocaleString()} />
           </Grid>
 
           <Grid item xs={6} md={3}>
-            <InfoBox title="Kills" subtitle="67" />
+            <InfoBox title="Kills" subtitle={huntingStats.killCount} />
+          </Grid>
+
+          <Grid item xs={6} md={3}>
+            <InfoBox title="Avg. dpp" subtitle={dpp.toFixed(6)} />
           </Grid>
         </Grid>
       </Box>
@@ -83,27 +89,27 @@ const General = () => {
 
         <Grid container spacing={2}>
           <Grid item xs={6} md={3}>
-            <InfoBox title="Damage received" subtitle="5,157 hp" />
+            <InfoBox title="Damage received" subtitle={`${huntingStats.damageTakenTotal.toLocaleString()} hp`} />
           </Grid>
 
           <Grid item xs={6} md={3}>
-            <InfoBox title="Evade rate" subtitle="78.14%" />
+            <InfoBox title="Evade rate" subtitle={`${huntingStats.enemyAttackMissRate.toFixed(2)}%`} />
           </Grid>
 
           <Grid item xs={6} md={3}>
-            <InfoBox title="Total evades" subtitle="325" />
+            <InfoBox title="Total evades" subtitle={huntingStats.enemyMissCount.toLocaleString()} />
           </Grid>
 
           <Grid item xs={6} md={3}>
-            <InfoBox title="Received hits" subtitle="157" />
+            <InfoBox title="Received hits" subtitle={huntingStats.enemyHitCount.toLocaleString()} />
           </Grid>
 
           <Grid item xs={6} md={3}>
-            <InfoBox title="Received crit rate" subtitle="0.25%" />
+            <InfoBox title="Received crit rate" subtitle={`${huntingStats.enemyAttackHitCritRate.toFixed(2)}%`} />
           </Grid>
 
           <Grid item xs={6} md={3}>
-            <InfoBox title="Received crits" subtitle="5" />
+            <InfoBox title="Received crits" subtitle={huntingStats.damageTakenCritCount.toLocaleString()} />
           </Grid>
         </Grid>
       </Box>

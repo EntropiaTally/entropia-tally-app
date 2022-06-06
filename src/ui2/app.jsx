@@ -15,20 +15,24 @@ import { lightTheme, darkTheme } from './themes.js';
 import {
   useAggregatedStore,
   useEventStore,
+  useHuntingSetStore,
 } from '@store';
 
 const EventManager = () => {
   const setAggregated = useAggregatedStore(state => state.updateAggregated);
   const setEvents = useEventStore(state => state.updateEvents);
+  const setUsedHuntingSets = useHuntingSetStore(state => state.updateHuntingSets);
 
   useEffect(() => {
     const newData = eventData => {
       const { type, data } = eventData;
       // Console.log(type, data)
-
+      // console.log(data)
       if (type === 'session:updated') {
+        // Console.log(data.aggregated)
         setAggregated(data.aggregated);
         setEvents(data.events);
+        setUsedHuntingSets(data.usedHuntingSets);
       }
 
       if (type === 'settings:updated') {

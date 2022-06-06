@@ -1,12 +1,12 @@
 import { useAggregatedStore } from '@store';
 import { deepCompare } from '@uiUtils2/compare';
-import { toNum } from '@utils/helpers';
+import { toNumber } from '@utils/helpers';
 
 export const useHeal = (avatarName = null) => {
   const heal = useAggregatedStore(state => state.heal, deepCompare);
 
   const targetUser = avatarName ? avatarName : 'yourself';
-  const healYourselfTotal = toNum(heal[targetUser]?.total);
+  const healYourselfTotal = toNumber(heal[targetUser]?.total);
   const healTotal = Object.values(heal).reduce((previous, current) => previous + current.total, 0);
   const healOthersTotal = healTotal - healYourselfTotal;
 

@@ -47,3 +47,7 @@ export const useSettingsStore = create(set => ({
   overlay: {},
   updateSettings: data => set(state => ({ ...state, ...data })),
 }));
+
+export const useHuntingSetStore = create(set => ({
+  updateHuntingSets: data => set(state => ({ ...state, ...data })),
+}));

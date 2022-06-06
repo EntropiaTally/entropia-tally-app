@@ -1,24 +1,24 @@
 import { useAggregatedStore } from '@store';
 import { shallowCompare } from '@uiUtils2/compare';
-import { toNum, sum } from '@utils/helpers';
+import { toNumber, sum } from '@utils/helpers';
 
 export const useStats = () => {
   const stats = useAggregatedStore(state => ({
-    damageInflictedCount: toNum(state.damageInflicted?.count),
-    damageInflictedTotal: toNum(state.damageInflicted?.total),
-    damageInflictedCritCount: toNum(state.damageInflictedCrit?.count),
-    damageTakenCount: toNum(state.damageTaken?.count),
-    damageTakenTotal: toNum(state.damageTaken?.total),
-    damageTakenCritCount: toNum(state.damageTakenCrit?.count),
-    playerDeflectCount: toNum(state.playerDeflect?.count),
-    playerMissCount: toNum(state.playerMiss?.count),
-    playerEvadeCount: toNum(state.playerEvade?.count),
-    playerDodgeCount: toNum(state.playerDodge?.count),
-    enemyMissCountValue: toNum(state.enemyMiss?.count),
-    enemyDodgeCount: toNum(state.enemyDodge?.count),
-    enemyEvadeCount: toNum(state.enemyEvade?.count),
-    enemyJamCount: toNum(state.enemyJam?.count),
-    lootEventCount: toNum(state.lootEvent?.count),
+    damageInflictedCount: toNumber(state.damageInflicted?.count),
+    damageInflictedTotal: toNumber(state.damageInflicted?.total),
+    damageInflictedCritCount: toNumber(state.damageInflictedCrit?.count),
+    damageTakenCount: toNumber(state.damageTaken?.count),
+    damageTakenTotal: toNumber(state.damageTaken?.total),
+    damageTakenCritCount: toNumber(state.damageTakenCrit?.count),
+    playerDeflectCount: toNumber(state.playerDeflect?.count),
+    playerMissCount: toNumber(state.playerMiss?.count),
+    playerEvadeCount: toNumber(state.playerEvade?.count),
+    playerDodgeCount: toNumber(state.playerDodge?.count),
+    enemyMissCountValue: toNumber(state.enemyMiss?.count),
+    enemyDodgeCount: toNumber(state.enemyDodge?.count),
+    enemyEvadeCount: toNumber(state.enemyEvade?.count),
+    enemyJamCount: toNumber(state.enemyJam?.count),
+    lootEventCount: toNumber(state.lootEvent?.count),
   }), shallowCompare);
 
   const { damageInflictedCount, damageInflictedCritCount, damageTakenCritCount } = stats;
@@ -54,11 +54,10 @@ export const useStats = () => {
 
   // Enemy attacks that missed
   const enemyMissCount = enemyAttackCount - enemyHitCount;
-
-  const playerAttackHitRate = (damageInflictedCount / playerAttackCount) * 100;
-  const playerAttackCritRate = (damageInflictedCritCount / damageInflictedCount) * 100;
-  const enemyAttackHitCritRate = (damageTakenCritCount / enemyHitCount) * 100;
-  const enemyAttackMissRate = ((playerEvadeCount + stats.enemyMissCountValue) / enemyAttackCount) * 100;
+  const playerAttackHitRate = (damageInflictedCount / playerAttackCount) * 100 || 0;
+  const playerAttackCritRate = (damageInflictedCritCount / damageInflictedCount) * 100 || 0;
+  const enemyAttackHitCritRate = (damageTakenCritCount / enemyHitCount) * 100 || 0;
+  const enemyAttackMissRate = ((playerEvadeCount + stats.enemyMissCountValue) / enemyAttackCount) * 100 || 0;
 
   return {
     damageInflictedTotal: stats.damageInflictedTotal,
@@ -74,7 +73,5 @@ export const useStats = () => {
     playerAttackCritRate,
     enemyAttackHitCritRate,
     enemyAttackMissRate,
-
-    // Dpp: avgDpp,
   };
 };

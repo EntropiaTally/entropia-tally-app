@@ -20,7 +20,7 @@ const InfoBox = ({ title, subtitle }) => (
 
 InfoBox.propTypes = {
   title: PropTypes.string.isRequired,
-  subtitle: PropTypes.string.isRequired,
+  subtitle: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 };
 
 export default InfoBox;
