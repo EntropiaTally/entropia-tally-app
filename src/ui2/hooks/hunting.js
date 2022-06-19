@@ -1,12 +1,12 @@
-import { useAggregatedStore, useHuntingSetStore } from '@store';
-import { deepCompare } from '@uiUtils2/compare';
+import { useActiveSessionStore, useAggregatedStore, useEventStore } from '@store';
+import { deepCompare, shallowCompare, arrayCompare } from '@uiUtils2/compare';
 import { toNumber } from '@utils/helpers';
 
 export const useDpp = () => {
   let avgDpp = 0;
   const existingHuntingSets = {};
 
-  const usedHuntingSets = useHuntingSetStore();
+  const usedHuntingSets = useActiveSessionStore(state => state.usedHuntingSets, shallowCompare);
   const { huntingSetDmg, huntingSetMissed, huntingSetLoot } = useAggregatedStore(state => ({
     huntingSetDmg: state.huntingSetDmg,
     huntingSetMissed: state.huntingSetMissed,
@@ -46,4 +46,44 @@ export const useDpp = () => {
     : 0;
 
   return avgDpp;
+};
+
+export const useTierUp = () => {
+  const aggregatedTierUps = useAggregatedStore(state => state.tierUp, deepCompare);
+  const eventTierUps = useEventStore(state => state.tierUp, arrayCompare);
+
+  const mapped = Object.keys(aggregatedTierUps).map(key => {
+    const tierEvents = eventTierUps.filter(event => event.item === key);
+    const sortedTierEvents = tierEvents.sort((a, b) => (a.tier > b.tier) ? -1 : ((b.tier > a.tier) ? 1 : 0))[0];
+    return { key, ...aggregatedTierUps[key], tier: sortedTierEvents?.tier };
+  });
+    
+  return Object.values(mapped).sort((a, b) => (a.total > b.total) ? -1 : ((b.total > a.total) ? 1 : 0));
+};
+
+export const useEnhancerBreaks = () => {
+  const enhancerBreaks = useEventStore(state => state.enhancerBreak, arrayCompare);
+
+  const groupedBreaks = {};
+
+  for (const event of enhancerBreaks) {
+    if (!groupedBreaks[event.item]) {
+      groupedBreaks[event.item] = [];
+    }
+
+    const existingBreak = groupedBreaks[event.item].find(row => row.name === event.name);
+
+    if (!existingBreak) {
+      groupedBreaks[event.item].push({ name: event.name, count: 1, value: Number(event.value) });
+    } else {
+      existingBreak.count += 1;
+      existingBreak.value += Number(event.value);
+    }
+  }
+
+  for (const key of Object.keys(groupedBreaks)) {
+    groupedBreaks[key] = groupedBreaks[key].sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
+  }
+
+  return groupedBreaks;
 };

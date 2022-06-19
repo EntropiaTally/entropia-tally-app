@@ -15,6 +15,9 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
+import HistoryIcon from '@mui/icons-material/History';
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import AddIcon from '@mui/icons-material/Add';
 
 import { ColorModeContext } from './contexts.js';
 
@@ -95,7 +98,10 @@ const Sidebar = () => {
   const [open, setOpen] = useState(true);
   const colorMode = useContext(ColorModeContext);
 
+  const openRoot = () => navigate('/');
   const openSettings = () => navigate('/settings');
+  const openHistory = () => navigate('/history');
+  const newRun = () => window.api2.request('session:new');
 
   return (
     <CustomDrawer variant="permanent" open={open} PaperProps={{ sx: { backgroundColor: 'background.sidebar' }}}>
@@ -109,14 +115,29 @@ const Sidebar = () => {
       <Divider sx={{ backgroundColor: 'sidebar.divider' }} />
 
       <List sx={{ color: 'sidebar.text' }}>
-        {['Current run', 'New Run', 'New Session', 'History'].map((text, _index) => (
-          <SidebarItem
-            key={text}
-            text={text}
-            isOpen={open}
-            icon={<PlayArrowIcon color="sidebar" />}
-          />
-        ))}
+        <SidebarItem
+          text="Current run"
+          isOpen={open}
+          icon={<PlayArrowIcon color="sidebar" />}
+          onClick={openRoot}
+        />
+        <SidebarItem
+          text="New Run"
+          isOpen={open}
+          icon={<AddIcon color="sidebar" />}
+          onClick={newRun}
+        />
+        <SidebarItem
+          text="New Session"
+          isOpen={open}
+          icon={<AddBoxIcon color="sidebar" />}
+        />
+        <SidebarItem
+          text="History"
+          isOpen={open}
+          icon={<HistoryIcon color="sidebar" />}
+          onClick={openHistory}
+        />
       </List>
 
       <Divider sx={{ backgroundColor: 'sidebar.divider' }} />

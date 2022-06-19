@@ -8,35 +8,61 @@ import {
 
 import Hunting from './sections/hunting';
 import Settings from './sections/settings';
+import History from './sections/history';
 
 import Sidebar from './sidebar.jsx';
 import { ColorModeContext } from './contexts.js';
 import { lightTheme, darkTheme } from './themes.js';
 import {
+  useActiveSessionStore,
   useAggregatedStore,
   useEventStore,
-  useHuntingSetStore,
+  useSessionStore,
 } from '@store';
 
 const EventManager = () => {
+  const [setActiveSession, setLoggerState, setSessionTime] = useActiveSessionStore(state => [
+    state.updateSession,
+    state.updateLoggerState,
+    state.updateTimer,
+  ]);
   const setAggregated = useAggregatedStore(state => state.updateAggregated);
   const setEvents = useEventStore(state => state.updateEvents);
-  const setUsedHuntingSets = useHuntingSetStore(state => state.updateHuntingSets);
+  const setSessionList = useSessionStore(state => state.updateList);
 
   useEffect(() => {
     const newData = eventData => {
       const { type, data } = eventData;
-      // Console.log(type, data)
-      // console.log(data)
+      // console.log(type, data)
       if (type === 'session:updated') {
-        // Console.log(data.aggregated)
+        // console.log("AGGREGATED", data.aggregated)
         setAggregated(data.aggregated);
+        // console.log("EVENTS", data.events)
         setEvents(data.events);
-        setUsedHuntingSets(data.usedHuntingSets);
+        // console.log("HUNTING SETS", data.usedHuntingSets)
+        setActiveSession({ usedHuntingSets: data.usedHuntingSets });
+      }
+
+      if (type === 'logger:status:updated') {
+        console.log("logger:status:updated", data)
+        setLoggerState(data);
+      }
+
+      if (type === 'session:time:updated') {
+        console.log("session:time:updated", data)
+        setSessionTime(data);
       }
 
       if (type === 'settings:updated') {
         // SetSettings(data);
+      }
+
+      //if (type === 'requested:sessions') {
+      //  setSessionList(data);
+      //}
+
+      if (type === 'session:new') {
+        console.log('session:new', data);
       }
     };
 
@@ -44,6 +70,7 @@ const EventManager = () => {
 
     setTimeout(() => {
       window.api2.request('session:data');
+      //window.api2.request('logger:status:toggle');
       // Window.api2.call('event', { eventKey: 'session:data:get' });
     }, 5000);
 
@@ -74,6 +101,7 @@ const App = () => {
               <Box component="main" sx={{ flexGrow: 1 }}>
                 <Routes>
                   <Route exact path="/settings" element={<Settings />} />
+                  <Route exact path="/history" element={<History />} />
                   <Route exact path="/" element={<Hunting />} />
                 </Routes>
               </Box>

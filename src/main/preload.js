@@ -66,8 +66,8 @@ contextBridge.exposeInMainWorld(
         ipcRenderer.removeListener(eventName, subscription);
       };
     },
-    get(dataType, args) {
-      return ipcRenderer.invoke('get-data', { dataType, args });
+    fetch(dataType, args) {
+      return ipcRenderer.invoke('fetch', { dataType, args });
     },
     call(action, args = {}) {
       ipcRenderer.send(action, args);

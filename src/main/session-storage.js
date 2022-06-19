@@ -6,7 +6,8 @@ const db = require('./database');
 const Session = require('./session');
 
 const SessionStorage = {
-  ALL_DATA_QUERY: 'SELECT s.id, si.id AS instanceId, s.name, s.created_at AS createdAt, si.created_at AS instanceCreatedAt, si.events, si.aggregated, si.config, si.notes, si.run_time AS sessionTime FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE',
+  ALL_DATA_QUERY: 'SELECT s.id, si.id AS instanceId, s.name, s.created_at AS createdAt, si.created_at AS instanceCreatedAt, si.events, si.aggregated, si.config, si.notes, si.run_time AS sessionTime FROM session_instances AS si LEFT JOIN sessions AS s ON s.id = si.session_id WHERE',
+  SESSION_QUERY: 'SELECT id, name, created_at AS createdAt FROM sessions WHERE',
 
   prepareLoaded(sessionData) {
     const { name, createdAt, instanceCreatedAt, sessionTime } = sessionData;
@@ -34,16 +35,9 @@ const SessionStorage = {
     return { options, config, events, aggregated, notes };
   },
 
-  async Load(id, instanceId = null) {
-    const query = [SessionStorage.ALL_DATA_QUERY, 's.id = ?'];
-    const conditions = [id];
-
-    if (instanceId) {
-      query.push('AND si.id = ?');
-      conditions.push(instanceId);
-    }
-
-    const data = await db.get(query.join(' '), conditions);
+  async Load(instanceId) {
+    const query = [SessionStorage.ALL_DATA_QUERY, 'si.id = ?'];
+    const data = await db.get(query.join(' '), [instanceId]);
 
     const { options, config, events, aggregated, notes } = SessionStorage.prepareLoaded(data);
 
@@ -53,6 +47,17 @@ const SessionStorage = {
     instance.notes = notes;
 
     return instance;
+  },
+
+  async LoadSession(id, includeInstances = true) {
+    const query = [SessionStorage.SESSION_QUERY, 'id = ?'];
+    const data = await db.get(query.join(' '), [id]);
+
+    data.instances = includeInstances
+      ? await SessionStorage.FetchInstances(id)
+      : [];
+
+    return data;
   },
 
   async Create(options = {}, config = {}) {

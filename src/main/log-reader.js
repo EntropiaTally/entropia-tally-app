@@ -6,6 +6,7 @@ const path = require('path');
 const { is, fixPathForAsarUnpack } = require('electron-util');
 const EventEmitter = require('events');
 
+const appEvents = require('./app-events');
 const cliPath = path.resolve(app.getAppPath(), 'bin');
 const name = 'new-cli';
 const ext = (is.linux) ? 'unix' : 'exe';
@@ -20,6 +21,15 @@ class LogReader extends EventEmitter {
     this.active = false;
     this.onData = this.onData.bind(this);
     this.readFullLog = readFullLog;
+
+    appEvents.on('logger:status:toggle', data => {
+      console.log('LogReader - logger:status:toggle')
+      if (this.active) {
+        this.stop();
+      } else {
+        this.start();
+      }
+    });
   }
 
   onTailClose(code) {
@@ -47,6 +57,7 @@ class LogReader extends EventEmitter {
 
     this.active = true;
     this.emit('logger-status-changed');
+    appEvents.emit('logger:status:updated', this.active);
   }
 
   stop() {
@@ -57,6 +68,7 @@ class LogReader extends EventEmitter {
 
     this.active = false;
     this.emit('logger-status-changed');
+    appEvents.emit('logger:status:updated', this.active);
   }
 
   onData(raw) {
@@ -68,6 +80,7 @@ class LogReader extends EventEmitter {
       try {
         const event = JSON.parse(line);
         this.emit('event', { data: event, lastLine: currentLine === lineCount });
+        appEvents.emit('logger:event', event);
       } catch (error) {
         console.error('Failed to parse event', error, 'Source:', line);
       }

@@ -180,6 +180,7 @@ app.on('activate', async () => {
  * REFACTOR STUFF
  */
 
+
 function sendToWindow(event, data) {
   mainWindow.webContents.send(event, data);
 
@@ -192,34 +193,47 @@ function sendEventToWindow(data) {
   sendToWindow('event', data);
 }
 
+ipcMain.on('request', (_event, { key, args }) => {
+  //console.log(key, args);
+  appEvents.emit(key, args);
+});
+
+appEvents.on('session:new', async (data) => {
+  session.destruct();
+  session = await SessionStorage.Create();
+  sendEventToWindow({ type: 'session:new', data: session.getData() });
+});
+
 appEvents.on('session:updated', data => {
   sendEventToWindow({ type: 'session:updated', data });
+});
+
+appEvents.on('session:time:updated', data => {
+  sendEventToWindow({ type: 'session:time:updated', data })
 });
 
 appEvents.on('settings:updated', data => {
   sendEventToWindow({ type: 'settings:updated', data });
 });
 
-ipcMain.on('request', (_event, { key, args }) => {
-  console.log(key, args);
-  appEvents.emit(key, args);
+appEvents.on('logger:status:updated', data => {
+  sendEventToWindow({ type: 'logger:status:updated', data })
 });
 
-ipcMain.handle('direct', async (_event, { eventKey, options }) => true);
 
-logReader.on('event', receivedLoggerEvent);
+ipcMain.handle('direct', async (_event, { eventKey, args }) => true);
 
-/* SetInterval(() => {
-  logReader.stop();
-  logReader.start();
-}, 5000); */
+ipcMain.handle('fetch', async (_event, { dataType, args }) => {
+  console.log("FETCH", dataType, args)
+  if (dataType === 'session') {
+    return await SessionStorage.LoadSession(args.id);
+  } else if (dataType === 'sessions') {
+    return await SessionStorage.FetchAll();
+  }
+});
 
-setTimeout(() => {
-  // LogReader.stop();
-  logReader.start();
-}, 5000);
 
-// AppEvents.on('settings:update')
+
 
 /**
  * END REFACTOR STUFF
@@ -298,7 +312,7 @@ function setDefaultHuntingSet() {
 }
 
 function receivedLoggerEvent({ data, lastLine }) {
-  appEvents.emit('logger:event', data, true, customIgnoreList);
+  //appEvents.emit('logger:event', data, true, customIgnoreList);
 
   /* Session.newEvent(data, false, customIgnoreList).then(() => {
     // Only send the complete package
@@ -734,8 +748,8 @@ ipcMain.handle('delete', async (_event, { type, id }) => {
 
   session = await SessionStorage.Create();
   session.setHuntingSet(activeHuntingSet);
-  session.emitter.on('session-updated', sessionForcedUpdate);
-  session.emitter.on('session-time-updated', sessionTimeUpdated);
+  //session.emitter.on('session-updated', sessionForcedUpdate);
+  //session.emitter.on('session-time-updated', sessionTimeUpdated);
 
   setTimeout(() => {
     registerShortcuts();

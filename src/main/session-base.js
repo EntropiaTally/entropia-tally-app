@@ -70,10 +70,10 @@ class SessionBase {
     return camelString;
   }
 
-  newEvent(eventData, updateDb = false, customIgnoreList = []) {
-    console.log('EVENT', eventData, updateDb, customIgnoreList);
+  newEvent(eventData) {
+    const updateDb = true;
+    const customIgnoreList = [];
     const eventName = this.snakeToCamel(eventData.event);
-    this.customIgnoreList = customIgnoreList;
 
     this?.[`event${eventName}`]?.(eventData);
 
@@ -100,8 +100,8 @@ class SessionBase {
       data.aggregated = this.aggregated;
     }
 
-    console.log('EMIT GET DATA');
-    appEvents.emit('session:updated', data);
+    //console.log('EMIT GET DATA');
+    //appEvents.emit('session:updated', data);
 
     return data;
   }

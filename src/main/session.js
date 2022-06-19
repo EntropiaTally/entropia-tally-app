@@ -7,6 +7,14 @@ const SessionBase = require('./session-base');
 class Session extends SessionBase {
   constructor(id = null, instanceId = null, options = {}, config = null) {
     super(id, instanceId, options, config);
+
+    this.loggerStatusUpdateBind = this.loggerStatusUpdate.bind(this);
+    appEvents.on('logger:status:updated', this.loggerStatusUpdateBind);
+  }
+
+  destruct() {
+    super.destruct();
+    appEvents.removeListener('logger:status:updated', this.loggerStatusUpdateBind);
   }
 
   startTimer() {
@@ -21,6 +29,7 @@ class Session extends SessionBase {
 
       await this.updateDb();
       this.emitter.emit('session-time-updated', this.sessionTime);
+      appEvents.emit('session:time:updated', this.sessionTime);
     }, 1000);
   }
 
@@ -28,6 +37,15 @@ class Session extends SessionBase {
     if (this.sessionTimer) {
       clearInterval(this.sessionTimer);
       await this.updateDb();
+    }
+  }
+
+  loggerStatusUpdate(status) {
+    console.log("Session - logger:status:updated", status);
+    if (status) {
+      this.startTimer();
+    } else {
+      this.stopTimer();
     }
   }
 
@@ -152,7 +170,8 @@ class Session extends SessionBase {
 
     if (updateDb) {
       this.updateDb();
-      this.emitter.emit('session-updated');
+      //this.emitter.emit('session-updated');
+      appEvents.emit('session:updated', this.getData());
     }
   }
 
