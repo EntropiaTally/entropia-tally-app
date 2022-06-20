@@ -26,7 +26,7 @@ const Misc = () => {
             Enhancer breaks
           </Typography>
         </Toolbar>
-        <TableContainer component={Paper}>
+        <TableContainer>
           <Table sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow>
@@ -72,7 +72,7 @@ const Misc = () => {
             Tier Up
           </Typography>
         </Toolbar>
-        <TableContainer component={Paper}>
+        <TableContainer>
           <Table sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow>

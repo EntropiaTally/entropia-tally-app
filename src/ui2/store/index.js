@@ -8,7 +8,7 @@ export const useActiveSessionStore = create(set => ({
   sessionCreatedAt: null,
   instanceCreatedAt: null,
   usedHuntingSets: {},
-  additionalCost: {},
+  additionalCost: 0,
   notes: "",
   sessionTime: 0,
   updateLoggerState: data => set(() => ({ active: data })),

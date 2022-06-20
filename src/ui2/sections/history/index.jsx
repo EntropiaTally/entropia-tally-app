@@ -59,7 +59,7 @@ const History = () => {
           </Typography>
         </Toolbar>
 
-        <TableContainer component={Paper}>
+        <TableContainer>
           <Table sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow>

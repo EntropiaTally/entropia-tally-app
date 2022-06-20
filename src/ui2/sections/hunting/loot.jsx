@@ -26,18 +26,15 @@ const Loot = () => {
 
   return (
     <Box sx={{ m: 2 }}>
-      <Typography variant="h6">
-        Loot
-      </Typography>
       <Paper sx={{ width: '100%', mb: 2 }}>
         <Toolbar
           sx={{ pl: { sm: 2 }, minHeight: { sm: '48px' } }}
         >
           <Typography variant="h6">
-            Loot
+            Items
           </Typography>
         </Toolbar>
-        <TableContainer component={Paper}>
+        <TableContainer>
           <Table sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow>
@@ -73,7 +70,7 @@ const Loot = () => {
             Rare items
           </Typography>
         </Toolbar>
-        <TableContainer component={Paper}>
+        <TableContainer>
           <Table sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow>
@@ -107,7 +104,7 @@ const Loot = () => {
             Globals
           </Typography>
         </Toolbar>
-        <TableContainer component={Paper}>
+        <TableContainer>
           <Table sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow>
@@ -141,7 +138,7 @@ const Loot = () => {
             HoFs
           </Typography>
         </Toolbar>
-        <TableContainer component={Paper}>
+        <TableContainer>
           <Table sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow>

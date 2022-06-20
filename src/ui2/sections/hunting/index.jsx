@@ -20,6 +20,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import General from './general';
 import Loot from './loot';
 import Misc from './misc';
+import Returns from './returns';
+import Notes from './notes';
 
 const tabList = ['General', 'Loot', 'Misc', 'Returns', 'Notes'].map(tab => (
   <Tab key={tab} label={tab} />
@@ -40,6 +42,11 @@ TabView.propTypes = {
 const HuntingPage = () => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const toggleLogging = () => {
+    window.api2.request('logger:status:toggle');
+  };
+
   return (
     <>
       <AppBar position="static">
@@ -52,7 +59,7 @@ const HuntingPage = () => {
               </Grid>
               <Grid item>
                 00:25:24
-                <Button variant="contained" size="small" color="success">Start logging</Button>
+                <Button variant="contained" size="small" color="success" onClick={toggleLogging}><PlayArrowIcon /></Button>
               </Grid>
             </Grid>
           </Box>
@@ -82,18 +89,13 @@ const HuntingPage = () => {
         </TabView>
 
         <TabView index={3} selected={selectedTab}>
-          Returns
+          <Returns />
         </TabView>
 
         <TabView index={4} selected={selectedTab}>
-          Notes
+          <Notes />
         </TabView>
       </div>
-
-      <Fab variant="extended" color="primary" size="medium" sx={{ position: 'absolute', bottom: 16, right: 16 }}>
-        <PlayArrowIcon />
-        Start logging
-      </Fab>
 
       <div>
         <Dialog open={isEditOpen} onClose={() => setIsEditOpen(false)}>

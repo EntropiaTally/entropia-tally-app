@@ -2,8 +2,7 @@ import { useActiveSessionStore, useAggregatedStore, useEventStore } from '@store
 import { deepCompare, shallowCompare, arrayCompare } from '@uiUtils2/compare';
 import { toNumber } from '@utils/helpers';
 
-export const useDpp = () => {
-  let avgDpp = 0;
+export const useExistingHuntingSets = () => {
   const existingHuntingSets = {};
 
   const usedHuntingSets = useActiveSessionStore(state => state.usedHuntingSets, shallowCompare);
@@ -38,14 +37,16 @@ export const useDpp = () => {
     }
   }
 
+  return existingHuntingSets;
+};
+
+export const useDpp = () => {
+  const existingHuntingSets = useExistingHuntingSets();
+
   const activeSets = Object.values(existingHuntingSets).filter(set => set.hits || set.misses);
-
   const combinedDpp = activeSets.reduce((previous, current) => previous + current.dpp, 0);
-  avgDpp = combinedDpp
-    ? combinedDpp / activeSets.length
-    : 0;
 
-  return avgDpp;
+  return combinedDpp ? combinedDpp / activeSets.length : 0;
 };
 
 export const useTierUp = () => {
