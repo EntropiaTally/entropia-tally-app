@@ -13,7 +13,8 @@ const xlsx = require('node-xlsx').default;
 const config = require('./main/config');
 const menu = require('./main/menu');
 const checkForUpdates = require('./main/updater');
-const Session = require('./main/session');
+const appEvents = require('./main/app-events');
+const SessionStorage = require('./main/session-storage');
 const LogReader = require('./main/log-reader');
 const { exportXls } = require('./main/exporter');
 
@@ -175,6 +176,90 @@ app.on('activate', async () => {
   }
 });
 
+/**
+ * REFACTOR STUFF
+ */
+
+
+function sendToWindow(event, data) {
+  mainWindow.webContents.send(event, data);
+
+  if (overlayWindow) {
+    overlayWindow.webContents.send(event, data);
+  }
+}
+
+function sendEventToWindow(data) {
+  sendToWindow('event', data);
+}
+
+ipcMain.on('request', (_event, { key, args }) => {
+  //console.log(key, args);
+  appEvents.emit(key, args);
+});
+
+appEvents.on('session:new', async (data) => {
+  console.log("request - session:new", data)
+  session.destruct();
+  session = await SessionStorage.Create();
+  sendEventToWindow({ type: 'session:new', data: session.getData() });
+});
+
+appEvents.on('session:load', async (data) => {
+  console.log("request - session:load", data)
+  session.destruct();
+  session = await SessionStorage.Load(data.id);
+  sendEventToWindow({ type: 'session:loaded', data: session.getData() });
+});
+
+appEvents.on('session:initial', async (data) => {
+  console.log("request - session:initial", data)
+  sendEventToWindow({ type: 'session:initial', data: session.getData() });
+});
+
+appEvents.on('session:updated', data => {
+  console.log("session:updated", data)
+  sendEventToWindow({ type: 'session:updated', data });
+});
+
+appEvents.on('session:time:updated', data => {
+  sendEventToWindow({ type: 'session:time:updated', data })
+});
+
+appEvents.on('settings:updated', data => {
+  sendEventToWindow({ type: 'settings:updated', data });
+});
+
+appEvents.on('logger:status:updated', data => {
+  sendEventToWindow({ type: 'logger:status:updated', data })
+});
+
+
+ipcMain.handle('direct', async (_event, { eventKey, args }) => true);
+
+ipcMain.handle('fetch', async (_event, { dataType, args }) => {
+  console.log("FETCH", dataType, args)
+  if (dataType === 'session') {
+    return await SessionStorage.LoadSession(args.id);
+  } else if (dataType === 'sessions') {
+    return await SessionStorage.FetchAll();
+  }
+});
+
+/*ipcMain.handle('update', async (_event, { dataType, args }) => {
+  console.log("UPDATE", dataType, args)
+  if (dataType === 'session:name') {
+    return await SessionStorage.LoadSession(args.id);
+  }
+});*/
+
+
+
+
+/**
+ * END REFACTOR STUFF
+ */
+
 function registerShortcuts() {
   const huntingSets = config.get('huntingSets', []);
   const registrationStatus = {};
@@ -248,7 +333,9 @@ function setDefaultHuntingSet() {
 }
 
 function receivedLoggerEvent({ data, lastLine }) {
-  session.newEvent(data, false, customIgnoreList).then(() => {
+  //appEvents.emit('logger:event', data, true, customIgnoreList);
+
+  /* Session.newEvent(data, false, customIgnoreList).then(() => {
     // Only send the complete package
     if (lastLine) {
       const sessionData = session.getData();
@@ -263,7 +350,7 @@ function receivedLoggerEvent({ data, lastLine }) {
         overlayWindow.webContents.send('session-data-updated-events', sessionData?.events);
       }
     }
-  });
+  }); */
 }
 
 function sessionTimeUpdated(seconds) {
@@ -305,7 +392,7 @@ async function startNewSession(emit = true) {
   setDefaultHuntingSet();
 
   session.emitter.removeAllListeners();
-  session = await Session.Create();
+  session = await SessionStorage.Create();
   session.setHuntingSet(activeHuntingSet);
   session.emitter.on('session-updated', sessionForcedUpdate);
   session.emitter.on('session-time-updated', sessionTimeUpdated);
@@ -365,6 +452,10 @@ ipcMain.on('check-updates', () => {
   checkForUpdates(true);
 });
 
+ipcMain.on('goto-url', (_event, url) => {
+  shell.openExternal(url);
+});
+
 ipcMain.on('goto-wiki-weapontool', () => {
   shell.openExternal('http://www.entropiawiki.com/WeaponCompareV2.aspx');
 });
@@ -415,7 +506,7 @@ ipcMain.on('load-instance', async (_event, { sessionId, instanceId }) => {
   if (session) {
     session.emitter.removeAllListeners();
     const selectedInstanceId = (instanceId === 'new') ? null : instanceId;
-    session = await Session.Load(sessionId, selectedInstanceId);
+    session = await SessionStorage.Load(sessionId, selectedInstanceId);
 
     if (instanceId === 'new') {
       session.createNewInstance();
@@ -450,10 +541,10 @@ ipcMain.on('move-instance', async (_event, { targetSessionId, instanceId }) => {
   }
 
   if (instanceId && targetSessionId) {
-    await Session.MoveInstance(instanceId, targetSessionId);
+    await SessionStorage.MoveInstance(instanceId, targetSessionId);
 
     if (session.instanceId === instanceId) {
-      session = await Session.Load(targetSessionId, instanceId);
+      session = await SessionStorage.Load(targetSessionId, instanceId);
     }
   }
 });
@@ -477,7 +568,7 @@ ipcMain.on('change-hunting-set', (_event, selectedHuntingSet) => {
 });
 
 ipcMain.handle('export-instance', async (_event, { sessionId, instanceId }) => {
-  const exportSession = await Session.Load(sessionId, instanceId);
+  const exportSession = await SessionStorage.Load(sessionId, instanceId);
   const exportData = exportSession.getData();
   const exportSheets = await exportXls(exportData);
 
@@ -537,14 +628,14 @@ ipcMain.handle('get-data', async (_event, { dataType, args }) => {
       response = session ? session.getData() : {};
       break;
     case 'session':
-      loadedSession = await Session.Load(args.id, args?.instanceId);
+      loadedSession = await SessionStorage.Load(args.id, args?.instanceId);
       response = loadedSession.getData();
       break;
     case 'sessions':
-      response = await Session.FetchAll();
+      response = await SessionStorage.FetchAll();
       break;
     case 'instances':
-      response = await Session.FetchInstances(args.id);
+      response = await SessionStorage.FetchInstances(args.id);
       break;
     case 'overlay-window-status':
       response = overlayWindow && overlayWindow.isVisible() ? 'enabled' : 'disabled';
@@ -649,9 +740,9 @@ ipcMain.handle('delete', async (_event, { type, id }) => {
   const currentSessionData = session ? session.getData(false) : null;
 
   if (type === 'session') {
-    status = await Session.Delete(id);
+    status = await SessionStorage.Delete(id);
   } else if (type === 'instance') {
-    status = await Session.DeleteInstance(id);
+    status = await SessionStorage.DeleteInstance(id);
   }
 
   if (status.success) {
@@ -676,10 +767,10 @@ ipcMain.handle('delete', async (_event, { type, id }) => {
 (async () => {
   await app.whenReady();
 
-  session = await Session.Create();
+  session = await SessionStorage.Create();
   session.setHuntingSet(activeHuntingSet);
-  session.emitter.on('session-updated', sessionForcedUpdate);
-  session.emitter.on('session-time-updated', sessionTimeUpdated);
+  //session.emitter.on('session-updated', sessionForcedUpdate);
+  //session.emitter.on('session-time-updated', sessionTimeUpdated);
 
   setTimeout(() => {
     registerShortcuts();

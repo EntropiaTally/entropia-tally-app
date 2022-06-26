@@ -51,11 +51,31 @@ contextBridge.exposeInMainWorld(
     exportInstance(sessionId, instanceId) {
       return ipcRenderer.invoke('export-instance', { sessionId, instanceId });
     },
-    removeListener: (eventName, callback) => {
-      ipcRenderer.removeListener(eventName, callback);
+    removeListener: (eventName, callback) => ipcRenderer.removeListener(eventName, callback),
+    removeAllListeners: eventName => ipcRenderer.removeAllListeners(eventName),
+  },
+);
+
+contextBridge.exposeInMainWorld(
+  'api2', {
+    on(eventName, callback) {
+      const subscription = (event, data) => callback(data);
+      ipcRenderer.on(eventName, subscription);
+
+      return () => {
+        ipcRenderer.removeListener(eventName, subscription);
+      };
     },
-    removeAllListeners: eventName => {
-      ipcRenderer.removeAllListeners(eventName);
+    fetch(dataType, args) {
+      return ipcRenderer.invoke('fetch', { dataType, args });
     },
+    call(action, args = {}) {
+      ipcRenderer.send(action, args);
+    },
+    request(key, args = {}) {
+      ipcRenderer.send('request', { key, args });
+    },
+    removeListener: (eventName, callback) => ipcRenderer.removeListener(eventName, callback),
+    removeAllListeners: eventName => ipcRenderer.removeAllListeners(eventName),
   },
 );

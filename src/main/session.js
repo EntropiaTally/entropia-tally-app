@@ -1,128 +1,20 @@
 'use strict';
 
-const EventEmitter = require('events');
-const { v4: uuidv4 } = require('uuid');
-
 const { aggregateHuntingSetData, calculateReturns } = require('../utils/helpers');
-const db = require('./database');
+const appEvents = require('./app-events');
+const SessionBase = require('./session-base');
 
-class Session {
-  static IGNORE_LOOT = ['Universal Ammo', 'Strongbox Key'];
-  static IGNORE_LOOT_EVENT_LOOT = [
-    'Mayhem Token',
-    'Daily Token',
-    'Bombardo',
-    'Caroot',
-    'Haimoros',
-    'Papplon',
-    'Common Dung',
-    'Brukite',
-    'Kaldon',
-    'Nissit',
-    'Rutol',
-    'Sopur',
-    'Trutun',
-    'Vibrant Sweat',
-  ];
-
-  static async Load(id, instanceId = null) {
-    const data = await (instanceId
-      ? db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.created_at AS instance_created_at, si.events, si.aggregated, si.config, si.notes, si.run_time FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ? AND si.id = ?', [id, instanceId])
-      : db.get('SELECT s.id, si.id AS instance_id, s.name, s.created_at, si.created_at AS instance_created_at, si.events, si.aggregated, si.config, si.notes, si.run_time FROM sessions AS s LEFT JOIN session_instances AS si ON s.id = si.session_id WHERE s.id = ?', [id]));
-
-    const options = { name: data?.name, createdAt: data?.created_at, instanceCreatedAt: data?.instance_created_at, sessionTime: data?.run_time };
-    const config = data?.config ? JSON.parse(data.config) : 0;
-
-    const instance = new Session(id, data?.instance_id, options, config);
-
-    if (data?.events) {
-      instance.events = JSON.parse(data.events);
-    }
-
-    if (data?.aggregated) {
-      instance.aggregated = JSON.parse(data.aggregated);
-    }
-
-    if (data?.notes) {
-      instance.notes = data.notes;
-    }
-
-    return instance;
-  }
-
-  static async Create(name = null, config = null) {
-    const id = uuidv4();
-    const options = { name };
-    const instance = new Session(id, null, options, config);
-    return instance;
-  }
-
-  static async FetchAll() {
-    const rows = await db.all('SELECT id, created_at, name FROM sessions ORDER BY DATETIME(created_at) DESC');
-    return rows;
-  }
-
-  static async FetchInstances(id) {
-    const rows = await db.all('SELECT id, session_id, created_at, aggregated, config, notes, run_time FROM session_instances WHERE session_id = ? ORDER BY DATETIME(created_at) DESC', [id]);
-    return rows.map(row => {
-      row.aggregated = JSON.parse(row.aggregated);
-      row.config = JSON.parse(row.config);
-      return row;
-    });
-  }
-
-  static async Delete(id) {
-    let success = true;
-
-    try {
-      await db.all('DELETE FROM session_instances WHERE session_id = ?', [id]);
-      await db.all('DELETE FROM sessions WHERE id = ?', [id]);
-    } catch (error) {
-      success = false;
-      console.error(error);
-    }
-
-    return { success, sessionId: id };
-  }
-
-  static async DeleteInstance(id) {
-    let success = true;
-
-    const { session_id: sessionId } = await db.get('SELECT session_id FROM session_instances WHERE id = ?', [id]);
-
-    try {
-      await db.all('DELETE FROM session_instances WHERE id = ?', [id]);
-    } catch (error) {
-      success = false;
-      console.error(error);
-    }
-
-    return { success, sessionId, instanceId: id };
-  }
-
-  static async MoveInstance(id, newSessionId) {
-    await db.run('UPDATE session_instances SET session_id = ? WHERE id = ?', [newSessionId, id]);
-  }
-
+class Session extends SessionBase {
   constructor(id = null, instanceId = null, options = {}, config = null) {
-    this.id = id;
-    this.instanceId = instanceId;
-    this.name = options?.name;
-    this.instanceCreatedAt = options?.instanceCreatedAt;
-    this.createdAt = options?.createdAt;
-    this.events = {};
-    this.aggregated = {};
-    this.config = config || {};
-    this.currentHuntingSet = null;
-    this.notes = '';
-    this.lastLootTime = null;
-    this.currentLootEvent = [];
-    this.currentEventTimer = null;
-    this.sessionTime = options?.sessionTime ?? 0;
-    this.sessionTimer = null;
-    this.customIgnoreList = [];
+    super(id, instanceId, options, config);
 
-    this.emitter = new EventEmitter();
+    this.loggerStatusUpdateBind = this.loggerStatusUpdate.bind(this);
+    appEvents.on('logger:status:updated', this.loggerStatusUpdateBind);
+  }
+
+  destruct() {
+    super.destruct();
+    appEvents.removeListener('logger:status:updated', this.loggerStatusUpdateBind);
   }
 
   startTimer() {
@@ -137,6 +29,7 @@ class Session {
 
       await this.updateDb();
       this.emitter.emit('session-time-updated', this.sessionTime);
+      appEvents.emit('session:time:updated', this.sessionTime);
     }, 1000);
   }
 
@@ -144,6 +37,15 @@ class Session {
     if (this.sessionTimer) {
       clearInterval(this.sessionTimer);
       await this.updateDb();
+    }
+  }
+
+  loggerStatusUpdate(status) {
+    console.log("Session - logger:status:updated", status);
+    if (status) {
+      this.startTimer();
+    } else {
+      this.stopTimer();
     }
   }
 
@@ -159,20 +61,6 @@ class Session {
     } else {
       this.currentHuntingSet = null;
     }
-  }
-
-  newEvent(eventData, updateDb = false, customIgnoreList = []) {
-    const eventName = eventData.event
-      .split('_')
-      .map(event => event[0].toUpperCase() + event.slice(1))
-      .join('');
-
-    this.customIgnoreList = customIgnoreList;
-
-    const handler = `handle${eventName}Event`;
-    this?.[handler]?.(eventData);
-
-    return updateDb ? this.updateDb() : Promise.resolve();
   }
 
   dataPoint(type, data) {
@@ -282,11 +170,12 @@ class Session {
 
     if (updateDb) {
       this.updateDb();
-      this.emitter.emit('session-updated');
+      //this.emitter.emit('session-updated');
+      appEvents.emit('session:updated', this.getData());
     }
   }
 
-  handleLootEvent(data) {
+  eventLoot(data) {
     const { name, amount, value } = data.values;
 
     if (Session.IGNORE_LOOT.includes(name) || this.customIgnoreList.includes(name)) {
@@ -325,91 +214,49 @@ class Session {
     }
   }
 
-  handleRareLootEvent(data) {
-    const { item, value } = data.values;
-    this.dataPoint('rareLoot', data);
-    this.aggregate('rareLoot', item, value);
+  eventSpecialLoot(data) {
+    const keyName = this.snakeToCamel(data.values.type, false);
+    // TODO: Remove when ready to use new keys
+    const temporaryReplaceMe = {
+      hallOfFame: 'hofs',
+      global: 'globals',
+      rareLoot: 'rareLoot',
+    };
+
+    this.dataPoint(temporaryReplaceMe[keyName], data);
+    this.aggregate(temporaryReplaceMe[keyName], data.values.item, data.values.value);
   }
 
-  handleGlobalEvent(data) {
-    this.dataPoint('globals', data);
-    this.aggregate('globals', null, data.values.value);
-  }
+  eventDamageInflicted(data) {
+    const { amount, critical } = data.values;
+    this.aggregate('damageInflicted', null, amount);
 
-  handleHallOfFameEvent(data) {
-    this.dataPoint('hofs', data);
-    this.aggregate('hofs', null, data.values.value);
-  }
-
-  handleSkillEvent(data) {
-    const { name, value } = data.values;
-    this.dataPoint('skills', data);
-    this.aggregate('skills', name, value);
-  }
-
-  handleAttributeEvent(data) {
-    const { name, value } = data.values;
-    this.dataPoint('attributes', data);
-    this.aggregate('attributes', name, value);
-  }
-
-  handleDamageInflictedEvent(data) {
-    this.aggregate('damageInflicted', null, data.values.amount);
-
-    if (data.values.critical === '1') {
-      this.aggregate('damageInflictedCrit', null, data.values.amount);
+    if (critical) {
+      this.aggregate('damageInflictedCrit', null, amount);
     }
 
     if (this.currentHuntingSet) {
-      this.aggregate('huntingSetDmg', this.currentHuntingSet, data.values.amount);
+      this.aggregate('huntingSetDmg', this.currentHuntingSet, amount);
     }
   }
 
-  handleDamageTakenEvent(data) {
-    this.aggregate('damageTaken', null, data.values.amount);
+  eventDamageTaken(data) {
+    const { amount, critical } = data.values;
+    this.aggregate('damageTaken', null, amount);
 
-    if (data.values.critical === '1') {
-      this.aggregate('damageTakenCrit', null, data.values.amount);
+    if (critical) {
+      this.aggregate('damageTakenCrit', null, amount);
     }
   }
 
-  handleEnemyMissEvent() {
-    this.aggregate('enemyMiss', null, 1);
+  eventPlayerEvade(data) {
+    // Evade, Dodge, Deflect
+    const evadeType = this.snakeToCamel(data.values.reason);
+
+    this.aggregate(`player${evadeType}`, null, 1);
   }
 
-  handleEnemyEvadeEvent() {
-    this.aggregate('enemyEvade', null, 1);
-
-    if (this.currentHuntingSet) {
-      this.aggregate('huntingSetMissed', this.currentHuntingSet, 1);
-    }
-  }
-
-  handleEnemyDodgeEvent() {
-    this.aggregate('enemyDodge', null, 1);
-
-    if (this.currentHuntingSet) {
-      this.aggregate('huntingSetMissed', this.currentHuntingSet, 1);
-    }
-  }
-
-  handleEnemyJamEvent() {
-    this.aggregate('enemyJam', null, 1);
-
-    if (this.currentHuntingSet) {
-      this.aggregate('huntingSetMissed', this.currentHuntingSet, 1);
-    }
-  }
-
-  handlePlayerDodgeEvent() {
-    this.aggregate('playerDodge', null, 1);
-  }
-
-  handlePlayerEvadeEvent() {
-    this.aggregate('playerEvade', null, 1);
-  }
-
-  handlePlayerMissEvent() {
+  eventPlayerMiss() {
     this.aggregate('playerMiss', null, 1);
 
     if (this.currentHuntingSet) {
@@ -417,112 +264,41 @@ class Session {
     }
   }
 
-  handlePlayerDeflectEvent() {
-    this.aggregate('playerDeflect', null, 1);
+  eventEnemyEvade(data) {
+    // Evade, Dodge, Jam
+    const evadeType = this.snakeToCamel(data.values.reason);
+    this.aggregate(`enemy${evadeType}`, null, 1);
+
+    if (this.currentHuntingSet) {
+      this.aggregate('huntingSetMissed', this.currentHuntingSet, 1);
+    }
   }
 
-  handleHealEvent(data) {
-    const { target, amount } = data.values;
-    this.aggregate('heal', target, amount);
+  eventEnemyMiss() {
+    this.aggregate('enemyMiss', null, 1);
   }
 
-  handlePositionEvent(data) {
-    this.dataPoint('position', data);
+  eventPointsGained(data) {
+    const { type } = data.values;
+    this.dataPoint(`${type}s`, data);
+    this.aggregate(`${type}s`, data.values.name, data.values.value);
   }
 
-  handleTierUpEvent(data) {
+  eventEnhancerBreak(data) {
+    this.dataPoint('enhancerBreak', data);
+  }
+
+  eventTierUp(data) {
     this.dataPoint('tierUp', data);
     this.aggregate('tierUp', data.values.item, 0.01);
   }
 
-  handleEnhancerBreakEvent(data) {
-    this.dataPoint('enhancerBreak', data);
+  eventHeal(data) {
+    this.aggregate('heal', data.values.target, data.values.amount);
   }
 
-  getData(events = true) {
-    const data = {
-      id: this.id,
-      instanceId: this.instanceId,
-      sessionName: this.name,
-      sessionCreatedAt: this.createdAt,
-      instanceCreatedAt: this.instanceCreatedAt,
-      usedHuntingSets: this.config.usedHuntingSets,
-      additionalCost: this.config.additionalCost,
-      notes: this.notes,
-      sessionTime: this.sessionTime,
-    };
-
-    if (events) {
-      data.events = this.events;
-      data.aggregated = this.aggregated;
-    }
-
-    return data;
-  }
-
-  createNewInstance() {
-    this.instanceId = uuidv4();
-    this.aggregated = {};
-    this.instanceCreatedAt = null;
-    this.createdAt = null;
-    this.events = {};
-    this.config = {};
-    this.notes = '';
-    this.sessionTime = 0;
-  }
-
-  async createNewSession() {
-    if (this.instanceId === null) {
-      this.instanceId = uuidv4();
-      await db.run('INSERT INTO sessions(id, name) VALUES(?, ?)', [this.id, this.name]);
-
-      const result = await db.get('SELECT created_at FROM sessions WHERE id = ?', [this.id]);
-      this.createdAt = result.created_at;
-    }
-  }
-
-  async updateDb() {
-    await this.createNewSession();
-    await db.run('REPLACE INTO session_instances(id, session_id, created_at, events, aggregated, config, notes, run_time) VALUES(?, ?, ?, ?, ?, ?, ?, ?)', [
-      this.instanceId,
-      this.id,
-      this.instanceCreatedAt,
-      JSON.stringify(this.events),
-      JSON.stringify(this.aggregated),
-      JSON.stringify(this.config),
-      this.notes,
-      this.sessionTime,
-    ]);
-
-    if (!this.instanceCreatedAt) {
-      const result = await db.get('SELECT created_at FROM session_instances WHERE id = ? AND session_id = ?', [this.instanceId, this.id]);
-      this.instanceCreatedAt = result?.created_at;
-    }
-  }
-
-  async setName(name) {
-    this.name = name;
-    await this.createNewSession();
-    await db.run('UPDATE sessions SET name = ? WHERE id = ?', [name, this.id]);
-  }
-
-  async setNotes(notes) {
-    this.notes = notes;
-    await this.createNewSession();
-    await db.run('UPDATE session_instances SET notes = ? WHERE id = ?', [notes, this.instanceId]);
-  }
-
-  async setData(data) {
-    if (data?.name) {
-      await this.setName(data.name);
-    }
-
-    if (data?.additionalCost !== null) {
-      this.config.additionalCost = data.additionalCost;
-      await this.updateDb();
-    }
-
-    return this.getData(true);
+  eventPosition(data) {
+    this.dataPoint('position', data);
   }
 }
 
