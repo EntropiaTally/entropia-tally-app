@@ -21,10 +21,11 @@ import {
 } from '@store';
 
 const EventManager = () => {
-  const [setActiveSession, setLoggerState, setSessionTime] = useActiveSessionStore(state => [
+  const [setActiveSession, setLoggerState, setSessionTime, setNewActiveSession] = useActiveSessionStore(state => [
     state.updateSession,
     state.updateLoggerState,
     state.updateTimer,
+    state.resetUpdate,
   ]);
   const setAggregated = useAggregatedStore(state => state.updateAggregated);
   const setEvents = useEventStore(state => state.updateEvents);
@@ -34,13 +35,37 @@ const EventManager = () => {
     const newData = eventData => {
       const { type, data } = eventData;
       // console.log(type, data)
-      if (type === 'session:updated') {
+      console.log(`event: ${type}`);
+      if (type === 'session:initial') {
+
         // console.log("AGGREGATED", data.aggregated)
         setAggregated(data.aggregated);
         // console.log("EVENTS", data.events)
         setEvents(data.events);
         // console.log("HUNTING SETS", data.usedHuntingSets)
-        setActiveSession({ usedHuntingSets: data.usedHuntingSets });
+        delete data.events;
+        delete data.aggregated;
+        setActiveSession(data);
+      }
+
+
+      if (type === 'session:updated') {
+
+        // console.log("AGGREGATED", data.aggregated)
+        setAggregated(data.aggregated);
+        // console.log("EVENTS", data.events)
+        setEvents(data.events);
+        // console.log("HUNTING SETS", data.usedHuntingSets)
+        delete data.events;
+        delete data.aggregated;
+        setActiveSession(data);
+      }
+
+      if (type === 'session:content:updated') {
+        // console.log("AGGREGATED", data.aggregated)
+        setAggregated(data.aggregated);
+        // console.log("EVENTS", data.events)
+        setEvents(data.events);
       }
 
       if (type === 'logger:status:updated') {
@@ -49,7 +74,7 @@ const EventManager = () => {
       }
 
       if (type === 'session:time:updated') {
-        console.log("session:time:updated", data)
+        //console.log("session:time:updated", data)
         setSessionTime(data);
       }
 
@@ -63,19 +88,33 @@ const EventManager = () => {
 
       if (type === 'session:new') {
         console.log('session:new', data);
+        setNewActiveSession(data);
+      }
+
+      if (type === 'session:loaded') {
+        console.log('session:loaded', data);
+        setNewActiveSession(data);
       }
     };
 
     const eventListener = window.api2.on('event', newData);
 
     setTimeout(() => {
-      window.api2.request('session:data');
+      window.api2.request('session:initial');
       //window.api2.request('logger:status:toggle');
       // Window.api2.call('event', { eventKey: 'session:data:get' });
-    }, 5000);
+    }, 1000);
 
     return () => eventListener.removeListener();
-  }, [setAggregated, setEvents]);
+  }, [
+    setActiveSession,
+    setLoggerState,
+    setSessionTime,
+    setNewActiveSession,
+    setAggregated,
+    setEvents,
+    setSessionList,
+  ]);
 
   return null;
 };

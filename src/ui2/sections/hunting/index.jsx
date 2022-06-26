@@ -11,17 +11,15 @@ import Fab from '@mui/material/Fab';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import EditIcon from '@mui/icons-material/Edit';
 import TextField from '@mui/material/TextField';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
+
+import Header from './header';
 
 import General from './general';
 import Loot from './loot';
 import Misc from './misc';
 import Returns from './returns';
 import Notes from './notes';
+
 
 const tabList = ['General', 'Loot', 'Misc', 'Returns', 'Notes'].map(tab => (
   <Tab key={tab} label={tab} />
@@ -41,7 +39,6 @@ TabView.propTypes = {
 
 const HuntingPage = () => {
   const [selectedTab, setSelectedTab] = useState(0);
-  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const toggleLogging = () => {
     window.api2.request('logger:status:toggle');
@@ -51,18 +48,7 @@ const HuntingPage = () => {
     <>
       <AppBar position="static">
         <div>
-          <Box sx={{ flexGrow: 1, mx: 2 }}>
-            <Grid container>
-              <Grid item xs>
-                <Typography>Session name here</Typography>
-                <EditIcon onClick={() => setIsEditOpen(true)} />
-              </Grid>
-              <Grid item>
-                00:25:24
-                <Button variant="contained" size="small" color="success" onClick={toggleLogging}><PlayArrowIcon /></Button>
-              </Grid>
-            </Grid>
-          </Box>
+          <Header />
         </div>
         <Tabs
           value={selectedTab}
@@ -95,28 +81,6 @@ const HuntingPage = () => {
         <TabView index={4} selected={selectedTab}>
           <Notes />
         </TabView>
-      </div>
-
-      <div>
-        <Dialog open={isEditOpen} onClose={() => setIsEditOpen(false)}>
-          <DialogTitle>Edit session name</DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="name"
-              label="Session name"
-              type="text"
-              fullWidth
-              variant="standard"
-              defaultValue="Current value goes here"
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setIsEditOpen(false)}>Cancel</Button>
-            <Button onClick={() => setIsEditOpen(false)}>Subscribe</Button>
-          </DialogActions>
-        </Dialog>
       </div>
     </>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Table from '@mui/material/Table';
@@ -41,12 +42,16 @@ const History = () => {
     setSessions(fetchedSessions);
   }, [setSessions]);
 
-  const openSession = async (id) => {
+  const openSessionModal = async (id) => {
     const fetchedSession = await window.api2.fetch('session', { id });
     console.log("fetchedSession", fetchedSession);
     setSessionData(fetchedSession);
     setHistoryModalOpen(true);
-  }
+  };
+
+  const loadInstance = (id) => {
+    window.api2.request('session:load', { id });
+  };
 
   return (
     <Box sx={{ m: 2 }}>
@@ -73,7 +78,7 @@ const History = () => {
                   <TableRow
                       hover
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                      onClick={() => openSession(row.id)}
+                      onClick={() => openSessionModal(row.id)}
                     >
                     <TableCell component="th" scope="row">{formatLocalTime(row.created_at)}</TableCell>
                     <TableCell align="right">{row.name ? row.name : '-'}</TableCell>
@@ -96,6 +101,31 @@ const History = () => {
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
             Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
           </Typography>
+          
+          <TableContainer>
+            <Table sx={{ minWidth: 650 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Text</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {sessionData.instances && sessionData.instances.map(row => (
+                  <React.Fragment key={row.id}>
+                    <TableRow
+                        hover
+                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                        onClick={() => loadInstance(row.id)}
+                      >
+                      <TableCell component="th" scope="row">{formatLocalTime(row.created_at)}</TableCell>
+                      <TableCell component="th" scope="row">{row.notes}</TableCell>
+                    </TableRow>
+                  </React.Fragment>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Box>
       </Modal>
     </Box>

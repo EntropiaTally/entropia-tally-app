@@ -199,12 +199,26 @@ ipcMain.on('request', (_event, { key, args }) => {
 });
 
 appEvents.on('session:new', async (data) => {
+  console.log("request - session:new", data)
   session.destruct();
   session = await SessionStorage.Create();
   sendEventToWindow({ type: 'session:new', data: session.getData() });
 });
 
+appEvents.on('session:load', async (data) => {
+  console.log("request - session:load", data)
+  session.destruct();
+  session = await SessionStorage.Load(data.id);
+  sendEventToWindow({ type: 'session:loaded', data: session.getData() });
+});
+
+appEvents.on('session:initial', async (data) => {
+  console.log("request - session:initial", data)
+  sendEventToWindow({ type: 'session:initial', data: session.getData() });
+});
+
 appEvents.on('session:updated', data => {
+  console.log("session:updated", data)
   sendEventToWindow({ type: 'session:updated', data });
 });
 
@@ -231,6 +245,13 @@ ipcMain.handle('fetch', async (_event, { dataType, args }) => {
     return await SessionStorage.FetchAll();
   }
 });
+
+/*ipcMain.handle('update', async (_event, { dataType, args }) => {
+  console.log("UPDATE", dataType, args)
+  if (dataType === 'session:name') {
+    return await SessionStorage.LoadSession(args.id);
+  }
+});*/
 
 
 

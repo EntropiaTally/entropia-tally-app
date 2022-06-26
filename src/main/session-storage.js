@@ -41,7 +41,7 @@ const SessionStorage = {
 
     const { options, config, events, aggregated, notes } = SessionStorage.prepareLoaded(data);
 
-    const instance = new Session(id, instanceId, options, config);
+    const instance = new Session(data.id, instanceId, options, config);
     instance.events = events;
     instance.aggregated = aggregated;
     instance.notes = notes;

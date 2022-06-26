@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useAggregatedStore, useActiveSessionStore } from '@store';
+import { useAggregatedStore, useActiveSessionStore, useEventStore } from '@store';
 import { deepCompare, shallowCompare, arrayCompare } from '@uiUtils2/compare';
 import { toNumber } from '@utils/helpers';
 import { useExistingHuntingSets } from '@hooks/hunting';

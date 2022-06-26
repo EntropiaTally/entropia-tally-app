@@ -48,13 +48,17 @@ class SessionBase {
     this.newEventBind = this.newEvent.bind(this);
     appEvents.on('logger:event', this.newEventBind);
 
-    this.getDataBind = this.getData.bind(this);
-    appEvents.on('session:data:get', this.getDataBind);
+    //this.getDataBind = this.getData.bind(this);
+    //appEvents.on('session:data:get', this.getDataBind);
+
+    this.setNameBind = this.setName.bind(this);
+    appEvents.on('session:name:update', this.setNameBind);
   }
 
   destruct() {
     appEvents.removeListener('logger:event', this.newEventBind);
-    appEvents.removeListener('session:data:get', this.getDataBind);
+    //appEvents.removeListener('session:data:get', this.getDataBind);
+    appEvents.removeListener('session:name:update', this.setNameBind);
   }
 
   snakeToCamel(snakeString, capital = true) {
@@ -147,9 +151,12 @@ class SessionBase {
   }
 
   async setName(name) {
+    console.log("session:name:update", name)
     this.name = name;
     await this.createNewSession();
     await db.run('UPDATE sessions SET name = ? WHERE id = ?', [name, this.id]);
+    console.log(this.getData());
+    appEvents.emit('session:updated', this.getData());
   }
 
   async setNotes(notes) {
