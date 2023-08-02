@@ -1,4 +1,4 @@
-import create from 'zustand';
+import { createWithEqualityFn } from 'zustand/traditional';
 
 const activeSessionStoreDefaults = {
   active: false,
@@ -13,7 +13,7 @@ const activeSessionStoreDefaults = {
   sessionTime: 0,
 };
 
-export const useActiveSessionStore = create(set => ({
+export const useActiveSessionStore = createWithEqualityFn(set => ({
   ...Object.assign({}, activeSessionStoreDefaults),
   updateLoggerState: data => set(() => ({ active: data })),
   updateName: data => set(() => ({ sessionName: data })),
@@ -49,7 +49,7 @@ const aggregatedStoreDefaults = {
   tierUp: {},
 };
 
-export const useAggregatedStore = create(set => ({
+export const useAggregatedStore = createWithEqualityFn(set => ({
   ...Object.assign({}, aggregatedStoreDefaults),
   updateAggregated: data => set(state => ({ ...state, ...data })),
   resetUpdate: data => set(() => ({ ...Object.assign({}, aggregatedStoreDefaults), ...data })),
@@ -69,13 +69,13 @@ const eventStoreDefaults = {
   tierUp: [],
 };
 
-export const useEventStore = create(set => ({
+export const useEventStore = createWithEqualityFn(set => ({
   ...Object.assign({}, eventStoreDefaults),
   updateEvents: data => set(state => ({ ...state, ...data })),
   resetUpdate: data => set(() => ({ ...Object.assign({}, eventStoreDefaults), ...data })),
 }));
 
-export const useSettingsStore = create(set => ({
+export const useSettingsStore = createWithEqualityFn(set => ({
   sidebarStyle: null,
   killCount: null,
   darkMode: false,
@@ -84,7 +84,7 @@ export const useSettingsStore = create(set => ({
   updateSettings: data => set(state => ({ ...state, ...data })),
 }));
 
-export const useSessionStore = create(set => ({
+export const useSessionStore = createWithEqualityFn(set => ({
   list: [],
   updateList: data => set({ list: data }),
 }));

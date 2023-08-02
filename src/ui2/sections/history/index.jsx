@@ -37,9 +37,13 @@ const History = () => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [sessionData, setSessionData] = useState({});
 
-  useEffect(async () => {
-    const fetchedSessions = await window.api2.fetch('sessions');
-    setSessions(fetchedSessions);
+  useEffect(() => {
+    async function fetchSessions() {
+      const fetchedSessions = await window.api2.fetch('sessions');
+      setSessions(fetchedSessions);
+    }
+
+    fetchSessions();
   }, [setSessions]);
 
   const openSessionModal = async (id) => {
