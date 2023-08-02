@@ -60,8 +60,13 @@ function sum(...values) {
   return result;
 }
 
+function toNumber(value) {
+  return value || 0;
+}
+
 module.exports = {
   aggregateHuntingSetData,
   calculateReturns,
   sum,
+  toNumber,
 };
